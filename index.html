@@ -1,0 +1,235 @@
+<!doctype html>
+<html lang="pt-BR">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>eproc2txt — Consolidador Híbrido de Textos Jurídicos</title>
+  <!-- Google Fonts: Inter and Fira Code for logs -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&family=Inter:wght@300;400;500;600;700&display=swap"
+    rel="stylesheet" />
+  <link rel="stylesheet" href="/style.css" />
+</head>
+
+<body>
+  <div class="app-container">
+    <!-- Header -->
+    <header class="app-header">
+      <div class="header-left">
+        <div class="header-logo-group">
+          <div class="glow-ring"></div>
+          <h1>eproc2txt</h1>
+        </div>
+      </div>
+
+      <div class="header-stats" id="header-stats">
+        <div class="header-stat-item">
+          <span class="header-stat-label">Tempo:</span>
+          <span class="header-stat-value" id="stat-elapsed-time">0.0s</span>
+        </div>
+        <div class="header-stat-item">
+          <span class="header-stat-label">Nativas:</span>
+          <span class="header-stat-value" id="stat-pdf-pages">0</span>
+        </div>
+        <div class="header-stat-item">
+          <span class="header-stat-label">OCR:</span>
+          <span class="header-stat-value" id="stat-ocr-pages">0</span>
+        </div>
+      </div>
+
+      <div class="header-right-col">
+        <div class="header-right-row">
+          <div id="process-timeline" class="process-timeline">
+            <div class="timeline-step active" id="step-upload">
+              <div class="step-icon">1</div>
+              <div class="step-label">ZIP</div>
+            </div>
+            <div class="timeline-connector"></div>
+            <div class="timeline-step" id="step-mapping">
+              <div class="step-icon">2</div>
+              <div class="step-label">Mapeamento</div>
+            </div>
+            <div class="timeline-connector"></div>
+            <div class="timeline-step" id="step-processing">
+              <div class="step-icon">3</div>
+              <div class="step-label">Extração</div>
+            </div>
+            <div class="timeline-connector"></div>
+            <div class="timeline-step" id="step-ocr">
+              <div class="step-icon">4</div>
+              <div class="step-label">OCR</div>
+            </div>
+            <div class="timeline-connector"></div>
+            <div class="timeline-step" id="step-xml">
+              <div class="step-icon">5</div>
+              <div class="step-label">Pronto</div>
+            </div>
+          </div>
+
+          <button id="btn-theme-toggle" class="btn btn-secondary btn-xs btn-theme-toggle" title="Alternar Tema">
+            <svg class="theme-icon-dark hidden" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+              stroke="currentColor" width="14" height="14">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
+            </svg>
+            <svg class="theme-icon-light" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+              stroke="currentColor" width="14" height="14">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364-6.364l-.707.707M6.343 17.657l-.707.707m0-12.728l.707.707m12.728 12.728l.707-.707M12 8a4 4 0 100 8 4 4 0 000-8z" />
+            </svg>
+          </button>
+        </div>
+
+        <div class="progress-bar-container hidden" id="progress-container">
+          <div class="progress-bar-track">
+            <div class="progress-bar-fill" id="progress-fill"></div>
+          </div>
+          <div class="progress-bar-info">
+            <span id="progress-percentage">0%</span>
+            <span id="progress-counter">0 / 0 páginas</span>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <!-- Main Layout -->
+    <main class="app-main">
+      <!-- Step 1: Upload (Visible at start) -->
+      <section id="upload-section" class="card dropzone-card">
+        <div id="dropzone" class="dropzone">
+          <input type="file" id="zip-file-input" accept=".zip" class="hidden-input" />
+          <div class="dropzone-content">
+            <svg class="upload-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+              stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+                d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+            </svg>
+            <h3>Arraste o arquivo ZIP do processo</h3>
+            <p>Ou clique para navegar em seus arquivos locais</p>
+            <span class="file-spec-hint">Padrão eproc: Evento {n} - {TIPO}{n}.{pdf|html}</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- Step 2: Dashboard (Initially Hidden) -->
+      <section id="dashboard-section" class="dashboard-grid hidden">
+        <!-- Left Column: Tree & Selection -->
+        <div class="card panel-card left-panel">
+          <div class="panel-controls-row">
+            <div class="tesseract-selector">
+              <table class="tesseract-table">
+                <thead>
+                  <tr>
+                    <th></th>
+                    <th>
+                      <label class="tesseract-option-label">
+                        <input type="radio" name="tesseract-model" value="fast" />
+                        <span class="model-name">Rápido</span>
+                      </label>
+                    </th>
+                    <th>
+                      <label class="tesseract-option-label">
+                        <input type="radio" name="tesseract-model" value="standard" checked />
+                        <span class="model-name">Normal</span>
+                      </label>
+                    </th>
+                    <th>
+                      <label class="tesseract-option-label">
+                        <input type="radio" name="tesseract-model" value="best" />
+                        <span class="model-name">Preciso</span>
+                      </label>
+                    </th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td class="row-title">Precisão</td>
+                    <td class="val-low">Baixa</td>
+                    <td class="val-medium">Média</td>
+                    <td class="val-high">Alta</td>
+                  </tr>
+                  <tr>
+                    <td class="row-title">Velocidade</td>
+                    <td class="val-high">Alta</td>
+                    <td class="val-medium">Média</td>
+                    <td class="val-low">Baixa</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+
+            <button id="btn-process" class="btn btn-primary btn-iniciar">
+              <span class="btn-text">Iniciar</span>
+              <span class="glow-effect"></span>
+            </button>
+          </div>
+
+          <div class="tree-toolbar-row">
+            <div class="tree-controls">
+              <button id="btn-select-all" class="btn btn-secondary btn-xs" title="Selecionar Tudo">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" width="14"
+                  height="14" style="display: block;">
+                  <rect x="3" y="3" width="18" height="18" rx="2" stroke-width="2" />
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4" />
+                </svg>
+              </button>
+              <button id="btn-deselect-all" class="btn btn-secondary btn-xs" title="Limpar Seleção">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" width="14"
+                  height="14" style="display: block;">
+                  <rect x="3" y="3" width="18" height="18" rx="2" stroke-width="2" />
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 8l8 8M16 8l-8 8" />
+                </svg>
+              </button>
+            </div>
+            <span class="badge" id="total-docs-badge">0 documentos selecionados</span>
+          </div>
+
+          <!-- Interactive tree rendering container -->
+          <div id="tree-container" class="tree-container"></div>
+        </div>
+
+        <!-- Right Column: Consolidated Output XML Panel -->
+        <div class="card panel-card xml-panel">
+          <div class="panel-header">
+            <div class="header-title-indicator">
+              <h2>Texto Consolidado</h2>
+            </div>
+            <div class="xml-actions">
+              <button id="btn-copy-xml" class="btn btn-secondary btn-sm" disabled>Copiar</button>
+              <button id="btn-download-xml" class="btn btn-secondary btn-sm" disabled>Download</button>
+            </div>
+          </div>
+          <div class="xml-preview-container">
+            <textarea id="xml-output" class="xml-output" readonly
+              placeholder="O texto consolidado será gerado aqui após o processamento..."></textarea>
+          </div>
+        </div>
+      </section>
+
+      <!-- Step 3: Ignored Files Notification (Initially Hidden) -->
+      <section id="ignored-files-card" class="card warning-card hidden">
+        <div class="warning-header">
+          <svg class="warning-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+            stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+              d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+          </svg>
+          <h3>Arquivos Ignorados (Fora do Padrão eproc)</h3>
+        </div>
+        <p class="warning-description">Os seguintes arquivos foram encontrados no pacote ZIP, mas foram desconsiderados
+          por não seguirem a nomenclatura estipulada:</p>
+        <ul id="ignored-files-list" class="ignored-files-list"></ul>
+      </section>
+    </main>
+
+
+  </div>
+
+  <!-- Application Script entry point -->
+  <script type="module" src="/src/main.js"></script>
+</body>
+
+</html>
