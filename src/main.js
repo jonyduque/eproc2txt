@@ -491,6 +491,55 @@ btnDeselectAll.addEventListener('click', () => {
 });
 
 /**
+ * Reset application state and return to Step 1 (Upload)
+ */
+function resetToUploadState() {
+  currentZipData = null;
+  currentTree = null;
+  if (activeWorker) {
+    activeWorker.terminate();
+    activeWorker = null;
+  }
+  
+  // Reset file input value
+  fileInput.value = '';
+  
+  // Clear tree and output panel
+  treeContainer.innerHTML = '';
+  xmlOutput.value = '';
+  btnCopyXml.disabled = true;
+  btnDownloadXml.disabled = true;
+  
+  // Reset stats
+  statElapsedTime.textContent = '0.0s';
+  statPdfPages.textContent = '0';
+  statOcrPages.textContent = '0';
+  
+  // Hide progress bar and reset values
+  progressContainer.classList.add('hidden');
+  progressFill.style.width = '0%';
+  progressPercentage.textContent = '0%';
+  progressCounter.textContent = '0 / 0 páginas';
+  
+  // Hide ignored files card
+  ignoredFilesList.innerHTML = '';
+  ignoredFilesCard.classList.add('hidden');
+  
+  // Reset timeline steps
+  setTimelineStep('step-upload');
+  
+  // Switch sections
+  dashboardSection.classList.add('hidden');
+  uploadSection.classList.remove('hidden');
+  
+  // Reset button state
+  setUiProcessing(false, false);
+  setStatus('idled', 'Aguardando Arquivo');
+  
+  logToConsole('Pronto para receber um novo arquivo ZIP.', 'system');
+}
+
+/**
  * Start the pipeline execution
  */
 btnProcess.addEventListener('click', () => {
@@ -503,6 +552,14 @@ btnProcess.addEventListener('click', () => {
     updateProgress(0, 'Processamento cancelado pelo usuário.');
     return;
   }
+
+  // Check if we are in the completed state (showing 'Reiniciar')
+  const btnText = btnProcess.querySelector('.btn-text');
+  if (btnText && btnText.textContent === 'Reiniciar') {
+    resetToUploadState();
+    return;
+  }
+
 
   if (!currentZipData || !currentTree) return;
 
