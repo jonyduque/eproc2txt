@@ -1,14 +1,24 @@
 import { unzipSync } from 'fflate';
 import { PDFiumLibrary } from '@hyzyla/pdfium/browser/cdn';
-import { createWorker } from 'tesseract.js';
 
 let pdfiumLib = null;
-let tesseractWorker = null;
+let isPaused = false;
+let resolveResume = null;
+
+/**
+ * Aguarda a retomada se o pipeline estiver pausado por contra-pressão
+ */
+async function checkPause() {
+  if (isPaused) {
+    self.postMessage({ type: 'status', message: 'Aguardando liberação de memória...' });
+    await new Promise(resolve => {
+      resolveResume = resolve;
+    });
+  }
+}
 
 /**
  * Converts BGRA pixel data in-place to RGBA, applies grayscale, and performs Otsu's threshold binarization.
- * 
- * @param {Uint8Array} data - The raw BGRA pixel data array.
  */
 function binarizeBgraToRgba(data) {
   const len = data.length;
@@ -73,7 +83,7 @@ const HTML_ENTITIES = {
   'deg': '°', 'ordm': 'º', 'ordf': 'ª', 'middot': '·', 'bull': '•',
   'ndash': '–', 'mdash': '—', 'copy': '©', 'reg': '®', 'trade': '™',
   'euro': '€', 'pound': '£', 'cent': '¢', 'yen': '¥',
-  
+
   // Portuguese accents and other common latin-1 chars
   'aacute': 'á', 'Aacute': 'Á',
   'acirc': 'â', 'Acirc': 'Â',
@@ -98,13 +108,6 @@ const HTML_ENTITIES = {
   'yacute': 'ý', 'Yacute': 'Ý'
 };
 
-/**
- * Regex-based HTML cleaner that strips styles, scripts, SVGs, tags,
- * decodes entities, and collapses spaces.
- * 
- * @param {string} html - The raw HTML string.
- * @returns {string} Cleaned plain text.
- */
 function cleanHtmlContent(html) {
   if (!html) return '';
 
@@ -135,37 +138,21 @@ function cleanHtmlContent(html) {
   return text.trim();
 }
 
-/**
- * Decodes HTML bytes using the charset declared in the HTML meta tag or
- * automatically falls back to UTF-8 or Windows-1252.
- * 
- * @param {Uint8Array} bytes - The HTML file raw bytes.
- * @returns {string} The decoded HTML string.
- */
 function decodeHtmlBytes(bytes) {
-  // 1. First, attempt to decode as UTF-8 with fatal: true.
-  // UTF-8 validation is extremely reliable for detecting if a file contains valid UTF-8 sequences.
   try {
     const utf8Decoder = new TextDecoder('utf-8', { fatal: true });
     return utf8Decoder.decode(bytes);
   } catch (e) {
-    // UTF-8 decoding failed, meaning the file contains invalid UTF-8 sequences.
-    // We fall back to looking at the meta tags or using Windows-1252.
-    
-    // Decode the first 4096 bytes as latin1 (iso-8859-1) to check for a charset meta tag.
-    // latin1 is safe because it maps bytes 0-255 1-to-1 to unicode code points 0-255 without throwing.
     const headerBytes = bytes.slice(0, 4096);
     const latin1Decoder = new TextDecoder('iso-8859-1');
     const headerText = latin1Decoder.decode(headerBytes);
-    
+
     let charset = null;
-    
-    // Try to find <meta charset="...">
+
     const charsetMatch = headerText.match(/<meta\s+charset=["']?([a-zA-Z0-9_-]+)["']?/i);
     if (charsetMatch && charsetMatch[1]) {
       charset = charsetMatch[1].toLowerCase();
     } else {
-      // Try to find <meta http-equiv="Content-Type" content="...charset=...">
       const contentTypeMatch = headerText.match(/<meta[^>]+http-equiv=["']?content-type["']?[^>]+content=["']?[^"'>]*charset=([a-zA-Z0-9_-]+)/i);
       if (contentTypeMatch && contentTypeMatch[1]) {
         charset = contentTypeMatch[1].toLowerCase();
@@ -176,62 +163,50 @@ function decodeHtmlBytes(bytes) {
         }
       }
     }
-    
-    // If a non-UTF-8 charset was declared, attempt to use it.
-    // Note: We skip 'utf-8' and 'utf8' here because we already know it failed UTF-8 validation.
+
     if (charset && charset !== 'utf-8' && charset !== 'utf8') {
       try {
         const decoder = new TextDecoder(charset);
         return decoder.decode(bytes);
       } catch (err) {
-        // If specified charset is invalid or unsupported, fallback
+        // fallback
       }
     }
-    
-    // Default fallback to windows-1252 for Portuguese single-byte encoding
+
     const fallbackDecoder = new TextDecoder('windows-1252');
     return fallbackDecoder.decode(bytes);
   }
 }
 
 /**
- * Main pipeline processor
+ * Main pipeline processor (Sem OCR direto)
  */
-async function processPipeline(zipData, selectedFiles, tessDataPath) {
-  // 1. Initialize dependencies
+async function processPipeline(zipData, selectedFiles) {
+  // 1. Initialize PDFium
   self.postMessage({ type: 'status', message: 'Inicializando motor PDFium...' });
   if (!pdfiumLib) {
     pdfiumLib = await PDFiumLibrary.init();
   }
 
-  self.postMessage({ type: 'status', message: 'Inicializando motor Tesseract OCR (Português)...' });
-  if (!tesseractWorker) {
-    tesseractWorker = await createWorker('por', 1, { langPath: tessDataPath });
-  }
-
   self.postMessage({ type: 'status', message: 'Iniciando processamento dos arquivos...' });
 
   const totalFiles = selectedFiles.length;
-  let pdfPagesCount = 0;
-  let ocrPagesCount = 0;
-
-  const resultTree = [];
 
   for (let index = 0; index < totalFiles; index++) {
     const file = selectedFiles[index];
-    self.postMessage({ 
-      type: 'doc_start', 
-      fileName: file.fileName, 
-      index: index + 1, 
-      total: totalFiles 
+    self.postMessage({
+      type: 'doc_start',
+      fileName: file.fileName,
+      index: index + 1,
+      total: totalFiles
     });
 
-    // Extract the specific file data from ZIP in a memory-efficient way
+    // Extrai os bytes correspondentes do ZIP
     const targetPath = file.originalPath;
     const unzipped = unzipSync(zipData, {
       filter: (f) => f.name === targetPath
     });
-    
+
     const fileBytes = unzipped[targetPath];
     if (!fileBytes) {
       self.postMessage({
@@ -242,24 +217,16 @@ async function processPipeline(zipData, selectedFiles, tessDataPath) {
       continue;
     }
 
-    const docResult = {
-      eventNumber: file.eventNumber,
-      docNumber: file.docNumber,
-      docType: file.docType,
-      fileName: file.fileName,
-      extension: file.extension,
-      pages: []
-    };
-
     if (file.extension === 'html') {
-      // Decode HTML using detected charset, falling back to UTF-8 / Windows-1252
       const htmlText = decodeHtmlBytes(fileBytes);
       const cleaned = cleanHtmlContent(htmlText);
 
-      docResult.pages.push({
-        pagId: 1,
-        content: cleaned,
-        method: 'native'
+      self.postMessage({
+        type: 'page_native',
+        fileName: file.fileName,
+        page: 1,
+        pageCount: 1,
+        content: cleaned
       });
 
       self.postMessage({
@@ -272,67 +239,54 @@ async function processPipeline(zipData, selectedFiles, tessDataPath) {
         const doc = await pdfiumLib.loadDocument(fileBytes);
         const pageCount = doc.getPageCount();
 
+        // Informa os metadados do documento antes de ler as páginas
+        self.postMessage({
+          type: 'doc_info',
+          fileName: file.fileName,
+          pageCount: pageCount
+        });
+
         for (let p = 0; p < pageCount; p++) {
+          // Verifica contra-pressão
+          await checkPause();
+
           const page = doc.getPage(p);
           let text = page.getText();
           if (text) {
             text = text.replace(/\s+/g, ' ').trim();
           }
 
-          if (text && text.length > 5) { // Threshold for valid native text length
-            docResult.pages.push({
-              pagId: p + 1,
-              content: text,
-              method: 'native'
-            });
-            pdfPagesCount++;
+          if (text && text.length > 5) {
             self.postMessage({
-              type: 'page_complete',
-              method: 'native',
+              type: 'page_native',
               fileName: file.fileName,
               page: p + 1,
-              pageCount: pageCount
+              pageCount: pageCount,
+              content: text
             });
           } else {
-            // Scanned page - render to bitmap and run Tesseract OCR
             self.postMessage({
               type: 'log',
               level: 'info',
               message: `[PDF-OCR] Página ${p + 1}/${pageCount} de ${file.fileName} identificada como escaneada. Renderizando...`
             });
 
-            // Render page at scale 2.0 for higher OCR quality
             const render = await page.render({ scale: 2.0, colorSpace: 'BGRA' });
-            
-            // Apply binarization in-place and convert to RGBA
             binarizeBgraToRgba(render.data);
 
-            // Setup OffscreenCanvas
-            const canvas = new OffscreenCanvas(render.width, render.height);
-            const ctx = canvas.getContext('2d');
-            const imgData = new ImageData(new Uint8ClampedArray(render.data), render.width, render.height);
-            ctx.putImageData(imgData, 0, 0);
-
-            // Execute Tesseract OCR
-            const { data: { text: ocrText } } = await tesseractWorker.recognize(canvas);
-            const cleanedOcrText = ocrText ? ocrText.replace(/\s+/g, ' ').trim() : '';
-
-            docResult.pages.push({
-              pagId: p + 1,
-              content: cleanedOcrText,
-              method: 'ocr'
-            });
-            ocrPagesCount++;
+            const buffer = render.data.buffer;
             self.postMessage({
-              type: 'page_complete',
-              method: 'ocr',
+              type: 'page_ocr_request',
               fileName: file.fileName,
               page: p + 1,
-              pageCount: pageCount
-            });
+              pageCount: pageCount,
+              width: render.width,
+              height: render.height,
+              imageBuffer: buffer
+            }, [buffer]); // Transfere posse do buffer da imagem
           }
         }
-        doc.destroy(); // Free document resources immediately
+        doc.destroy();
       } catch (err) {
         self.postMessage({
           type: 'log',
@@ -342,37 +296,31 @@ async function processPipeline(zipData, selectedFiles, tessDataPath) {
       }
     }
 
-    resultTree.push(docResult);
-
-    // Explicitly delete references to free memory
+    // Libera do garbage collector
     delete unzipped[targetPath];
   }
 
-  // Cleanup workers and WASM instances to free memory
-  if (tesseractWorker) {
-    await tesseractWorker.terminate();
-    tesseractWorker = null;
-  }
-
+  // Notifica conclusão da varredura sequencial
   self.postMessage({
-    type: 'complete',
-    resultTree,
-    pdfPagesCount,
-    ocrPagesCount
+    type: 'pipeline_finished'
   });
 }
 
 self.onmessage = async (event) => {
-  const { type, zipData, selectedFiles, tessDataPath } = event.data;
+  const { type, zipData, selectedFiles } = event.data;
   if (type === 'start') {
     try {
-      await processPipeline(zipData, selectedFiles, tessDataPath);
+      await processPipeline(zipData, selectedFiles);
     } catch (err) {
       self.postMessage({ type: 'error', message: err.message });
-      if (tesseractWorker) {
-        await tesseractWorker.terminate();
-        tesseractWorker = null;
-      }
+    }
+  } else if (type === 'pause') {
+    isPaused = true;
+  } else if (type === 'resume') {
+    isPaused = false;
+    if (resolveResume) {
+      resolveResume();
+      resolveResume = null;
     }
   }
 };
