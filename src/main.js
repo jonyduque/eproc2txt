@@ -191,13 +191,15 @@ updateTesseractHighlighting();
 /**
  * Updates UI State when process is running or idle
  */
-function setUiProcessing(processing) {
+function setUiProcessing(processing, completed = false) {
   const btnText = btnProcess.querySelector('.btn-text');
   if (processing) {
     if (btnText) btnText.textContent = 'Parar';
     btnProcess.classList.add('btn-parar');
   } else {
-    if (btnText) btnText.textContent = 'Iniciar';
+    if (btnText) {
+      btnText.textContent = completed ? 'Reiniciar' : 'Iniciar';
+    }
     btnProcess.classList.remove('btn-parar');
   }
   
@@ -433,6 +435,10 @@ async function handleFile(file) {
       uploadSection.classList.add('hidden');
       dashboardSection.classList.remove('hidden');
       setStatus('idled', 'Pronto');
+      
+      // Ensure start button text is reset to "Iniciar"
+      const btnText = btnProcess.querySelector('.btn-text');
+      if (btnText) btnText.textContent = 'Iniciar';
 
     } catch (err) {
       logToConsole(`Erro ao ler arquivo ZIP: ${err.message}`, 'error');
@@ -588,7 +594,7 @@ btnProcess.addEventListener('click', () => {
       }
 
       case 'complete': {
-        setUiProcessing(false);
+        setUiProcessing(false, true);
         setStatus('finished', 'Finalizado');
         setTimelineStep('step-xml');
         
@@ -687,12 +693,12 @@ btnDownloadXml.addEventListener('click', () => {
   const content = xmlOutput.value;
   if (!content) return;
 
-  const blob = new Blob([content], { type: 'application/xml;charset=utf-8' });
+  const blob = new Blob([content], { type: 'text/plain;charset=utf-8' });
   const url = URL.createObjectURL(blob);
   
   const a = document.createElement('a');
   a.href = url;
-  a.download = 'eproc_consolidado.xml';
+  a.download = 'eproc_consolidado.txt';
   document.body.appendChild(a);
   a.click();
   
