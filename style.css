@@ -410,14 +410,49 @@ body.light-theme .btn-secondary:hover {
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  padding: 0.25rem;
-  border-radius: 4px;
+  padding: 0.25rem 0.5rem;
+  border-left: 3px solid transparent;
+  border-radius: 0 6px 6px 0;
   cursor: pointer;
   user-select: none;
+  transition: background-color 0.2s ease, border-left-color 0.2s ease, color 0.2s ease, opacity 0.2s ease;
 }
 
 .tree-node-header:hover {
-  background: rgba(255, 255, 255, 0.03);
+  background: rgba(255, 255, 255, 0.04);
+}
+
+/* Selected & Indeterminate Header Highlights */
+.tree-node-header:has(.tree-checkbox:checked),
+.tree-node-header:has(.tree-checkbox:indeterminate) {
+  background: rgba(139, 92, 246, 0.08); /* Subtle violet background */
+  border-left-color: var(--color-accent);
+  color: var(--color-text-primary);
+  opacity: 1 !important;
+}
+
+.tree-node-header:has(.tree-checkbox:checked) .node-icon,
+.tree-node-header:has(.tree-checkbox:indeterminate) .node-icon {
+  color: var(--color-accent);
+}
+
+body.light-theme .tree-node-header:has(.tree-checkbox:checked),
+body.light-theme .tree-node-header:has(.tree-checkbox:indeterminate) {
+  background: rgba(124, 58, 237, 0.06);
+}
+
+/* Unselected State Dimming */
+.tree-node-header:not(:has(.tree-checkbox:checked)):not(:has(.tree-checkbox:indeterminate)) {
+  opacity: 0.65;
+}
+
+.tree-node-header:not(:has(.tree-checkbox:checked)):not(:has(.tree-checkbox:indeterminate)):hover {
+  opacity: 0.95;
+  background: rgba(255, 255, 255, 0.06);
+}
+
+body.light-theme .tree-node-header:not(:has(.tree-checkbox:checked)):not(:has(.tree-checkbox:indeterminate)):hover {
+  background: rgba(0, 0, 0, 0.03);
 }
 
 .tree-toggle {
@@ -446,21 +481,38 @@ body.light-theme .btn-secondary:hover {
 /* Custom Checkboxes */
 .tree-checkbox {
   appearance: none;
-  width: 16px;
-  height: 16px;
-  border: 1px solid var(--color-text-muted);
-  border-radius: 3px;
-  background: transparent;
+  width: 18px;
+  height: 18px;
+  border: 1.5px solid var(--color-text-muted);
+  border-radius: 4px;
+  background: rgba(0, 0, 0, 0.25);
   cursor: pointer;
   position: relative;
-  display: inline-block;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   outline: none;
-  transition: background-color 0.2s, border-color 0.2s;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.25);
+  flex-shrink: 0;
+}
+
+body.light-theme .tree-checkbox {
+  background: rgba(255, 255, 255, 0.9);
+  border-color: #cbd5e1;
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.05);
+}
+
+.tree-checkbox:hover {
+  border-color: var(--color-accent);
+  box-shadow: 0 0 0 3px var(--color-accent-glow);
+  transform: scale(1.08);
 }
 
 .tree-checkbox:checked {
   background-color: var(--color-accent);
   border-color: var(--color-accent);
+  box-shadow: 0 0 8px var(--color-accent-glow);
 }
 
 .tree-checkbox:checked::after {
@@ -468,26 +520,27 @@ body.light-theme .btn-secondary:hover {
   position: absolute;
   left: 5px;
   top: 1px;
-  width: 4px;
-  height: 8px;
+  width: 5px;
+  height: 9px;
   border: solid #ffffff;
   border-width: 0 2px 2px 0;
   transform: rotate(45deg);
 }
 
 .tree-checkbox:indeterminate {
-  background-color: transparent;
+  background-color: var(--color-accent);
   border-color: var(--color-accent);
+  box-shadow: 0 0 8px var(--color-accent-glow);
 }
 
 .tree-checkbox:indeterminate::after {
   content: "";
   position: absolute;
-  left: 3px;
-  top: 6px;
+  left: 4px;
+  top: 7px;
   width: 8px;
   height: 2px;
-  background-color: var(--color-accent);
+  background-color: #ffffff;
 }
 
 .node-label {
