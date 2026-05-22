@@ -4,6 +4,7 @@ import { buildConsolidatedXml } from './utils/xml-builder.js';
 
 // Application state
 let currentZipData = null;
+let currentZipName = 'eproc_consolidado';
 let currentTree = null;
 let activeWorker = null;
 
@@ -397,6 +398,9 @@ async function handleFile(file) {
     return;
   }
 
+  // Extract the base name of the uploaded ZIP file (without .zip extension)
+  currentZipName = file.name.substring(0, file.name.lastIndexOf('.')) || file.name;
+
   logToConsole(`Carregando ZIP: ${file.name} (${formatBytes(file.size)})...`, 'system');
   setTimelineStep('step-upload');
   
@@ -495,6 +499,7 @@ btnDeselectAll.addEventListener('click', () => {
  */
 function resetToUploadState() {
   currentZipData = null;
+  currentZipName = 'eproc_consolidado';
   currentTree = null;
   if (activeWorker) {
     activeWorker.terminate();
@@ -755,7 +760,7 @@ btnDownloadXml.addEventListener('click', () => {
   
   const a = document.createElement('a');
   a.href = url;
-  a.download = 'eproc_consolidado.txt';
+  a.download = `${currentZipName}.txt`;
   document.body.appendChild(a);
   a.click();
   
