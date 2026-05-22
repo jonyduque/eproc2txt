@@ -19,79 +19,25 @@
     <!-- Header -->
     <header class="app-header">
       <div class="header-left">
-        <div class="header-logo-group">
-          <div class="glow-ring"></div>
+        <div class="header-logo-group small-logo">
+          <div class="glow-ring small-glow"></div>
           <h1>eproc2txt</h1>
         </div>
       </div>
 
-      <div class="header-stats" id="header-stats">
-        <div class="header-stat-item">
-          <span class="header-stat-label">Tempo:</span>
-          <span class="header-stat-value" id="stat-elapsed-time">0.0s</span>
-        </div>
-        <div class="header-stat-item">
-          <span class="header-stat-label">Nativas:</span>
-          <span class="header-stat-value" id="stat-pdf-pages">0</span>
-        </div>
-        <div class="header-stat-item">
-          <span class="header-stat-label">OCR:</span>
-          <span class="header-stat-value" id="stat-ocr-pages">0</span>
-        </div>
-      </div>
-
       <div class="header-right-col">
-        <div class="header-right-row">
-          <div id="process-timeline" class="process-timeline">
-            <div class="timeline-step active" id="step-upload">
-              <div class="step-icon">1</div>
-              <div class="step-label">ZIP</div>
-            </div>
-            <div class="timeline-connector"></div>
-            <div class="timeline-step" id="step-mapping">
-              <div class="step-icon">2</div>
-              <div class="step-label">Mapeamento</div>
-            </div>
-            <div class="timeline-connector"></div>
-            <div class="timeline-step" id="step-processing">
-              <div class="step-icon">3</div>
-              <div class="step-label">Extração</div>
-            </div>
-            <div class="timeline-connector"></div>
-            <div class="timeline-step" id="step-ocr">
-              <div class="step-icon">4</div>
-              <div class="step-label">OCR</div>
-            </div>
-            <div class="timeline-connector"></div>
-            <div class="timeline-step" id="step-xml">
-              <div class="step-icon">5</div>
-              <div class="step-label">Pronto</div>
-            </div>
-          </div>
-
-          <button id="btn-theme-toggle" class="btn btn-secondary btn-xs btn-theme-toggle" title="Alternar Tema">
-            <svg class="theme-icon-dark hidden" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
-              stroke="currentColor" width="14" height="14">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
-            </svg>
-            <svg class="theme-icon-light" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
-              stroke="currentColor" width="14" height="14">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364-6.364l-.707.707M6.343 17.657l-.707.707m0-12.728l.707.707m12.728 12.728l.707-.707M12 8a4 4 0 100 8 4 4 0 000-8z" />
-            </svg>
-          </button>
-        </div>
-
-        <div class="progress-bar-container hidden" id="progress-container">
-          <div class="progress-bar-track">
-            <div class="progress-bar-fill" id="progress-fill"></div>
-          </div>
-          <div class="progress-bar-info">
-            <span id="progress-percentage">0%</span>
-            <span id="progress-counter">0 / 0 páginas</span>
-          </div>
-        </div>
+        <button id="btn-theme-toggle" class="btn btn-secondary btn-xs btn-theme-toggle" title="Alternar Tema">
+          <svg class="theme-icon-dark hidden" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+            stroke="currentColor" width="14" height="14">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+              d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
+          </svg>
+          <svg class="theme-icon-light" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+            stroke="currentColor" width="14" height="14">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+              d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364-6.364l-.707.707M6.343 17.657l-.707.707m0-12.728l.707.707m12.728 12.728l.707-.707M12 8a4 4 0 100 8 4 4 0 000-8z" />
+          </svg>
+        </button>
       </div>
     </header>
 
@@ -144,59 +90,35 @@
 
         <!-- Right Column: Control & Results Panel -->
         <div class="card panel-card xml-panel">
-          <!-- Tessdata selector & Iniciar button -->
+          <!-- Tessdata selector & Iniciar button (compact) -->
           <div class="panel-controls-row">
-            <div class="tesseract-selector">
-              <table class="tesseract-table">
-                <thead>
-                  <tr>
-                    <th></th>
-                    <th>
-                      <label class="tesseract-option-label">
-                        <input type="radio" name="tesseract-model" value="fast" />
-                        <span class="model-name">Rápido</span>
-                      </label>
-                    </th>
-                    <th>
-                      <label class="tesseract-option-label">
-                        <input type="radio" name="tesseract-model" value="standard" checked />
-                        <span class="model-name">Normal</span>
-                      </label>
-                    </th>
-                    <th>
-                      <label class="tesseract-option-label">
-                        <input type="radio" name="tesseract-model" value="best" />
-                        <span class="model-name">Preciso</span>
-                      </label>
-                    </th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr>
-                    <td class="row-title">Precisão</td>
-                    <td class="val-low">Baixa</td>
-                    <td class="val-medium">Média</td>
-                    <td class="val-high">Alta</td>
-                  </tr>
-                  <tr>
-                    <td class="row-title">Velocidade</td>
-                    <td class="val-high">Alta</td>
-                    <td class="val-medium">Média</td>
-                    <td class="val-low">Baixa</td>
-                  </tr>
-                </tbody>
-              </table>
+            <div class="tesseract-selector-compact">
+              <span class="tesseract-title">Tessdata:</span>
+              <div class="tesseract-radios">
+                <label class="tesseract-option-label" title="Precisão: Baixa | Velocidade: Alta">
+                  <input type="radio" name="tesseract-model" value="fast" />
+                  <span class="model-name">Rápido</span>
+                </label>
+                <label class="tesseract-option-label" title="Precisão: Média | Velocidade: Média">
+                  <input type="radio" name="tesseract-model" value="standard" checked />
+                  <span class="model-name">Normal</span>
+                </label>
+                <label class="tesseract-option-label" title="Precisão: Alta | Velocidade: Baixa">
+                  <input type="radio" name="tesseract-model" value="best" />
+                  <span class="model-name">Preciso</span>
+                </label>
+              </div>
             </div>
 
-            <button id="btn-process" class="btn btn-primary btn-iniciar">
+            <button id="btn-process" class="btn btn-primary btn-iniciar btn-sm">
               <span class="btn-text">Iniciar</span>
               <span class="glow-effect"></span>
             </button>
           </div>
 
-          <!-- Workers Config & Status -->
+          <!-- Workers Config -->
           <div class="workers-controls-row">
-            <div class="workers-slider-group">
+            <div class="workers-slider-group" style="width: 100%;">
               <div class="workers-label-row">
                 <span class="workers-label-title">Workers OCR</span>
                 <span id="workers-count-display" class="badge workers-badge">3</span>
@@ -215,28 +137,106 @@
                 </button>
               </div>
             </div>
-            <div class="workers-status-group">
-              <span class="workers-status-title">Status dos Workers</span>
-              <div class="workers-status-grid" id="workers-status-grid">
-                <div class="worker-status-dot offline" data-worker="1" title="Worker 1: Desativado"></div>
-                <div class="worker-status-dot offline" data-worker="2" title="Worker 2: Desativado"></div>
-                <div class="worker-status-dot offline" data-worker="3" title="Worker 3: Desativado"></div>
-                <div class="worker-status-dot offline" data-worker="4" title="Worker 4: Desativado"></div>
-                <div class="worker-status-dot offline" data-worker="5" title="Worker 5: Desativado"></div>
+          </div>
+
+          <!-- Status dos Workers Ostensivo -->
+          <div class="workers-status-section">
+            <span class="workers-status-title">Status dos Workers</span>
+            <div class="workers-status-list" id="workers-status-list">
+              <div class="worker-status-row offline" data-worker="1">
+                <div class="worker-status-dot offline" data-worker="1"></div>
+                <span class="worker-name">Worker 1</span>
+                <span class="worker-state-tag">Desativado</span>
+                <span class="worker-current-job">Aguardando Início</span>
+              </div>
+              <div class="worker-status-row offline" data-worker="2">
+                <div class="worker-status-dot offline" data-worker="2"></div>
+                <span class="worker-name">Worker 2</span>
+                <span class="worker-state-tag">Desativado</span>
+                <span class="worker-current-job">Aguardando Início</span>
+              </div>
+              <div class="worker-status-row offline" data-worker="3">
+                <div class="worker-status-dot offline" data-worker="3"></div>
+                <span class="worker-name">Worker 3</span>
+                <span class="worker-state-tag">Desativado</span>
+                <span class="worker-current-job">Aguardando Início</span>
+              </div>
+              <div class="worker-status-row offline" data-worker="4">
+                <div class="worker-status-dot offline" data-worker="4"></div>
+                <span class="worker-name">Worker 4</span>
+                <span class="worker-state-tag">Desativado</span>
+                <span class="worker-current-job">Aguardando Início</span>
+              </div>
+              <div class="worker-status-row offline" data-worker="5">
+                <div class="worker-status-dot offline" data-worker="5"></div>
+                <span class="worker-name">Worker 5</span>
+                <span class="worker-state-tag">Desativado</span>
+                <span class="worker-current-job">Aguardando Início</span>
               </div>
             </div>
           </div>
 
-          <!-- Actions / Results Panel -->
+          <!-- Actions / Results Panel (com Progresso e Timeline) -->
           <div class="results-actions-card">
-            <div class="results-info-group">
-              <svg class="results-decor-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-              </svg>
-              <h2>Resultado Consolidado</h2>
-              <p class="results-hint">Após a extração, você poderá copiar o texto completo ou baixar o arquivo consolidado.</p>
+            <!-- Timeline (movida do Header) -->
+            <div id="process-timeline" class="process-timeline">
+              <div class="timeline-step active" id="step-upload">
+                <div class="step-icon">1</div>
+                <div class="step-label">ZIP</div>
+              </div>
+              <div class="timeline-connector"></div>
+              <div class="timeline-step" id="step-mapping">
+                <div class="step-icon">2</div>
+                <div class="step-label">Mapeamento</div>
+              </div>
+              <div class="timeline-connector"></div>
+              <div class="timeline-step" id="step-processing">
+                <div class="step-icon">3</div>
+                <div class="step-label">Extração</div>
+              </div>
+              <div class="timeline-connector"></div>
+              <div class="timeline-step" id="step-ocr">
+                <div class="step-icon">4</div>
+                <div class="step-label">OCR</div>
+              </div>
+              <div class="timeline-connector"></div>
+              <div class="timeline-step" id="step-xml">
+                <div class="step-icon">5</div>
+                <div class="step-label">Pronto</div>
+              </div>
             </div>
-            <div class="xml-actions-large">
+
+            <!-- Stats (Tempo e Contadores) -->
+            <div class="results-stats-row" id="results-stats-row">
+              <div class="results-stat-item">
+                <span class="results-stat-label">Tempo:</span>
+                <span class="results-stat-value" id="stat-elapsed-time">0.0s</span>
+              </div>
+              <div class="results-stat-item">
+                <span class="results-stat-label">Nativas:</span>
+                <span class="results-stat-value" id="stat-pdf-pages">0</span>
+              </div>
+              <div class="results-stat-item">
+                <span class="results-stat-label">OCR:</span>
+                <span class="results-stat-value" id="stat-ocr-pages">0</span>
+              </div>
+            </div>
+
+            <!-- Barra de Progresso do Processamento -->
+            <div class="results-progress-group" id="results-progress-group">
+              <div class="progress-bar-container" id="progress-container">
+                <div class="progress-bar-track">
+                  <div class="progress-bar-fill" id="progress-fill"></div>
+                </div>
+                <div class="progress-bar-info">
+                  <span id="progress-percentage">0%</span>
+                  <span id="progress-counter">Aguardando início...</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Ações Finais (Exibidas quando finalizado) -->
+            <div class="xml-actions-large hidden" id="xml-actions-container">
               <button id="btn-copy-xml" class="btn btn-secondary btn-lg" disabled>
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" width="20" height="20">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3" />

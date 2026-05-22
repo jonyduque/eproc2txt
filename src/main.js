@@ -42,7 +42,7 @@ const inputWorkers = document.getElementById('input-workers');
 const workersCountDisplay = document.getElementById('workers-count-display');
 const btnWorkersMinus = document.getElementById('btn-workers-minus');
 const btnWorkersPlus = document.getElementById('btn-workers-plus');
-const workersStatusGrid = document.getElementById('workers-status-grid');
+const workersStatusList = document.getElementById('workers-status-list');
 
 const statusDot = document.querySelector('.status-dot');
 const statusText = document.getElementById('status-text');
@@ -50,6 +50,9 @@ const progressContainer = document.getElementById('progress-container');
 const progressFill = document.getElementById('progress-fill');
 const progressPercentage = document.getElementById('progress-percentage');
 const progressCounter = document.getElementById('progress-counter');
+
+const resultsProgressGroup = document.getElementById('results-progress-group');
+const xmlActionsContainer = document.getElementById('xml-actions-container');
 
 const btnCopyXml = document.getElementById('btn-copy-xml');
 const btnDownloadXml = document.getElementById('btn-download-xml');
@@ -63,7 +66,6 @@ const statOcrPages = document.getElementById('stat-ocr-pages');
 
 // Tesseract Selector Elements
 const tesseractRadios = document.getElementsByName('tesseract-model');
-const tesseractTable = document.querySelector('.tesseract-table');
 
 // Theme Switcher Elements
 const btnThemeToggle = document.getElementById('btn-theme-toggle');
@@ -184,33 +186,46 @@ btnThemeToggle.addEventListener('click', () => {
 });
 
 /**
- * Update the highlighted column in the Tesseract selector table
+ * Trata o status do Worker e sua linha correspondente no painel
  */
-function updateTesseractHighlighting() {
-  if (!tesseractTable) return;
-  const selectedIndex = Array.from(tesseractRadios).findIndex(r => r.checked);
-  if (selectedIndex === -1) return;
-  
-  // Clear existing highlights
-  tesseractTable.querySelectorAll('.active-col').forEach(el => el.classList.remove('active-col'));
-  
-  // Columns: Index 0 is label, Index 1 is fast, Index 2 is standard, Index 3 is best
-  const colIndex = selectedIndex + 1;
-  tesseractTable.querySelectorAll('tr').forEach(row => {
-    const cells = row.children;
-    if (cells[colIndex]) {
-      cells[colIndex].classList.add('active-col');
+function updateWorkerStatusDot(index, status, jobText = '') {
+  const row = workersStatusList.querySelector(`.worker-status-row[data-worker="${index}"]`);
+  if (!row) return;
+
+  row.className = `worker-status-row ${status}`;
+  const dot = row.querySelector('.worker-status-dot');
+  if (dot) {
+    dot.className = `worker-status-dot ${status}`;
+  }
+
+  const tag = row.querySelector('.worker-state-tag');
+  if (tag) {
+    if (status === 'offline') {
+      tag.textContent = 'Desativado';
+    } else if (status === 'idle') {
+      tag.textContent = 'Ocioso';
+    } else if (status === 'active') {
+      tag.textContent = 'Processando';
     }
-  });
+  }
+
+  const jobEl = row.querySelector('.worker-current-job');
+  if (jobEl) {
+    if (status === 'offline') {
+      jobEl.textContent = jobText || 'Desativado';
+    } else if (status === 'idle') {
+      jobEl.textContent = jobText || 'Aguardando tarefa';
+    } else if (status === 'active') {
+      jobEl.textContent = jobText || 'Processando...';
+    }
+  }
+
+  let tooltip = `Worker ${index}: `;
+  if (status === 'offline') tooltip += jobText || 'Desativado';
+  else if (status === 'idle') tooltip += jobText || 'Ocioso';
+  else if (status === 'active') tooltip += `Processando: ${jobText}`;
+  row.setAttribute('title', tooltip);
 }
-
-// Add event listener to each radio button
-tesseractRadios.forEach(radio => {
-  radio.addEventListener('change', updateTesseractHighlighting);
-});
-
-// Initialize highlighting and workers UI
-updateTesseractHighlighting();
 
 /**
  * Update the UI showing active/offline workers based on the slider value
@@ -220,28 +235,27 @@ function updateWorkersUi() {
   maxOcrWorkers = count;
   workersCountDisplay.textContent = count;
   
-  const dots = workersStatusGrid.querySelectorAll('.worker-status-dot');
-  dots.forEach((dot, index) => {
-    const workerIndex = index + 1;
-    if (workerIndex <= count) {
-      dot.classList.remove('offline');
-      // If we are currently processing, leave them as idle/active,
-      // otherwise make sure they show as offline/disabled until started.
-      if (activeWorker) {
-        if (!dot.classList.contains('active')) {
-          dot.classList.add('idle');
+  for (let i = 1; i <= 5; i++) {
+    if (i <= count) {
+      if (activeWorker || ocrWorkers.length > 0) {
+        const wRecord = ocrWorkers.find(w => w.index === i);
+        if (wRecord) {
+          if (wRecord.active) {
+            const job = wRecord.currentJob;
+            updateWorkerStatusDot(i, 'active', job ? `OCR ${job.fileName} (Pág ${job.page}/${job.pageCount})` : 'Processando...');
+          } else {
+            updateWorkerStatusDot(i, 'idle');
+          }
+        } else {
+          updateWorkerStatusDot(i, 'idle');
         }
       } else {
-        dot.classList.add('offline');
-        dot.classList.remove('idle', 'active');
-        dot.setAttribute('title', `Worker ${workerIndex}: Desativado (Aguardando Início)`);
+        updateWorkerStatusDot(i, 'offline', 'Aguardando Início');
       }
     } else {
-      dot.classList.add('offline');
-      dot.classList.remove('idle', 'active');
-      dot.setAttribute('title', `Worker ${workerIndex}: Desativado`);
+      updateWorkerStatusDot(i, 'offline');
     }
-  });
+  }
 }
 
 // Add event listeners to worker controls
@@ -310,7 +324,8 @@ function setUiProcessing(processing, completed = false) {
   });
 
   if (processing) {
-    progressContainer.classList.remove('hidden');
+    if (resultsProgressGroup) resultsProgressGroup.classList.remove('hidden');
+    if (xmlActionsContainer) xmlActionsContainer.classList.add('hidden');
     setStatus('processing', 'Processando');
     startTimer();
     consolidatedText = '';
@@ -318,6 +333,13 @@ function setUiProcessing(processing, completed = false) {
     btnDownloadXml.disabled = true;
   } else {
     stopTimer();
+    if (completed) {
+      if (resultsProgressGroup) resultsProgressGroup.classList.add('hidden');
+      if (xmlActionsContainer) xmlActionsContainer.classList.remove('hidden');
+    } else {
+      if (resultsProgressGroup) resultsProgressGroup.classList.add('hidden');
+      if (xmlActionsContainer) xmlActionsContainer.classList.add('hidden');
+    }
   }
 }
 
@@ -614,7 +636,8 @@ function resetToUploadState() {
   statOcrPages.textContent = '0';
   
   // Hide progress bar and reset values
-  progressContainer.classList.add('hidden');
+  if (resultsProgressGroup) resultsProgressGroup.classList.add('hidden');
+  if (xmlActionsContainer) xmlActionsContainer.classList.add('hidden');
   progressFill.style.width = '0%';
   progressPercentage.textContent = '0%';
   progressCounter.textContent = '0 / 0 páginas';
@@ -662,26 +685,12 @@ function startOcrWorkers() {
     });
 
     // Coloca o status dot correspondente em ocioso (idle)
-    updateWorkerStatusDot(workerIndex, 'idle', `Worker ${workerIndex}: Ocioso`);
+    updateWorkerStatusDot(workerIndex, 'idle');
   }
 
   // Deixa os outros status dots excedentes offline
   for (let i = maxOcrWorkers + 1; i <= 5; i++) {
-    updateWorkerStatusDot(i, 'offline', `Worker ${i}: Desativado`);
-  }
-}
-
-/**
- * Trata o status do Dot correspondente no painel
- */
-function updateWorkerStatusDot(index, status, title) {
-  const dot = workersStatusGrid.querySelector(`.worker-status-dot[data-worker="${index}"]`);
-  if (dot) {
-    dot.className = 'worker-status-dot';
-    dot.classList.add(status); // 'offline', 'idle', 'active'
-    if (title) {
-      dot.setAttribute('title', title);
-    }
+    updateWorkerStatusDot(i, 'offline');
   }
 }
 
@@ -702,7 +711,7 @@ function terminateAllWorkers() {
 
   // Define todos os dots como offline
   for (let i = 1; i <= 5; i++) {
-    updateWorkerStatusDot(i, 'offline', `Worker ${i}: Desativado`);
+    updateWorkerStatusDot(i, 'offline');
   }
 }
 
@@ -717,7 +726,7 @@ function dispatchOcrJobs() {
       wRecord.currentJob = job;
 
       // Atualiza visual do status
-      updateWorkerStatusDot(wRecord.index, 'active', `Worker ${wRecord.index}: OCR ${job.fileName} - Pág ${job.page}`);
+      updateWorkerStatusDot(wRecord.index, 'active', `OCR ${job.fileName} (Pág ${job.page}/${job.pageCount})`);
 
       // Envia tarefa transferindo posse do buffer
       wRecord.worker.postMessage({
@@ -766,7 +775,7 @@ function handleOcrWorkerMessage(workerIndex, event) {
       // Libera o worker
       wRecord.active = false;
       wRecord.currentJob = null;
-      updateWorkerStatusDot(workerIndex, 'idle', `Worker ${workerIndex}: Ocioso`);
+      updateWorkerStatusDot(workerIndex, 'idle');
 
       // Resolve o job
       const jobInfo = activeJobs.get(data.jobId);
@@ -873,6 +882,12 @@ function handlePipelineMessage(event) {
     }
 
     case 'page_ocr_request': {
+      // Se for a primeira requisição de OCR, avança a timeline para o passo OCR
+      const activeTimelineStep = document.querySelector('.timeline-step.active');
+      if (activeTimelineStep && activeTimelineStep.id === 'step-processing') {
+        setTimelineStep('step-ocr');
+      }
+
       // Recebemos requisição de OCR da página. Colocamos na fila
       const jobId = ++jobIdCounter;
       ocrQueue.push({
@@ -922,6 +937,13 @@ function finishProcessing() {
   setUiProcessing(false, true);
   setStatus('finished', 'Finalizado');
   setTimelineStep('step-xml');
+
+  // Forçar o último passo a também ficar completed (verde)
+  const stepXml = document.getElementById('step-xml');
+  if (stepXml) {
+    stepXml.classList.remove('active');
+    stepXml.classList.add('completed');
+  }
 
   statPdfPages.textContent = pdfPagesCount;
   statOcrPages.textContent = ocrPagesCount;
