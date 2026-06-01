@@ -22,7 +22,7 @@
   --color-accent-glow: rgba(236, 72, 153, 0.25);
   --color-primary: oklch(0.82 0.17 195); /* electric cyan */
   --color-primary-glow: rgba(34, 211, 238, 0.25);
-  
+
   --color-success: oklch(0.78 0.18 150);
   --color-warning: oklch(0.82 0.16 85);
   --color-error: oklch(0.68 0.22 25);

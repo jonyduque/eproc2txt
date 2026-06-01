@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import usePipeline from './hooks/usePipeline.js';
 import BackgroundFX from './components/BackgroundFX.jsx';
+import { BackgroundGradientAnimation } from './components/Background-Gradient.tsx';
 import Header from './components/Header.jsx';
 import Footer from './components/Footer.jsx';
 import IdleScreen from './components/IdleScreen.jsx';
@@ -81,17 +82,20 @@ export default function App() {
 
   return (
     <main className="app-main-layout">
+      {/* Animated gradient background overlay */}
+      <BackgroundGradientAnimation containerClassName="app-fixed-background-gradient" interactive={true} />
+
       <BackgroundFX />
-      
-      <Header 
-        statusClass={statusClass} 
-        statusLabel={statusLabel} 
+
+      <Header
+        statusClass={statusClass}
+        statusLabel={statusLabel}
       />
 
       <section className="app-content-wrapper">
         {!zipData ? (
-          <IdleScreen 
-            onZipParsed={handleZipParsed} 
+          <IdleScreen
+            onZipParsed={handleZipParsed}
             onLoadingChange={setGlobalLoading}
           />
         ) : (

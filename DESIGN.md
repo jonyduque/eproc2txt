@@ -54,6 +54,10 @@ All colors are specified using the modern `oklch` color space to ensure uniform 
 *   **Pulsing Glow Core:** The central folder icon sits inside a pulsing circular cyan blur.
 *   **Laser Scanning Lines:** Real horizontal scanlines that glide slowly from left to right with varying speeds, mimicking laser triangulation.
 
+### Background Gradient Animation
+*   **Animated Ambient Glow:** Multiple color bubbles (electric cyan, cyber magenta, steel blue, soft red, amber) float vertically and circularly using hardware-accelerated CSS animations and `hard-light` blend mode.
+*   **Smooth Cursor Follower:** A dedicated bubble follows mouse movements globally, reacting with a smooth latency transition for high-tech interactivity.
+
 ---
 
 ## 5. Layout Principles
