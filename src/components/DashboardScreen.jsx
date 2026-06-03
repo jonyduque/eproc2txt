@@ -4,6 +4,7 @@ import DoneView from './DoneView';
 import ProcessingView from './ProcessingView';
 import FileSummaryBar from './FileSummaryBar';
 import ConfigPanel from './ConfigPanel';
+import './DashboardScreen.css';
 
 export default function DashboardScreen({
   zipName,

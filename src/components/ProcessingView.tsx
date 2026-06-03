@@ -1,5 +1,6 @@
 import React from 'react';
 import FileIcon from './FileIcon';
+import './ProcessingView.css';
 import { formatDuration } from '../utils/format';
 
 interface ProcessingViewProps {

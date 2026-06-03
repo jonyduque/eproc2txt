@@ -1,4 +1,5 @@
 import React, { useRef, useEffect } from "react";
+import './Wheel.css';
 
 interface WheelProps {
   workers: number;

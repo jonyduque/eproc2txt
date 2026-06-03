@@ -1,6 +1,7 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { TreeSelectionTools } from './TreeSelectionTools';
 import { TreeEventNode } from './TreeEventNode';
+import './Tree.css';
 
 interface TreeProps {
   tree: any[];

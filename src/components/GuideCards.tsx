@@ -1,4 +1,5 @@
 import React from 'react';
+import './GuideCards.css';
 
 export default function GuideCards() {
   const steps = [

@@ -1,6 +1,7 @@
 import React from 'react';
 import Dropzone from './Dropzone';
 import GuideCards from './GuideCards';
+import './IdleScreen.css';
 
 export default function IdleScreen({ onZipParsed, onLoadingChange }) {
   return (

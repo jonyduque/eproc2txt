@@ -1,6 +1,7 @@
 import React from 'react';
 import Wheel from './Wheel';
 import TessModel from './TessModel';
+import './ConfigPanel.css';
 
 interface ConfigPanelProps {
   workers: number;

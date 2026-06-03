@@ -1,4 +1,5 @@
 import React from 'react';
+import './DoneView.css';
 
 interface DoneViewProps {
   totalDocsCount: number;

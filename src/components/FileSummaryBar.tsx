@@ -1,5 +1,6 @@
 import React from 'react';
 import { formatBytes } from '../utils/format';
+import './FileSummaryBar.css';
 
 interface FileSummaryBarProps {
   zipName: string;

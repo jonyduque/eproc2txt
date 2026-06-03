@@ -1,4 +1,5 @@
 import React from 'react';
+import './TessModel.css';
 
 interface TessModelProps {
   tessModel: string;

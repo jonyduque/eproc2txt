@@ -1,5 +1,6 @@
 import React, { useState, useRef } from 'react';
 import { parseZipStructure } from '../utils/parser.js';
+import './Dropzone.css';
 
 interface DropzoneProps {
   onZipParsed: (zipData: Uint8Array, zipName: string, parsedTree: any[], ignored: any[]) => void;
