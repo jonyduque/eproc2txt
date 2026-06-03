@@ -12,6 +12,8 @@ export default function usePipeline() {
   const [progressText, setProgressText] = useState('Aguardando início...');
   const [consolidatedXml, setConsolidatedXml] = useState('');
   const [timelineStep, setTimelineStep] = useState('step-upload');
+  const [isPaused, setIsPaused] = useState(false);
+  const isPausedRef = useRef(false);
   
   // Document live status tracking
   const [docStatuses, setDocStatuses] = useState({});
@@ -42,6 +44,7 @@ export default function usePipeline() {
   // Timer refs
   const timerIntervalRef = useRef(null);
   const startTimeRef = useRef(0);
+  const accumulatedTimeRef = useRef(0);
 
   // Stats refs (to avoid stale render dependencies)
   const pdfPagesCountRef = useRef(0);
@@ -56,6 +59,7 @@ export default function usePipeline() {
   };
 
   const startTimer = () => {
+    accumulatedTimeRef.current = 0;
     startTimeRef.current = Date.now();
     setElapsedTime('00:00.00');
     setElapsedMs(0);
@@ -66,11 +70,29 @@ export default function usePipeline() {
     }, 50);
   };
 
+  const pauseTimer = () => {
+    if (timerIntervalRef.current) {
+      clearInterval(timerIntervalRef.current);
+      timerIntervalRef.current = null;
+    }
+    accumulatedTimeRef.current += Date.now() - startTimeRef.current;
+  };
+
+  const resumeTimer = () => {
+    startTimeRef.current = Date.now();
+    timerIntervalRef.current = setInterval(() => {
+      const elapsed = Date.now() - startTimeRef.current + accumulatedTimeRef.current;
+      setElapsedMs(elapsed);
+      setElapsedTime(formatDuration(elapsed));
+    }, 50);
+  };
+
   const stopTimer = () => {
     if (timerIntervalRef.current) {
       clearInterval(timerIntervalRef.current);
       timerIntervalRef.current = null;
     }
+    accumulatedTimeRef.current = 0;
   };
 
   const updateWorkerStatus = useCallback((index, status, jobText = '') => {
@@ -124,6 +146,7 @@ export default function usePipeline() {
   }, []);
 
   const dispatchOcrJobs = useCallback(() => {
+    if (isPausedRef.current) return;
     const ocrWorkers = ocrWorkersRef.current;
     const ocrQueue = ocrQueueRef.current;
     const tessDataPath = currentTessDataPathRef.current;
@@ -285,12 +308,17 @@ export default function usePipeline() {
     ocrWorkersRef.current = [];
 
     // Initialize state mapping
-    setWorkerStatuses(prev => prev.map(w => {
-      if (w.index <= count) {
-        return { ...w, status: 'idle', job: 'Aguardando tarefa' };
+    setWorkerStatuses(prev => {
+      const next = [];
+      for (let i = 1; i <= Math.max(5, count); i++) {
+        next.push({
+          index: i,
+          status: i <= count ? 'idle' : 'offline',
+          job: i <= count ? 'Aguardando tarefa' : 'Desativado'
+        });
       }
-      return { ...w, status: 'offline', job: 'Desativado' };
-    }));
+      return next;
+    });
 
     for (let i = 0; i < count; i++) {
       const workerIndex = i + 1;
@@ -483,6 +511,8 @@ export default function usePipeline() {
     // Set UI states
     setIsProcessing(true);
     setIsCompleted(false);
+    isPausedRef.current = false;
+    setIsPaused(false);
     setProgressPercentage(0);
     setProgressText(`Iniciando processamento de ${selectedFiles.length} documentos...`);
     setTimelineStep('step-processing');
@@ -509,6 +539,8 @@ export default function usePipeline() {
     stopTimer();
     setIsProcessing(false);
     setIsCompleted(false);
+    isPausedRef.current = false;
+    setIsPaused(false);
     setTimelineStep('step-mapping');
     setProgressPercentage(0);
     setProgressText('Processamento cancelado pelo usuário.');
@@ -520,6 +552,8 @@ export default function usePipeline() {
     stopTimer();
     setIsProcessing(false);
     setIsCompleted(false);
+    isPausedRef.current = false;
+    setIsPaused(false);
     setElapsedTime('00:00.00');
     setElapsedMs(0);
     setPdfPages(0);
@@ -530,6 +564,31 @@ export default function usePipeline() {
     setTimelineStep('step-upload');
     setDocStatuses({});
   }, [terminateAllWorkers]);
+
+  const pausePipeline = useCallback(() => {
+    if (!isProcessing || isPausedRef.current) return;
+    isPausedRef.current = true;
+    setIsPaused(true);
+    pauseTimer();
+
+    if (pipelineWorkerRef.current) {
+      pipelineWorkerRef.current.postMessage({ type: 'pause' });
+    }
+    setProgressText('Processamento pausado pelo usuário.');
+  }, [isProcessing]);
+
+  const resumePipeline = useCallback(() => {
+    if (!isProcessing || !isPausedRef.current) return;
+    isPausedRef.current = false;
+    setIsPaused(false);
+    resumeTimer();
+
+    if (pipelineWorkerRef.current && !isPipelinePausedRef.current) {
+      pipelineWorkerRef.current.postMessage({ type: 'resume' });
+    }
+    setProgressText('Processamento retomado...');
+    dispatchOcrJobs();
+  }, [isProcessing, dispatchOcrJobs]);
 
   // Cleanup on unmount
   useEffect(() => {
@@ -542,6 +601,7 @@ export default function usePipeline() {
   return {
     isProcessing,
     isCompleted,
+    isPaused,
     elapsedTime,
     elapsedMs,
     pdfPages,
@@ -555,6 +615,8 @@ export default function usePipeline() {
     startPipeline,
     cancelPipeline,
     resetPipeline,
+    pausePipeline,
+    resumePipeline,
     setTimelineStep
   };
 }

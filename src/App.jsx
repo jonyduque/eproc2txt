@@ -11,6 +11,7 @@ export default function App() {
   const {
     isProcessing,
     isCompleted,
+    isPaused,
     elapsedTime,
     elapsedMs,
     pdfPages,
@@ -24,6 +25,8 @@ export default function App() {
     startPipeline,
     cancelPipeline,
     resetPipeline,
+    pausePipeline,
+    resumePipeline,
     setTimelineStep
   } = usePipeline();
 
@@ -107,6 +110,7 @@ export default function App() {
             setSelectedPaths={setSelectedPaths}
             isProcessing={isProcessing}
             isCompleted={isCompleted}
+            isPaused={isPaused}
             elapsedTime={elapsedTime}
             elapsedMs={elapsedMs}
             pdfPages={pdfPages}
@@ -120,6 +124,8 @@ export default function App() {
             onStart={handleStartPipeline}
             onCancel={handleCancelPipeline}
             onReset={handleResetPipeline}
+            onPause={pausePipeline}
+            onResume={resumePipeline}
           />
         )}
       </section>

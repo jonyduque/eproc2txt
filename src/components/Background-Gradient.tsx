@@ -2,15 +2,15 @@ import React, { useEffect, useRef, useState } from "react";
 import "./background-gradient.css";
 
 export const BackgroundGradientAnimation = ({
-  gradientBackgroundStart = "rgb(32, 36, 47)",
-  gradientBackgroundEnd = "rgb(25, 28, 37)",
+  gradientBackgroundStart = "rgba(32, 36, 47, 0.5)",
+  gradientBackgroundEnd = "rgba(25, 28, 37, 0.5)",
   firstColor = "34, 211, 238",
   secondColor = "236, 72, 153",
   thirdColor = "96, 165, 250",
   fourthColor = "248, 113, 113",
   fifthColor = "251, 191, 36",
   pointerColor = "156, 163, 175",
-  size = "80%",
+  size = "40%",
   blendingValue = "hard-light",
   children,
   className,

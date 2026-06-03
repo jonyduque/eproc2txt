@@ -41,11 +41,14 @@ export function parseZipStructure(zipData) {
     const baseName = name.substring(name.lastIndexOf('/') + 1);
     if (!baseName) continue;
 
+    const extMatch = baseName.match(/\.([a-zA-Z0-9]+)$/);
+    const ext = extMatch ? extMatch[1].toLowerCase() : '';
+    const isValidExtension = (ext === 'pdf' || ext === 'html');
+
     const capaMatch = baseName.match(capaRegex);
     const eprocMatch = baseName.match(eprocRegex);
 
-    if (capaMatch) {
-      const ext = capaMatch[1].toLowerCase();
+    if (isValidExtension && capaMatch) {
       if (!groups[0]) {
         groups[0] = [];
       }
@@ -56,13 +59,14 @@ export function parseZipStructure(zipData) {
         docType: 'Capa',
         docNumber: 0,
         extension: ext,
-        size: file.size
+        size: file.size,
+        isValidExtension: true,
+        isValidNaming: true
       });
-    } else if (eprocMatch) {
+    } else if (isValidExtension && eprocMatch) {
       const eventNum = parseInt(eprocMatch[1], 10);
       const docType = eprocMatch[2].trim();
       const docNum = parseInt(eprocMatch[3], 10);
-      const ext = eprocMatch[4].toLowerCase();
 
       if (!groups[eventNum]) {
         groups[eventNum] = [];
@@ -75,13 +79,30 @@ export function parseZipStructure(zipData) {
         docType: docType,
         docNumber: docNum,
         extension: ext,
-        size: file.size
+        size: file.size,
+        isValidExtension: true,
+        isValidNaming: true
       });
     } else {
-      ignored.push({
+      const errorDescription = !isValidExtension
+        ? `Formato inválido: ${ext.toUpperCase()}`
+        : 'Nomenclatura fora do padrão';
+
+      if (!groups[-1]) {
+        groups[-1] = [];
+      }
+
+      groups[-1].push({
         originalPath: name,
         fileName: baseName,
-        size: file.size
+        eventNumber: -1,
+        docType: 'Fora do Padrão',
+        docNumber: 0,
+        extension: ext,
+        size: file.size,
+        isValidExtension: isValidExtension,
+        isValidNaming: false,
+        errorDescription: errorDescription
       });
     }
   }
@@ -91,7 +112,12 @@ export function parseZipStructure(zipData) {
     .map(Number)
     .sort((a, b) => a - b)
     .map(eventNum => {
-      const documents = groups[eventNum].sort((a, b) => a.docNumber - b.docNumber);
+      const documents = groups[eventNum];
+      if (eventNum === -1) {
+        documents.sort((a, b) => a.fileName.localeCompare(b.fileName, undefined, { sensitivity: 'base' }));
+      } else {
+        documents.sort((a, b) => a.docNumber - b.docNumber);
+      }
       return {
         eventNumber: eventNum,
         documents: documents
@@ -100,6 +126,6 @@ export function parseZipStructure(zipData) {
 
   return {
     tree: sortedTree,
-    ignored: ignored
+    ignored: []
   };
 }

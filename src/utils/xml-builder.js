@@ -38,6 +38,13 @@ export function buildConsolidatedXml(tree) {
       }
       const pageLabel = pageCount === 1 ? '1 página' : `${pageCount} páginas`;
       xml += `- Capa do processo: ${pageLabel}\n`;
+    } else if (event.eventNumber === -1) {
+      xml += `- Arquivos fora de padrão:\n`;
+      for (const doc of event.documents) {
+        const pageCount = doc.pages ? doc.pages.length : 0;
+        const pageLabel = pageCount === 1 ? '1 página' : `${pageCount} páginas`;
+        xml += `\t- ${doc.fileName}: ${pageLabel}\n`;
+      }
     } else {
       xml += `- Evento ${event.eventNumber}\n`;
       for (const doc of event.documents) {
@@ -72,6 +79,27 @@ export function buildConsolidatedXml(tree) {
         }
       }
       xml += `</capa>\n`;
+    } else if (event.eventNumber === -1) {
+      for (const doc of event.documents) {
+        xml += `<arquivo_fora_padrao nome="${escapeXml(doc.fileName)}">\n`;
+        if (doc.pages) {
+          for (const page of doc.pages) {
+            const escapedContent = escapeXml(page.content);
+            xml += `\t<pag n="${page.pagId}">\n`;
+            const lines = escapedContent.split('\n');
+            const indentedContent = lines
+              .map(line => line.trim())
+              .filter(line => line.length > 0)
+              .map(line => `\t\t${line}`)
+              .join('\n');
+            if (indentedContent) {
+              xml += `${indentedContent}\n`;
+            }
+            xml += `\t</pag>\n`;
+          }
+        }
+        xml += `</arquivo_fora_padrao>\n`;
+      }
     } else {
       xml += `<evento n="${event.eventNumber}">\n`;
       for (const doc of event.documents) {
