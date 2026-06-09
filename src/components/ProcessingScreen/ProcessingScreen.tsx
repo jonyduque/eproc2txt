@@ -1,5 +1,5 @@
-import FileIcon from "../Tree/FileIcon";
-import "./ProcessingView.css";
+import FileIcon from "../FileIcon";
+import "./ProcessingScreen.css";
 import { formatDuration } from "../../utils/format";
 
 interface DocStatusItem {
@@ -9,6 +9,7 @@ interface DocStatusItem {
 	fileName: string;
 	extension: string;
 	pageCount?: number;
+	completedPages: number;
 }
 
 interface WorkerStatusItem {
@@ -17,43 +18,46 @@ interface WorkerStatusItem {
 	job?: string;
 }
 
-interface ProcessingViewProps {
+interface ProcessingScreenProps {
 	isPaused: boolean;
 	elapsedTime: string;
-	completedDocs: number;
-	totalDocsCount: number;
-	activeWorkersCount: number;
-	progressPercentage: number;
-	completedPages: number;
-	totalPages: number;
-	pagesPerSec: number;
-	queuedDocsCount: number;
-	onResume: () => void;
-	onPause: () => void;
-	onCancel: () => void;
+	elapsedMs: number;
+	pdfPages: number;
+	ocrPages: number;
 	docStatuses: Record<string, DocStatusItem>;
 	workerStatuses: WorkerStatusItem[];
 	maxWorkers: number;
+	onResume: () => void;
+	onPause: () => void;
+	onCancel: () => void;
 }
 
-export default function ProcessingView({
+export default function ProcessingScreen({
 	isPaused,
 	elapsedTime,
-	completedDocs,
-	totalDocsCount,
-	activeWorkersCount,
-	progressPercentage,
-	completedPages,
-	totalPages,
-	pagesPerSec,
-	queuedDocsCount,
-	onResume,
-	onPause,
-	onCancel,
+	elapsedMs,
+	pdfPages,
+	ocrPages,
 	docStatuses,
 	workerStatuses,
 	maxWorkers,
-}: ProcessingViewProps) {
+	onResume,
+	onPause,
+	onCancel,
+}: ProcessingScreenProps) {
+	// Calculate derived values internally
+	const totalPages = Object.values(docStatuses).reduce((s, d) => s + (d.pageCount || 0), 0) || 1;
+	const completedPages = pdfPages + ocrPages;
+	const elapsedSec = (elapsedMs || 0) / 1000 || 0.1;
+	const pagesPerSec = completedPages / elapsedSec;
+
+	const completedDocs = Object.values(docStatuses).filter((d) => d.status === "done").length;
+	const totalDocsCount = Object.keys(docStatuses).length || 1;
+
+	const activeWorkersCount = workerStatuses.filter((w) => w.status === "active").length;
+	const queuedDocsCount = Object.values(docStatuses).filter((d) => d.status === "queued").length;
+	const progressPercentage = Math.min(100, Math.round((completedPages / totalPages) * 100));
+
 	return (
 		<div className="animate-fade-up">
 			{/* Top stats glow panel */}

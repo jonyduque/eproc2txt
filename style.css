@@ -155,13 +155,37 @@ body.light-theme {
 }
 
 @keyframes pulse-text {
-  18%, 58%, 98% {
+
+  18%,
+  58%,
+  98% {
     text-shadow: 0 0 var(--blur-size) oklch(from currentColor l c h / 1);
   }
-  0%, 10%, 20%, 30%, 40%, 50%, 60%, 70%, 80%, 90%, 100% {
+
+  0%,
+  10%,
+  20%,
+  30%,
+  40%,
+  50%,
+  60%,
+  70%,
+  80%,
+  90%,
+  100% {
     text-shadow: 0 0 var(--blur-size) oklch(from currentColor l c h / 0.8);
   }
-  5%, 15%, 25%, 35%, 45%, 55%, 65%, 75%, 85%, 95% {
+
+  5%,
+  15%,
+  25%,
+  35%,
+  45%,
+  55%,
+  65%,
+  75%,
+  85%,
+  95% {
     text-shadow: 0 0 var(--blur-size) oklch(from currentColor l c h / 0.9);
   }
 }
@@ -260,15 +284,38 @@ body.light-theme {
     background-position-y: 0px;
     opacity: 0.3;
   }
-  18%, 58%, 98% {
+
+  18%,
+  58%,
+  98% {
     opacity: 1;
   }
-  10%, 20%, 30%, 40%, 50%, 60%, 70%, 80%, 90% {
+
+  10%,
+  20%,
+  30%,
+  40%,
+  50%,
+  60%,
+  70%,
+  80%,
+  90% {
     opacity: 0.5;
   }
-  5%, 15%, 25%, 35%, 45%, 55%, 65%, 75%, 85%, 95% {
+
+  5%,
+  15%,
+  25%,
+  35%,
+  45%,
+  55%,
+  65%,
+  75%,
+  85%,
+  95% {
     opacity: 0.7;
   }
+
   100% {
     background-position-y: calc(var(--altura) + var(--espessura));
     opacity: 0.8;
@@ -291,12 +338,15 @@ body.light-theme {
     top: 0%;
     opacity: 0;
   }
+
   10% {
     opacity: 1;
   }
+
   90% {
     opacity: 1;
   }
+
   100% {
     top: 100%;
     opacity: 0;
@@ -321,6 +371,7 @@ body.light-theme {
     transform: scale(0.8);
     opacity: 0.9;
   }
+
   100% {
     transform: scale(2.0);
     opacity: 0;
@@ -331,23 +382,32 @@ body.light-theme {
   0% {
     opacity: 100%;
   }
+
   50% {
     opacity: 50%;
   }
 }
 
 @keyframes glow-pulse {
-  0%, 100% {
+
+  0%,
+  100% {
     box-shadow: 0 0 20px -6px oklch(0.82 0.17 195 / 0.4);
   }
+
   50% {
     box-shadow: 0 0 40px -4px oklch(0.82 0.17 195 / 0.8);
   }
 }
 
 @keyframes orbit {
-  from { transform: rotate(0deg); }
-  to { transform: rotate(360deg); }
+  from {
+    transform: rotate(0deg);
+  }
+
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 .animate-orbit {
@@ -427,6 +487,8 @@ body {
   position: relative;
   min-height: 100vh;
   overflow: hidden;
+  display: flex;
+  flex-direction: column;
 }
 
 .app-content-wrapper {
@@ -439,6 +501,7 @@ body {
   padding-right: var(--space-6);
   padding-bottom: var(--space-6);
   padding-top: var(--space-3);
+  flex-grow: 1;
 }
 
 .app-container {
@@ -446,8 +509,7 @@ body {
   width: 100%;
   margin: 0 auto;
   padding: 0.75rem 1.25rem;
-  height: 100vh;
-  max-height: 100vh;
+  height: calc(100vh - 25vh);
   display: flex;
   flex-direction: column;
   gap: 0.75rem;
@@ -464,13 +526,127 @@ body {
   letter-spacing: 0.2em;
   color: var(--color-text-secondary);
   flex-shrink: 0;
-  padding-top: var(--space-2);
+  padding: var(--space-3);
   border-top: var(--border-width-default) solid var(--border-color);
-  height: 6vh;
+  height: 20vh;
   display: flex;
   align-items: center;
   justify-content: center;
 }
+
+.app-footer {
+	position: relative;
+	z-index: 9999;
+	text-align: center;
+	font-family: var(--font-mono);
+	font-size: var(--font-size-2xs);
+	text-transform: uppercase;
+	letter-spacing: 0.2em;
+	color: var(--color-text-secondary);
+	flex-shrink: 0;
+	padding-top: var(--space-2) var(--space-4);
+	border-top: var(--border-width-default) solid var(--border-color);
+	height: 8vh;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	box-sizing: border-box;
+}
+
+/* Dev Footer styles */
+.app-footer.dev-footer {
+	height: auto;
+	min-height: 8vh;
+	padding: var(--space-2) var(--space-4);
+	display: flex;
+	flex-direction: row;
+	align-items: center;
+	justify-content: space-between;
+	gap: var(--gap-4);
+	flex-wrap: wrap;
+	background: rgba(10, 11, 20, 0.4);
+	backdrop-filter: blur(8px);
+	border-top: var(--border-width-default) solid rgba(0, 242, 254, 0.15);
+	box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.5);
+}
+
+.footer-brand {
+	display: flex;
+	align-items: center;
+	gap: var(--gap-2);
+}
+
+.dev-badge {
+	font-size: 9px;
+	padding: 2px 6px;
+	background: linear-gradient(135deg, #ff007f, #ff0055);
+	color: #ffffff;
+	border-radius: 4px;
+	font-weight: var(--font-weight-bold);
+	letter-spacing: 0.1em;
+	box-shadow: 0 0 8px rgba(255, 0, 127, 0.4);
+	text-shadow: none;
+}
+
+.dev-toolbar {
+	display: flex;
+	align-items: center;
+	gap: var(--gap-2);
+}
+
+.btn-dev {
+	font-family: var(--font-sans);
+	font-size: 11px;
+	font-weight: var(--font-weight-medium);
+	color: var(--color-text-secondary);
+	background: rgba(255, 255, 255, 0.05);
+	border: var(--border-width-default) solid rgba(255, 255, 255, 0.1);
+	padding: var(--space-1) var(--space-2);
+	border-radius: var(--border-radius-md);
+	cursor: pointer;
+	text-transform: none;
+	letter-spacing: normal;
+	transition: all 0.25s cubic-bezier(0.25, 0.8, 0.25, 1);
+}
+
+.btn-dev:hover {
+	background: rgba(255, 255, 255, 0.1);
+	color: var(--color-text-primary);
+	border-color: rgba(255, 255, 255, 0.2);
+}
+
+.btn-dev.active {
+	background: rgba(0, 242, 254, 0.1);
+	color: var(--color-primary);
+	border-color: var(--color-primary);
+	box-shadow: 0 0 10px var(--color-primary-glow);
+}
+
+/* Light theme support */
+body.light-theme .app-footer.dev-footer {
+	background: rgba(241, 245, 249, 0.85);
+	border-top: var(--border-width-default) solid rgba(0, 0, 0, 0.08);
+	box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.03);
+}
+
+body.light-theme .btn-dev {
+	background: rgba(0, 0, 0, 0.03);
+	border-color: rgba(0, 0, 0, 0.08);
+	color: #64748b;
+}
+
+body.light-theme .btn-dev:hover {
+	background: rgba(0, 0, 0, 0.06);
+	color: #0f172a;
+}
+
+body.light-theme .btn-dev.active {
+	background: rgba(0, 242, 254, 0.08);
+	color: oklch(0.55 0.15 195);
+	border-color: oklch(0.55 0.15 195);
+	box-shadow: none;
+}
+
 
 /* Header Navigation & Components */
 .app-header-nav {
@@ -479,13 +655,11 @@ body {
   margin: 0 auto;
   display: flex;
   width: 100%;
+  height: 10vh;
   max-width: calc(var(--max-w-xl) * 2);
   align-items: center;
   justify-content: space-between;
-  padding-left: var(--space-6);
-  padding-right: var(--space-6);
-  padding-top: var(--space-6);
-  padding-bottom: var(--space-3);
+  padding: var(--space-3) var(--space-6);
 }
 
 .logo-text-group {
@@ -741,6 +915,7 @@ body.light-theme .btn-secondary:hover {
     opacity: 0.6;
     box-shadow: 0 0 6px var(--color-primary-glow);
   }
+
   100% {
     opacity: 1;
     box-shadow: 0 0 16px rgba(34, 211, 238, 0.5);

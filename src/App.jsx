@@ -1,87 +1,118 @@
-import { useState } from "react";
-import BackgroundFX from "./components/Background/BackgroundFX.jsx";
-import { BackgroundGradientAnimation } from "./components/Background/BackgroundGradient.tsx";
+import ConfigScreen from "./components/ConfigScreen/ConfigScreen.jsx";
+import DoneScreen from "./components/DoneScreen/DoneScreen.jsx";
+import BackgroundFX from "./components/Layout/Background/BackgroundFX.jsx";
+import { BackgroundGradientAnimation } from "./components/Layout/Background/BackgroundGradient.tsx";
+import Footer from "./components/Layout/Footer.jsx";
 import Header from "./components/Layout/Header.jsx";
-import DashboardScreen from "./components/Screens/DashboardScreen.jsx";
-import Footer from "./components/Screens/Footer.jsx";
-import IdleScreen from "./components/Screens/IdleScreen.jsx";
+import LoadingScreen from "./components/LoadingScreen/LoadingScreen.jsx";
+import ProcessingScreen from "./components/ProcessingScreen/ProcessingScreen.jsx";
 import usePipeline from "./hooks/usePipeline.js";
 
 export default function App() {
 	const {
-		isProcessing,
-		isCompleted,
+		status,
+		globalLoading,
+		zipName,
+		tree,
+		ignoredFiles,
+		selectedPaths,
 		isPaused,
-		elapsedTime,
-		elapsedMs,
 		pdfPages,
 		ocrPages,
-		progressPercentage,
-		progressText,
 		consolidatedXml,
-		timelineStep,
 		workerStatuses,
 		docStatuses,
+		mockState,
+		maxWorkers,
+		tessModel,
+		elapsedTime,
+		elapsedMs,
 		startPipeline,
 		cancelPipeline,
 		resetPipeline,
 		pausePipeline,
 		resumePipeline,
-		setTimelineStep,
+		setWorkers,
+		setTessModel,
+		setMockState,
+		setSelectedPaths,
+		setGlobalLoading,
+		handleZipParsed,
 	} = usePipeline();
 
-	const [zipData, setZipData] = useState(null);
-	const [zipName, setZipName] = useState("");
-	const [tree, setTree] = useState([]);
-	const [ignoredFiles, setIgnoredFiles] = useState([]);
-	const [selectedPaths, setSelectedPaths] = useState(new Set());
-	const [globalLoading, setGlobalLoading] = useState(false);
-
-	const handleZipParsed = (data, name, parsedTree, ignored) => {
-		setZipData(data);
-		setZipName(name);
-		setTree(parsedTree);
-		setIgnoredFiles(ignored);
-		setTimelineStep("step-mapping");
-	};
-
-	const handleStartPipeline = (selectedFiles, maxWorkers, model) => {
-		startPipeline(zipData, selectedFiles, maxWorkers, model, tree);
-	};
-
-	const handleCancelPipeline = () => {
-		cancelPipeline();
-	};
-
-	const handleResetPipeline = () => {
-		resetPipeline();
-		setZipData(null);
-		setZipName("");
-		setTree([]);
-		setIgnoredFiles([]);
-		setSelectedPaths(new Set());
-	};
-
 	// Determine status indicators for the header
-	let statusClass = "idled pulse-radar-dot";
+	let statusClass = "loading pulse-radar-dot";
 	let statusLabel = "Aguardando Arquivo";
 
 	if (globalLoading) {
 		statusClass = "processing";
 		statusLabel = "Lendo ZIP...";
-	} else if (zipData && !isProcessing && !isCompleted) {
-		statusClass = "idled";
+	} else if (status === "configuring") {
+		statusClass = "loading";
 		statusLabel = "Pronto";
-	} else if (isProcessing) {
+	} else if (status === "processing") {
 		statusClass = "processing";
 		statusLabel = "Processando";
-	} else if (isCompleted) {
+	} else if (status === "completed") {
 		statusClass = "finished";
 		statusLabel = "Finalizado";
-	} else if (timelineStep === "step-mapping" && !isProcessing) {
-		statusClass = "warning";
-		statusLabel = "Interrompido";
 	}
+
+	const renderScreen = () => {
+		if (status === "completed") {
+			const totalDocsCount = Object.keys(docStatuses).length || 1;
+			return (
+				<DoneScreen
+					totalDocsCount={totalDocsCount}
+					pdfPages={pdfPages}
+					ocrPages={ocrPages}
+					maxWorkers={maxWorkers}
+					tessModel={tessModel}
+					elapsedTime={elapsedTime}
+					consolidatedXml={consolidatedXml}
+					onReset={resetPipeline}
+				/>
+			);
+		}
+
+		if (status === "processing") {
+			return (
+				<ProcessingScreen
+					isPaused={isPaused}
+					elapsedTime={elapsedTime}
+					elapsedMs={elapsedMs}
+					pdfPages={pdfPages}
+					ocrPages={ocrPages}
+					docStatuses={docStatuses}
+					workerStatuses={workerStatuses}
+					maxWorkers={maxWorkers}
+					onResume={resumePipeline}
+					onPause={pausePipeline}
+					onCancel={cancelPipeline}
+				/>
+			);
+		}
+
+		if (status === "configuring") {
+			return (
+				<ConfigScreen
+					zipName={zipName}
+					tree={tree}
+					ignoredFiles={ignoredFiles}
+					selectedPaths={selectedPaths}
+					setSelectedPaths={setSelectedPaths}
+					workers={maxWorkers}
+					setWorkers={setWorkers}
+					tessModel={tessModel}
+					setTessModel={setTessModel}
+					onStart={startPipeline}
+					onReset={resetPipeline}
+				/>
+			);
+		}
+
+		return <LoadingScreen onZipParsed={handleZipParsed} onLoadingChange={setGlobalLoading} />;
+	};
 
 	return (
 		<main className="app-main-layout">
@@ -95,39 +126,9 @@ export default function App() {
 
 			<Header statusClass={statusClass} statusLabel={statusLabel} />
 
-			<section className="app-content-wrapper">
-				{!zipData ? (
-					<IdleScreen onZipParsed={handleZipParsed} onLoadingChange={setGlobalLoading} />
-				) : (
-					<DashboardScreen
-						zipName={zipName}
-						tree={tree}
-						ignoredFiles={ignoredFiles}
-						selectedPaths={selectedPaths}
-						setSelectedPaths={setSelectedPaths}
-						isProcessing={isProcessing}
-						isCompleted={isCompleted}
-						isPaused={isPaused}
-						elapsedTime={elapsedTime}
-						elapsedMs={elapsedMs}
-						pdfPages={pdfPages}
-						ocrPages={ocrPages}
-						progressPercentage={progressPercentage}
-						progressText={progressText}
-						consolidatedXml={consolidatedXml}
-						timelineStep={timelineStep}
-						workerStatuses={workerStatuses}
-						docStatuses={docStatuses}
-						onStart={handleStartPipeline}
-						onCancel={handleCancelPipeline}
-						onReset={handleResetPipeline}
-						onPause={pausePipeline}
-						onResume={resumePipeline}
-					/>
-				)}
-			</section>
+			<section className="app-content-wrapper">{renderScreen()}</section>
 
-			<Footer />
+			<Footer mockState={mockState} setMockState={setMockState} />
 		</main>
 	);
 }

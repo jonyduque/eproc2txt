@@ -1,6 +1,83 @@
+.loading-screen-container {
+	margin-left: auto;
+	margin-right: auto;
+	margin-top: 0;
+	max-width: calc(4 * var(--max-w-xl) / 3);
+	text-align: center;
+}
+
+.loading-subtitle {
+	font-family: var(--font-mono);
+	font-size: var(--font-size-xs);
+	text-transform: uppercase;
+	letter-spacing: 0.3em;
+	color: var(--color-primary);
+	--blur-size: 6px;
+}
+
+.loading-title {
+	margin-top: var(--space-2);
+	font-family: var(--font-sans);
+	font-size: var(--font-size-4xl);
+	font-weight: var(--font-weight-semibold);
+	letter-spacing: -0.025em;
+	line-height: 0.8;
+}
+
+@media (min-width: 768px) {
+	.loading-title {
+		font-size: calc(var(--font-size-2xl) * 2);
+	}
+}
+
+.loading-title-highlight {
+	color: var(--color-primary);
+}
+
+/* GUIDE CARDS */
+.guide-cards-grid {
+	margin-top: var(--space-10);
+	display: grid;
+	grid-template-columns: repeat(1, minmax(0, 1fr));
+	gap: var(--gap-3);
+	text-align: left;
+}
+
+@media (min-width: 768px) {
+	.guide-cards-grid {
+		grid-template-columns: repeat(3, minmax(0, 1fr));
+	}
+}
+
+.guide-card {
+	padding: var(--space-2) var(--space-4) var(--space-3);
+}
+
+.guide-card-number {
+	font-family: var(--font-mono);
+	font-size: var(--font-size-2xs);
+	font-weight: var(--font-weight-semibold);
+	text-transform: uppercase;
+	color: var(--color-primary);
+	--blur-size: 6px;
+}
+
+.guide-card-title {
+	margin-top: var(--space-1);
+	font-size: var(--font-size-sm);
+	font-weight: var(--font-weight-semibold);
+}
+
+.guide-card-description {
+	margin-top: var(--space-0-5);
+	font-size: var(--font-size-xs);
+	color: var(--color-text-secondary);
+}
+
+/* DROPZONE */
 .dropzone-card {
 	position: relative;
-	margin-top: var(--space-8);
+	margin-top: var(--space-5);
 	display: block;
 	cursor: pointer;
 	overflow: hidden;
@@ -32,11 +109,11 @@
 		repeating-linear-gradient(
 			0deg,
 			rgba(0, 0, 0, 0.25),
-			rgba(0, 0, 0, 0.25) 1px,
-			transparent 1px,
-			transparent 3px
+			rgba(0, 0, 0, 0.25) 4px,
+			transparent 4px,
+			transparent 6px
 		),
-		radial-gradient(circle at center, rgba(34, 211, 238, 0.08) 0%, rgba(0, 0, 0, 0.35) 100%);
+		radial-gradient(circle at center, rgba(34, 211, 238, 0.205) 0%, rgba(0, 0, 0, 0.35) 100%);
 	pointer-events: none;
 	z-index: 2;
 	animation: tv-flicker 0.15s infinite;

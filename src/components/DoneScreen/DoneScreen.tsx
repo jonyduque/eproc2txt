@@ -1,28 +1,56 @@
-import "./DoneView.css";
+import { useState } from "react";
+import "./DoneScreen.css";
 
-interface DoneViewProps {
+interface DoneScreenProps {
 	totalDocsCount: number;
-	completedPages: number;
+	pdfPages: number;
+	ocrPages: number;
 	maxWorkers: number;
 	tessModel: string;
 	elapsedTime: string;
-	copied: boolean;
-	handleCopyXml: () => void;
-	handleDownloadXml: () => void;
+	consolidatedXml: string;
 	onReset: () => void;
 }
 
-export default function DoneView({
+export default function DoneScreen({
 	totalDocsCount,
-	completedPages,
+	pdfPages,
+	ocrPages,
 	maxWorkers,
 	tessModel,
 	elapsedTime,
-	copied,
-	handleCopyXml,
-	handleDownloadXml,
+	consolidatedXml,
 	onReset,
-}: DoneViewProps) {
+}: DoneScreenProps) {
+	const [copied, setCopied] = useState(false);
+	const completedPages = pdfPages + ocrPages;
+
+	const handleCopyXml = async () => {
+		if (!consolidatedXml) return;
+		try {
+			await navigator.clipboard.writeText(consolidatedXml);
+			setCopied(true);
+			setTimeout(() => setCopied(false), 1800);
+		} catch (err) {
+			console.error("Falha ao copiar XML:", err);
+		}
+	};
+
+	const handleDownloadXml = () => {
+		if (!consolidatedXml) return;
+		const blob = new Blob([consolidatedXml], {
+			type: "text/plain;charset=utf-8",
+		});
+		const url = URL.createObjectURL(blob);
+		const a = document.createElement("a");
+		a.href = url;
+		a.download = "consolidado.txt";
+		document.body.appendChild(a);
+		a.click();
+		document.body.removeChild(a);
+		URL.revokeObjectURL(url);
+	};
+
 	return (
 		<div className="done-view-container animate-fade-up">
 			<div className="done-header-banner">

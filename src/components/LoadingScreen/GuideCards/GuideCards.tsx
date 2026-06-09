@@ -1,5 +1,3 @@
-import "./GuideCards.css";
-
 export default function GuideCards() {
 	const steps = [
 		["01", "Envie o ZIP", "Extraímos e catalogamos cada PDF e HTML automaticamente."],
@@ -11,8 +9,9 @@ export default function GuideCards() {
 		<div className="guide-cards-grid">
 			{steps.map(([n, t, d]) => (
 				<div key={n} className="panel guide-card">
-					<span className="text-glow-magenta guide-card-number">{n}</span>
-					<p className="guide-card-title">{t}</p>
+					<span className="text-glow-magenta guide-card-number">
+						{n} - {t}
+					</span>
 					<p className="guide-card-description">{d}</p>
 				</div>
 			))}

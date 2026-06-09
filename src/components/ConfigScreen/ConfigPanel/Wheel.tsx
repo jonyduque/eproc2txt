@@ -95,7 +95,7 @@ export default function Wheel({ workers, setWorkers, maxAllowedWorkers }: WheelP
 
 		return items.map((val) => {
 			const offset = val - workers;
-			const angle = offset * 26;
+			const angle = offset * 38;
 			const scale = 1 - Math.abs(offset) * 0.15;
 			const opacity = 1 - Math.abs(offset) * 0.42;
 			const isActive = offset === 0;
@@ -105,7 +105,7 @@ export default function Wheel({ workers, setWorkers, maxAllowedWorkers }: WheelP
 					onClick={() => setWorkers(val)}
 					className={`wheel-item ${isActive ? "active" : ""}`}
 					style={{
-						transform: `rotateY(${angle}deg) translateZ(40px) scale(${scale})`,
+						transform: `rotateY(${angle}deg) translateZ(75px) scale(${scale})`,
 						opacity: opacity > 0 ? opacity : 0,
 						pointerEvents: Math.abs(offset) > 2 ? "none" : "auto",
 					}}
@@ -134,6 +134,7 @@ export default function Wheel({ workers, setWorkers, maxAllowedWorkers }: WheelP
 					<div className="wheel-indicator" />
 					<div
 						className="wheel-drum"
+						style={{ "--wheel-offset": workers } as React.CSSProperties}
 						onMouseDown={handleMouseDown}
 						onTouchStart={handleTouchStart}
 						onTouchMove={handleTouchMove}
