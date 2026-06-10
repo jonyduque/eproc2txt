@@ -119,15 +119,15 @@
 
 /* Light Theme overrides for the rotary selector */
 body.light-theme .wheel-window {
-	background: #f1f5f9;
-	border-color: rgba(0, 0, 0, 0.12);
+	background: var(--bg-primary);
+	border-color: var(--border-color);
 	box-shadow:
-		inset 12px 0 16px -10px rgba(0, 0, 0, 0.15),
-		inset -12px 0 16px -10px rgba(0, 0, 0, 0.15);
+		inset 12px 0 16px -10px rgba(0, 0, 0, 0.08),
+		inset -12px 0 16px -10px rgba(0, 0, 0, 0.08);
 }
 
 body.light-theme .wheel-indicator {
-	border-top-color: oklch(0.55 0.15 195);
+	border-top-color: var(--color-primary);
 	filter: none;
 }
 
@@ -140,7 +140,7 @@ body.light-theme .wheel-drum {
 			transparent 78%,
 			rgba(255, 255, 255, 0.75) 100%
 		),
-		repeating-linear-gradient(90deg, #e2e8f0 0px, #e2e8f0 6px, #cbd5e1 6px, #cbd5e1 12px);
+		repeating-linear-gradient(90deg, oklch(0.93 0.015 220) 0px, oklch(0.93 0.015 220) 6px, oklch(0.89 0.02 220) 6px, oklch(0.89 0.02 220) 12px);
 	background-position:
 		0 0,
 		calc(var(--wheel-offset, 0) * -24px) 0;
@@ -148,11 +148,11 @@ body.light-theme .wheel-drum {
 }
 
 body.light-theme .wheel-item {
-	color: #64748b;
+	color: var(--color-text-secondary);
 }
 
 body.light-theme .wheel-item.active {
-	color: oklch(0.55 0.15 195);
+	color: var(--color-primary);
 	text-shadow: none;
 }
 
