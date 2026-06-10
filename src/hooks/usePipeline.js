@@ -409,7 +409,7 @@ export default function usePipeline() {
 	}
 
 	const startPipeline = useCallback(
-		(zipData, selectedFiles) => {
+		(selectedFiles) => {
 			if (throttleTimeoutRef.current) {
 				clearTimeout(throttleTimeoutRef.current);
 				throttleTimeoutRef.current = null;
@@ -453,16 +453,19 @@ export default function usePipeline() {
 
 			startTimer();
 
+			const activeZipData = state.mockState ? "mock-zip-data" : state.zipData;
+			const activeTree = state.mockState ? mockTreeData : state.tree;
+
 			// Dispatch coordinator start
 			coordinatorRef.current.start(
-				zipData,
+				activeZipData,
 				selectedFiles,
 				state.maxWorkers,
 				state.tessModel,
-				state.tree,
+				activeTree,
 			);
 		},
-		[startTimer, state.maxWorkers, state.tessModel, state.tree],
+		[startTimer, state.maxWorkers, state.tessModel, state.tree, state.mockState, state.zipData],
 	);
 
 	const cancelPipeline = useCallback(() => {
