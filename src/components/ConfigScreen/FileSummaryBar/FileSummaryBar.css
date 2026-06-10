@@ -22,8 +22,8 @@
 }
 
 .btn-change-file {
-	background: rgba(34, 211, 238, 0.1);
-	border: 1px solid rgba(34, 211, 238, 0.35);
+	background: var(--color-primary-alpha-10);
+	border: 1px solid var(--color-primary-alpha-40);
 	border-radius: var(--border-radius-md);
 	cursor: pointer;
 	font-family: var(--font-mono);
@@ -40,21 +40,18 @@
 }
 
 .btn-change-file:hover {
-	background: rgba(34, 211, 238, 0.2);
+	background: var(--color-primary-alpha-10);
 	border-color: var(--color-primary);
-	color: #ffffff;
-	box-shadow: 0 0 16px rgba(34, 211, 238, 0.4);
+	color: var(--color-primary);
+	box-shadow: 0 0 16px var(--color-primary-glow);
+	filter: brightness(1.1);
 }
 
 body.light-theme .btn-change-file {
-	background: rgba(34, 211, 238, 0.08);
-	border-color: rgba(34, 211, 238, 0.4);
-	color: oklch(0.55 0.15 195);
 	box-shadow: none;
 }
 
 body.light-theme .btn-change-file:hover {
-	background: rgba(34, 211, 238, 0.15);
-	border-color: oklch(0.55 0.15 195);
-	color: oklch(0.45 0.15 195);
+	box-shadow: none;
+	filter: brightness(0.9);
 }
