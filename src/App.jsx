@@ -27,6 +27,8 @@ export default function App() {
 		tessModel,
 		elapsedTime,
 		elapsedMs,
+		timerStartTime,
+		timerAccumulatedMs,
 		startPipeline,
 		cancelPipeline,
 		resetPipeline,
@@ -79,7 +81,8 @@ export default function App() {
 			return (
 				<ProcessingScreen
 					isPaused={isPaused}
-					elapsedTime={elapsedTime}
+					timerStartTime={timerStartTime}
+					timerAccumulatedMs={timerAccumulatedMs}
 					elapsedMs={elapsedMs}
 					pdfPages={pdfPages}
 					ocrPages={ocrPages}
@@ -89,6 +92,7 @@ export default function App() {
 					onResume={resumePipeline}
 					onPause={pausePipeline}
 					onCancel={cancelPipeline}
+					tree={tree}
 				/>
 			);
 		}

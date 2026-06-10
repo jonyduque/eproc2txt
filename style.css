@@ -20,10 +20,10 @@
 
   --color-accent: oklch(0.72 0.22 320);
   /* magenta */
-  --color-accent-glow: rgba(236, 72, 153, 0.25);
+  --color-accent-glow: oklch(0.72 0.22 320 / 0.25);
   --color-primary: oklch(0.82 0.17 195);
   /* electric cyan */
-  --color-primary-glow: rgba(34, 211, 238, 0.25);
+  --color-primary-glow: oklch(0.82 0.17 195 / 0.25);
 
   --color-success: oklch(0.78 0.18 150);
   --color-warning: oklch(0.82 0.16 85);
@@ -112,12 +112,41 @@
   --gap-2: 0.5rem;
   --gap-3: 0.75rem;
   --gap-6: 1.5rem;
+
+  /* Background gradient animation variables */
+  --gradient-background-start: rgba(32, 36, 47, 0.5);
+  --gradient-background-end: rgba(25, 28, 37, 0.5);
+  --first-color: 34, 211, 238;
+  --second-color: 236, 72, 153;
+  --third-color: 96, 165, 250;
+  --fourth-color: 248, 113, 113;
+  --fifth-color: 251, 191, 36;
+  --pointer-color: 156, 163, 175;
+  --size: 40%;
+  --blending-value: hard-light;
+
+  /* Glow panel, grid, and body glow variables */
+  --bg-panel-glow: linear-gradient(180deg, oklch(0.24 0.04 262 / 0.92), oklch(0.18 0.025 262 / 0.92));
+  --border-panel-glow: 1px solid oklch(0.82 0.17 195 / 0.35);
+  --shadow-panel-glow: 0 0 40px -10px oklch(0.82 0.17 195 / 0.4), inset 0 1px 0 0 oklch(1 0 0 / 0.04);
+  --border-glow-shadow:
+    0 0 0 1px oklch(0.82 0.17 195 / 0.35),
+    0 0 32px -4px oklch(0.82 0.17 195 / 0.35),
+    inset 0 0 24px -8px oklch(0.82 0.17 195 / 0.15);
+  --grid-color: oklch(0.82 0.17 195 / 0.06);
+  --scanlines-color-1: oklch(0.82 0.17 195 / 0.04);
+  --scanlines-color-2: oklch(0.82 0.17 195 / 0.1);
+  --scanline-color: oklch(0.82 0.17 195 / 0.9);
+  --glow-pulse-start: oklch(0.82 0.17 195 / 0.4);
+  --glow-pulse-end: oklch(0.82 0.17 195 / 0.8);
+  --body-glow-1: oklch(0.82 0.17 195 / 0.15);
+  --body-glow-2: oklch(0.72 0.22 320 / 0.12);
 }
 
 /* Light Theme overrides */
 body.light-theme {
-  --bg-primary: oklch(0.97 0.01 220);
-  --bg-secondary: oklch(0.99 0.005 220);
+  --bg-primary: #ffffff;
+  --bg-secondary: #fbfcfd;
   --bg-card: linear-gradient(180deg, rgba(255, 255, 255, 0.82) 0%, rgba(250, 251, 253, 0.82) 100%);
   --border-color: rgba(37, 99, 235, 0.08);
 
@@ -127,9 +156,9 @@ body.light-theme {
   --color-text-muted: oklch(0.65 0.02 240);
 
   --color-accent: oklch(0.58 0.21 335);
-  --color-accent-glow: rgba(219, 39, 119, 0.15);
+  --color-accent-glow: oklch(0.58 0.21 335 / 0.15);
   --color-primary: oklch(0.58 0.19 230);
-  --color-primary-glow: rgba(34, 150, 238, 0.15);
+  --color-primary-glow: oklch(0.58 0.19 230 / 0.15);
 
   --bg-code: oklch(0.95 0.015 230);
   --color-code-text: oklch(0.50 0.20 335);
@@ -159,9 +188,34 @@ body.light-theme {
   --color-error: oklch(0.58 0.18 20);
   --color-info: oklch(0.60 0.14 240);
 
-  background-image:
-    radial-gradient(ellipse 80% 50% at 50% -10%, oklch(0.58 0.19 230 / 0.12), transparent 70%),
-    radial-gradient(ellipse 60% 50% at 90% 110%, oklch(0.58 0.21 335 / 0.08), transparent 70%);
+  /* Background gradient animation variables */
+  --gradient-background-start: #ffffff;
+  --gradient-background-end: #ffffff;
+  --first-color: 147, 197, 253;    /* Soft Light Blue */
+  --second-color: 244, 143, 177;   /* Soft Pink */
+  --third-color: 196, 181, 253;    /* Soft Lavender */
+  --fourth-color: 253, 186, 116;   /* Soft Peach */
+  --fifth-color: 167, 243, 208;    /* Soft Mint */
+  --pointer-color: 209, 213, 219;  /* Light Grey */
+  --size: 40%;
+  --blending-value: multiply;
+
+  /* Glow panel, grid, and body glow variables */
+  --bg-panel-glow: linear-gradient(180deg, rgba(255, 255, 255, 0.95), rgba(240, 244, 255, 0.95));
+  --border-panel-glow: 1px solid oklch(0.58 0.19 230 / 0.25);
+  --shadow-panel-glow: 0 0 40px -10px oklch(0.58 0.19 230 / 0.25), inset 0 1px 0 0 rgba(255, 255, 255, 0.6);
+  --border-glow-shadow:
+    0 0 0 1px oklch(0.58 0.19 230 / 0.25),
+    0 0 32px -4px oklch(0.58 0.19 230 / 0.25),
+    inset 0 0 24px -8px oklch(0.58 0.19 230 / 0.1);
+  --grid-color: oklch(0.58 0.19 230 / 0.08);
+  --scanlines-color-1: oklch(0.58 0.19 230 / 0.03);
+  --scanlines-color-2: oklch(0.58 0.19 230 / 0.07);
+  --scanline-color: oklch(0.58 0.19 230 / 0.75);
+  --glow-pulse-start: oklch(0.58 0.19 230 / 0.25);
+  --glow-pulse-end: oklch(0.58 0.19 230 / 0.6);
+  --body-glow-1: oklch(0.58 0.19 230 / 0.12);
+  --body-glow-2: oklch(0.58 0.21 335 / 0.08);
 }
 
 /* Utility Classes for Techno Design */
@@ -214,10 +268,7 @@ body.light-theme {
 }
 
 .border-glow {
-  box-shadow:
-    0 0 0 1px oklch(0.82 0.17 195 / 0.35),
-    0 0 32px -4px oklch(0.82 0.17 195 / 0.35),
-    inset 0 0 24px -8px oklch(0.82 0.17 195 / 0.15);
+  box-shadow: var(--border-glow-shadow);
 }
 
 .panel {
@@ -228,18 +279,16 @@ body.light-theme {
 }
 
 .panel-glow {
-  background: linear-gradient(180deg, oklch(0.24 0.04 262 / 0.92), oklch(0.18 0.025 262 / 0.92));
-  border: 1px solid oklch(0.82 0.17 195 / 0.35);
-  box-shadow:
-    0 0 40px -10px oklch(0.82 0.17 195 / 0.4),
-    inset 0 1px 0 0 oklch(1 0 0 / 0.04);
+  background: var(--bg-panel-glow);
+  border: var(--border-panel-glow);
+  box-shadow: var(--shadow-panel-glow);
   border-radius: var(--radius);
 }
 
 .grid-bg {
   background-image:
-    linear-gradient(oklch(0.82 0.17 195 / 0.06) 1px, transparent 1px),
-    linear-gradient(90deg, oklch(0.82 0.17 195 / 0.06) 1px, transparent 1px);
+    linear-gradient(var(--grid-color) 1px, transparent 1px),
+    linear-gradient(90deg, var(--grid-color) 1px, transparent 1px);
   background-size: 32px 32px;
 }
 
@@ -259,7 +308,7 @@ body.light-theme {
   height: var(--border-width-default);
   pointer-events: none;
   z-index: 10;
-  background: linear-gradient(90deg, transparent, rgba(34, 211, 238, 0.7), transparent);
+  background: linear-gradient(90deg, transparent, var(--color-primary-alpha-60), transparent);
 }
 
 .bottom-glow-circle {
@@ -294,8 +343,8 @@ body.light-theme {
     repeating-linear-gradient(to bottom,
       transparent,
       transparent var(--altura),
-      oklch(0.82 0.17 195 / 0.04) var(--altura),
-      oklch(0.82 0.17 195 / 0.1) calc(var(--altura) + var(--espessura)));
+      var(--scanlines-color-1) var(--altura),
+      var(--scanlines-color-2) calc(var(--altura) + var(--espessura)));
   background-size: 100% calc(var(--altura) + var(--espessura));
   border-radius: inherit;
   z-index: 1;
@@ -350,8 +399,8 @@ body.light-theme {
   left: 0;
   right: 0;
   height: 2px;
-  background: linear-gradient(90deg, transparent, oklch(0.82 0.17 195 / 0.9), transparent);
-  box-shadow: 0 0 16px oklch(0.82 0.17 195 / 0.9);
+  background: linear-gradient(90deg, transparent, var(--scanline-color), transparent);
+  box-shadow: 0 0 16px var(--scanline-color);
   animation: scan 1.8s linear infinite;
   z-index: 3;
 }
@@ -415,11 +464,11 @@ body.light-theme {
 
   0%,
   100% {
-    box-shadow: 0 0 20px -6px oklch(0.82 0.17 195 / 0.4);
+    box-shadow: 0 0 20px -6px var(--glow-pulse-start);
   }
 
   50% {
-    box-shadow: 0 0 40px -4px oklch(0.82 0.17 195 / 0.8);
+    box-shadow: 0 0 40px -4px var(--glow-pulse-end);
   }
 }
 
@@ -476,8 +525,8 @@ body {
   font-family: var(--font-sans);
   background-color: var(--bg-primary);
   background-image:
-    radial-gradient(ellipse 80% 50% at 50% -10%, oklch(0.82 0.17 195 / 0.15), transparent 70%),
-    radial-gradient(ellipse 60% 50% at 90% 110%, oklch(0.72 0.22 320 / 0.12), transparent 70%);
+    radial-gradient(ellipse 80% 50% at 50% -10%, var(--body-glow-1), transparent 70%),
+    radial-gradient(ellipse 60% 50% at 90% 110%, var(--body-glow-2), transparent 70%);
   background-attachment: fixed;
   color: var(--color-text-primary);
   min-height: 100vh;

@@ -187,10 +187,7 @@ body.light-theme .dropzone-card::after {
 }
 
 .dropzone-card.hovered {
-	box-shadow:
-		0 0 0 1px oklch(0.82 0.17 195 / 0.35),
-		0 0 32px -4px oklch(0.82 0.17 195 / 0.35),
-		inset 0 0 24px -8px oklch(0.82 0.17 195 / 0.15);
+	box-shadow: var(--border-glow-shadow);
 	transform: scale(1.01);
 }
 

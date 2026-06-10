@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useReducer, useRef, useState } from "react";
+import { useCallback, useEffect, useReducer, useRef } from "react";
 import {
 	mockDocStatusesData,
 	mockSelectedPaths,
@@ -7,6 +7,12 @@ import {
 	mockXmlData,
 } from "../utils/mockData.js";
 import PipelineCoordinator from "../utils/PipelineCoordinator.js";
+import {
+	releaseWakeLock,
+	requestWakeLock,
+	startSilentAudio,
+	stopSilentAudio,
+} from "../utils/wake-lock-audio.js";
 import { buildConsolidatedXml } from "../utils/xml-builder.js";
 
 const formatDuration = (ms) => {
@@ -42,6 +48,7 @@ const initialState = {
 	mockState: null,
 	maxWorkers: Math.max(navigator.hardwareConcurrency || 3, 3),
 	tessModel: "standard",
+	elapsedMs: 0,
 };
 
 function pipelineReducer(state, action) {
@@ -83,6 +90,7 @@ function pipelineReducer(state, action) {
 				ocrPages: action.payload.ocrPages,
 				progressPercentage: action.payload.progressPercentage,
 				progressText: action.payload.progressText,
+				elapsedMs: action.payload.elapsedMs ?? state.elapsedMs,
 			};
 		case "PAUSE_PIPELINE":
 			return {
@@ -102,6 +110,7 @@ function pipelineReducer(state, action) {
 				status: "completed",
 				consolidatedXml: action.payload.consolidatedXml,
 				docStatuses: action.payload.docStatuses,
+				elapsedMs: action.payload.elapsedMs ?? state.elapsedMs,
 			};
 		case "PIPELINE_ERROR":
 			return {
@@ -153,12 +162,13 @@ function pipelineReducer(state, action) {
 export default function usePipeline() {
 	const [state, dispatch] = useReducer(pipelineReducer, initialState);
 
-	// High-frequency clock states are kept separate to prevent reducer overhead
-	const [elapsedTime, setElapsedTime] = useState("00:00.00");
-	const [elapsedMs, setElapsedMs] = useState(0);
+	// Track pause state in ref to avoid scheduleStateUpdate dependency churn
+	const isPausedRef = useRef(false);
+	useEffect(() => {
+		isPausedRef.current = state.isPaused;
+	}, [state.isPaused]);
 
-	// Timer refs
-	const timerIntervalRef = useRef(null);
+	// Timer refs (used by the isolated Chronometer component via exposed values)
 	const startTimeRef = useRef(0);
 	const accumulatedTimeRef = useRef(0);
 
@@ -178,6 +188,10 @@ export default function usePipeline() {
 			throttleTimeoutRef.current = null;
 		}
 
+		const elapsed = isPausedRef.current
+			? accumulatedTimeRef.current
+			: accumulatedTimeRef.current + (Date.now() - startTimeRef.current);
+
 		dispatch({
 			type: "UPDATE_PROGRESS",
 			payload: {
@@ -186,6 +200,7 @@ export default function usePipeline() {
 				ocrPages: pendingOcrPagesRef.current,
 				progressPercentage: pendingProgressPercentageRef.current,
 				progressText: pendingProgressTextRef.current,
+				elapsedMs: elapsed,
 			},
 		});
 	}, []);
@@ -195,6 +210,10 @@ export default function usePipeline() {
 
 		throttleTimeoutRef.current = setTimeout(() => {
 			throttleTimeoutRef.current = null;
+			const elapsed = isPausedRef.current
+				? accumulatedTimeRef.current
+				: accumulatedTimeRef.current + (Date.now() - startTimeRef.current);
+
 			dispatch({
 				type: "UPDATE_PROGRESS",
 				payload: {
@@ -203,6 +222,7 @@ export default function usePipeline() {
 					ocrPages: pendingOcrPagesRef.current,
 					progressPercentage: pendingProgressPercentageRef.current,
 					progressText: pendingProgressTextRef.current,
+					elapsedMs: elapsed,
 				},
 			});
 		}, 100);
@@ -211,38 +231,18 @@ export default function usePipeline() {
 	const startTimer = useCallback(() => {
 		accumulatedTimeRef.current = 0;
 		startTimeRef.current = Date.now();
-		setElapsedTime("00:00.00");
-		setElapsedMs(0);
-		timerIntervalRef.current = setInterval(() => {
-			const elapsed = Date.now() - startTimeRef.current;
-			setElapsedMs(elapsed);
-			setElapsedTime(formatDuration(elapsed));
-		}, 50);
 	}, []);
 
 	const pauseTimer = useCallback(() => {
-		if (timerIntervalRef.current) {
-			clearInterval(timerIntervalRef.current);
-			timerIntervalRef.current = null;
-		}
 		accumulatedTimeRef.current += Date.now() - startTimeRef.current;
 	}, []);
 
 	const resumeTimer = useCallback(() => {
 		startTimeRef.current = Date.now();
-		timerIntervalRef.current = setInterval(() => {
-			const elapsed = Date.now() - startTimeRef.current + accumulatedTimeRef.current;
-			setElapsedMs(elapsed);
-			setElapsedTime(formatDuration(elapsed));
-		}, 50);
 	}, []);
 
 	const stopTimer = useCallback(() => {
-		if (timerIntervalRef.current) {
-			clearInterval(timerIntervalRef.current);
-			timerIntervalRef.current = null;
-		}
-		accumulatedTimeRef.current = 0;
+		// Interval has been removed, so this is now a no-op
 	}, []);
 
 	const updateOverallProgress = useCallback(
@@ -332,6 +332,8 @@ export default function usePipeline() {
 			},
 			onFinished: (processedDocs, currentTree) => {
 				stopTimer();
+				stopSilentAudio();
+				releaseWakeLock();
 
 				// Build the final XML data based on the processed files
 				const finalTree = [];
@@ -381,11 +383,16 @@ export default function usePipeline() {
 					};
 				});
 
+				const finalMs = isPausedRef.current
+					? accumulatedTimeRef.current
+					: accumulatedTimeRef.current + (Date.now() - startTimeRef.current);
+
 				dispatch({
 					type: "PIPELINE_FINISHED",
 					payload: {
 						consolidatedXml: xmlResult,
 						docStatuses: { ...pendingDocStatusesRef.current },
+						elapsedMs: finalMs,
 					},
 				});
 
@@ -452,6 +459,8 @@ export default function usePipeline() {
 			});
 
 			startTimer();
+			startSilentAudio();
+			requestWakeLock();
 
 			const activeZipData = state.mockState ? "mock-zip-data" : state.zipData;
 			const activeTree = state.mockState ? mockTreeData : state.tree;
@@ -476,6 +485,8 @@ export default function usePipeline() {
 
 		coordinatorRef.current.cancel();
 		stopTimer();
+		stopSilentAudio();
+		releaseWakeLock();
 		dispatch({ type: "CANCEL_PIPELINE" });
 	}, [stopTimer]);
 
@@ -487,6 +498,8 @@ export default function usePipeline() {
 
 		coordinatorRef.current.reset();
 		stopTimer();
+		stopSilentAudio();
+		releaseWakeLock();
 		dispatch({ type: "RESET_PIPELINE" });
 	}, [stopTimer]);
 
@@ -550,6 +563,8 @@ export default function usePipeline() {
 				coordinatorRef.current.terminateAllWorkers();
 			}
 			stopTimer();
+			stopSilentAudio();
+			releaseWakeLock();
 			if (throttleTimeoutRef.current) {
 				clearTimeout(throttleTimeoutRef.current);
 			}
@@ -621,12 +636,20 @@ export default function usePipeline() {
 		mockState: state.mockState,
 		maxWorkers: state.maxWorkers,
 		tessModel: state.tessModel,
+		elapsedMs: mockVal
+			? mockVal === "processing"
+				? 4500
+				: mockVal === "completed"
+					? 12500
+					: state.elapsedMs
+			: state.elapsedMs,
 	};
 
 	return {
 		...activeState,
-		elapsedTime,
-		elapsedMs,
+		elapsedTime: formatDuration(activeState.elapsedMs),
+		timerStartTime: startTimeRef.current,
+		timerAccumulatedMs: accumulatedTimeRef.current,
 		startPipeline,
 		cancelPipeline,
 		resetPipeline,

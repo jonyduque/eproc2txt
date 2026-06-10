@@ -3,16 +3,16 @@ import { useEffect, useRef, useState } from "react";
 import "./BackgroundGradient.css";
 
 export const BackgroundGradientAnimation = ({
-	gradientBackgroundStart = "rgba(32, 36, 47, 0.5)",
-	gradientBackgroundEnd = "rgba(25, 28, 37, 0.5)",
-	firstColor = "34, 211, 238",
-	secondColor = "236, 72, 153",
-	thirdColor = "96, 165, 250",
-	fourthColor = "248, 113, 113",
-	fifthColor = "251, 191, 36",
-	pointerColor = "156, 163, 175",
-	size = "40%",
-	blendingValue = "hard-light",
+	gradientBackgroundStart,
+	gradientBackgroundEnd,
+	firstColor,
+	secondColor,
+	thirdColor,
+	fourthColor,
+	fifthColor,
+	pointerColor,
+	size,
+	blendingValue,
 	children,
 	className,
 	interactive = true,
@@ -36,30 +36,6 @@ export const BackgroundGradientAnimation = ({
 	const interactiveRef = useRef<HTMLDivElement>(null);
 
 	useEffect(() => {
-		document.body.style.setProperty("--gradient-background-start", gradientBackgroundStart);
-		document.body.style.setProperty("--gradient-background-end", gradientBackgroundEnd);
-		document.body.style.setProperty("--first-color", firstColor);
-		document.body.style.setProperty("--second-color", secondColor);
-		document.body.style.setProperty("--third-color", thirdColor);
-		document.body.style.setProperty("--fourth-color", fourthColor);
-		document.body.style.setProperty("--fifth-color", fifthColor);
-		document.body.style.setProperty("--pointer-color", pointerColor);
-		document.body.style.setProperty("--size", size);
-		document.body.style.setProperty("--blending-value", blendingValue);
-	}, [
-		gradientBackgroundStart,
-		gradientBackgroundEnd,
-		firstColor,
-		secondColor,
-		thirdColor,
-		fourthColor,
-		fifthColor,
-		pointerColor,
-		size,
-		blendingValue,
-	]);
-
-	useEffect(() => {
 		if (!interactive) return;
 		const handleGlobalMouseMove = (event: MouseEvent) => {
 			if (interactiveRef.current) {
@@ -81,8 +57,43 @@ export const BackgroundGradientAnimation = ({
 		setIsSafari(/^((?!chrome|android).)*safari/i.test(navigator.userAgent));
 	}, []);
 
+	const containerStyle: Record<string, string> = {};
+	if (gradientBackgroundStart) {
+		containerStyle["--gradient-background-start"] = gradientBackgroundStart;
+	}
+	if (gradientBackgroundEnd) {
+		containerStyle["--gradient-background-end"] = gradientBackgroundEnd;
+	}
+	if (firstColor) {
+		containerStyle["--first-color"] = firstColor;
+	}
+	if (secondColor) {
+		containerStyle["--second-color"] = secondColor;
+	}
+	if (thirdColor) {
+		containerStyle["--third-color"] = thirdColor;
+	}
+	if (fourthColor) {
+		containerStyle["--fourth-color"] = fourthColor;
+	}
+	if (fifthColor) {
+		containerStyle["--fifth-color"] = fifthColor;
+	}
+	if (pointerColor) {
+		containerStyle["--pointer-color"] = pointerColor;
+	}
+	if (size) {
+		containerStyle["--size"] = size;
+	}
+	if (blendingValue) {
+		containerStyle["--blending-value"] = blendingValue;
+	}
+
 	return (
-		<div className={`bg-gradient-container ${containerClassName || ""}`.trim()}>
+		<div
+			className={`bg-gradient-container ${containerClassName || ""}`.trim()}
+			style={containerStyle as React.CSSProperties}
+		>
 			<svg className="hidden-svg">
 				<title>Gradient Filter</title>
 				<defs>
