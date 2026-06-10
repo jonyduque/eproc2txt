@@ -140,7 +140,13 @@ body.light-theme .wheel-drum {
 			transparent 78%,
 			rgba(255, 255, 255, 0.75) 100%
 		),
-		repeating-linear-gradient(90deg, oklch(0.93 0.015 220) 0px, oklch(0.93 0.015 220) 6px, oklch(0.89 0.02 220) 6px, oklch(0.89 0.02 220) 12px);
+		repeating-linear-gradient(
+			90deg,
+			oklch(0.93 0.015 220) 0px,
+			oklch(0.93 0.015 220) 6px,
+			oklch(0.89 0.02 220) 6px,
+			oklch(0.89 0.02 220) 12px
+		);
 	background-position:
 		0 0,
 		calc(var(--wheel-offset, 0) * -24px) 0;

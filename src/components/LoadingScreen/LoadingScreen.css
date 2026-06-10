@@ -127,12 +127,12 @@ body.light-theme .dropzone-card::after {
 	background:
 		repeating-linear-gradient(
 			0deg,
-			rgba(0, 0, 0, 0.08),
-			rgba(0, 0, 0, 0.08) 1px,
+			rgba(0, 0, 0, 0.04),
+			rgba(0, 0, 0, 0.04) 1px,
 			transparent 1px,
 			transparent 3px
 		),
-		radial-gradient(circle at center, rgba(34, 211, 238, 0.03) 0%, rgba(0, 0, 0, 0.08) 100%);
+		radial-gradient(circle at center, var(--color-primary-glow) 0%, rgba(0, 0, 0, 0.05) 100%);
 }
 
 @keyframes tv-static {
