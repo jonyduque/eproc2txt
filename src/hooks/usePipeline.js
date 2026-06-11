@@ -67,7 +67,13 @@ function pipelineReducer(state, action) {
 				selectedPaths: new Set(),
 			};
 		case "SET_SELECTED_PATHS":
-			return { ...state, selectedPaths: action.payload };
+			return {
+				...state,
+				selectedPaths:
+					typeof action.payload === "function"
+						? action.payload(state.selectedPaths)
+						: action.payload,
+			};
 		case "START_PIPELINE":
 			return {
 				...state,
