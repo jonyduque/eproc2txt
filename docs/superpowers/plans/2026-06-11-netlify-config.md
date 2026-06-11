@@ -15,7 +15,7 @@
 **Files:**
 - Create: `netlify.toml`
 
-- [ ] **Step 1: Write the Netlify configuration file**
+- [x] **Step 1: Write the Netlify configuration file**
 
 Create the file `netlify.toml` at the project root with the following content:
 
@@ -39,17 +39,17 @@ Create the file `netlify.toml` at the project root with the following content:
     Referrer-Policy = "strict-origin-when-cross-origin"
 ```
 
-- [ ] **Step 2: Run build command locally to verify setup**
+- [x] **Step 2: Run build command locally to verify setup**
 
 Run: `npm run build`
 Expected: The build succeeds and generates the distribution files in `dist/` without errors.
 
-- [ ] **Step 3: Run Biome formatter and linter check**
+- [x] **Step 3: Run Biome formatter and linter check**
 
 Run: `npm run lint`
 Expected: Biome check passes without errors on the project code.
 
-- [ ] **Step 4: Commit**
+- [x] **Step 4: Commit**
 
 ```bash
 git add netlify.toml
