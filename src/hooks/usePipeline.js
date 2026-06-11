@@ -587,7 +587,12 @@ export default function usePipeline() {
 		zipData: mockVal ? "mock-zip-data" : state.zipData,
 		zipName: mockVal ? "processo_mockado.zip" : state.zipName,
 		tree: mockVal ? mockTreeData : state.tree,
-		ignoredFiles: mockVal ? ["comprovante.png", "audio.mp3"] : state.ignoredFiles,
+		ignoredFiles: mockVal
+			? [
+					{ fileName: "comprovante.png", size: 122880 },
+					{ fileName: "audio.mp3", size: 1048576 },
+				]
+			: state.ignoredFiles,
 		selectedPaths: state.selectedPaths,
 		isPaused: mockVal ? (mockVal === "processing" ? false : state.isPaused) : state.isPaused,
 		pdfPages: mockVal

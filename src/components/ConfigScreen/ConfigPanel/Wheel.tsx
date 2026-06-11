@@ -1,7 +1,7 @@
 // biome-ignore-all lint/a11y/noStaticElementInteractions: custom dial component handled by adjacent accessible buttons
 // biome-ignore-all lint/a11y/useKeyWithClickEvents: custom dial component handled by adjacent accessible buttons
 import type React from "react";
-import { useCallback, useEffect, useRef } from "react";
+import { useEffect, useRef } from "react";
 import "./Wheel.css";
 
 interface WheelProps {
@@ -13,77 +13,88 @@ interface WheelProps {
 }
 
 export default function Wheel({ workers, setWorkers, maxAllowedWorkers }: WheelProps) {
+	const isDraggingRef = useRef(false);
 	const dragStartRef = useRef<number | null>(null);
+	const initialValueRef = useRef<number>(workers);
 
-	// Mouse Drag to scroll dial horizontally
-	const handleMouseDown = (e: React.MouseEvent) => {
-		dragStartRef.current = e.clientX;
+	// Refs to hold the latest prop values to prevent stale closures in the window listener
+	const workersRef = useRef(workers);
+	const maxAllowedWorkersRef = useRef(maxAllowedWorkers);
+	const setWorkersRef = useRef(setWorkers);
+
+	// Keep refs updated on every render
+	useEffect(() => {
+		workersRef.current = workers;
+		maxAllowedWorkersRef.current = maxAllowedWorkers;
+		setWorkersRef.current = setWorkers;
+	});
+
+	// Register window listeners once on mount
+	useEffect(() => {
+		const handleMouseMove = (e: MouseEvent) => {
+			if (!isDraggingRef.current || dragStartRef.current === null) return;
+			const deltaX = dragStartRef.current - e.clientX;
+			const steps = Math.round(deltaX / 30); // 30px per worker step
+			const newValue = Math.max(
+				1,
+				Math.min(maxAllowedWorkersRef.current, initialValueRef.current + steps),
+			);
+			setWorkersRef.current(newValue);
+		};
+
+		const handleMouseUp = () => {
+			isDraggingRef.current = false;
+			dragStartRef.current = null;
+		};
+
 		window.addEventListener("mousemove", handleMouseMove);
 		window.addEventListener("mouseup", handleMouseUp);
+		return () => {
+			window.removeEventListener("mousemove", handleMouseMove);
+			window.removeEventListener("mouseup", handleMouseUp);
+		};
+	}, []);
+
+	// Mouse Drag triggers
+	const handleMouseDown = (e: React.MouseEvent) => {
+		isDraggingRef.current = true;
+		dragStartRef.current = e.clientX;
+		initialValueRef.current = workersRef.current;
 	};
-
-	const handleMouseMove = useCallback(
-		(e: MouseEvent) => {
-			if (dragStartRef.current === null) return;
-			const deltaX = dragStartRef.current - e.clientX;
-			if (Math.abs(deltaX) > 20) {
-				if (deltaX > 0) {
-					setWorkers((prev) => Math.min(maxAllowedWorkers, prev + 1));
-				} else {
-					setWorkers((prev) => Math.max(1, prev - 1));
-				}
-				dragStartRef.current = e.clientX;
-			}
-		},
-		[maxAllowedWorkers, setWorkers],
-	);
-
-	const handleMouseUp = useCallback(() => {
-		dragStartRef.current = null;
-		window.removeEventListener("mousemove", handleMouseMove);
-		window.removeEventListener("mouseup", handleMouseUp);
-	}, [handleMouseMove]);
 
 	// Touch swipe to scroll dial horizontally
 	const handleTouchStart = (e: React.TouchEvent) => {
 		if (e.touches.length === 1) {
+			isDraggingRef.current = true;
 			dragStartRef.current = e.touches[0].clientX;
+			initialValueRef.current = workersRef.current;
 		}
 	};
 
 	const handleTouchMove = (e: React.TouchEvent) => {
-		if (dragStartRef.current === null || e.touches.length !== 1) return;
+		if (!isDraggingRef.current || dragStartRef.current === null || e.touches.length !== 1) return;
 		const deltaX = dragStartRef.current - e.touches[0].clientX;
-		if (Math.abs(deltaX) > 16) {
-			if (deltaX > 0) {
-				setWorkers((prev) => Math.min(maxAllowedWorkers, prev + 1));
-			} else {
-				setWorkers((prev) => Math.max(1, prev - 1));
-			}
-			dragStartRef.current = e.touches[0].clientX;
-		}
+		const steps = Math.round(deltaX / 30);
+		const newValue = Math.max(
+			1,
+			Math.min(maxAllowedWorkersRef.current, initialValueRef.current + steps),
+		);
+		setWorkersRef.current(newValue);
 	};
 
 	const handleTouchEnd = () => {
+		isDraggingRef.current = false;
 		dragStartRef.current = null;
 	};
 
 	const handleWheel = (e: React.WheelEvent) => {
 		e.preventDefault();
 		if (e.deltaY < 0) {
-			setWorkers((prev) => Math.min(maxAllowedWorkers, prev + 1));
+			setWorkersRef.current((prev) => Math.min(maxAllowedWorkersRef.current, prev + 1));
 		} else {
-			setWorkers((prev) => Math.max(1, prev - 1));
+			setWorkersRef.current((prev) => Math.max(1, prev - 1));
 		}
 	};
-
-	// Cleanup on unmount
-	useEffect(() => {
-		return () => {
-			window.removeEventListener("mousemove", handleMouseMove);
-			window.removeEventListener("mouseup", handleMouseUp);
-		};
-	}, [handleMouseUp, handleMouseMove]);
 
 	const renderNumbers = () => {
 		const items: number[] = [];
@@ -95,9 +106,9 @@ export default function Wheel({ workers, setWorkers, maxAllowedWorkers }: WheelP
 
 		return items.map((val) => {
 			const offset = val - workers;
-			const angle = offset * 38;
-			const scale = 1 - Math.abs(offset) * 0.15;
-			const opacity = 1 - Math.abs(offset) * 0.42;
+			const angle = offset * 28; // Smaller angle for 3D visibility of outer numbers
+			const scale = 1 - Math.abs(offset) * 0.15; // 1.0, 0.85, 0.70
+			const opacity = 1 - Math.abs(offset) * 0.32; // Higher opacity (1.0, 0.68, 0.36) to show outer numbers clearly
 			const isActive = offset === 0;
 			return (
 				<div
