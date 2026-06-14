@@ -1,6 +1,5 @@
 import ConfigPanel from "./ConfigPanel/ConfigPanel";
 import FileSummaryBar from "./FileSummaryBar/FileSummaryBar";
-import ProcessBinder3D from "./ProcessBinder3D";
 import Tree from "./Tree/Tree";
 import "./ConfigScreen.css";
 
@@ -70,12 +69,6 @@ export default function ConfigScreen({
 					setSelectedPaths={setSelectedPaths}
 					isProcessing={false}
 					isCompleted={false}
-				/>
-
-				<ProcessBinder3D
-					zipName={zipName}
-					documentCount={treeDocsCount}
-					selectedPathsCount={selectedPaths.size}
 				/>
 
 				<ConfigPanel
