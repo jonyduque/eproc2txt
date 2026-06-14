@@ -1,4 +1,5 @@
 import { useState } from "react";
+import CRTTerminal3D from "./CRTTerminal3D";
 import "./DoneScreen.css";
 
 interface DoneScreenProps {
@@ -80,6 +81,9 @@ export default function DoneScreen({
 					<p className="ticker done-stats-value">{completedPages}</p>
 				</div>
 			</div>
+
+			{/* Interactive 3D CRT Console for XML Preview */}
+			<CRTTerminal3D xmlText={consolidatedXml} />
 
 			{/* Export actions */}
 			<div className="done-actions-row">

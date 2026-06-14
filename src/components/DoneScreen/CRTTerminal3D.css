@@ -1,0 +1,407 @@
+/* CRTTerminal3D.css - Retro 3D CRT Monitor Stylesheet */
+
+.crt-terminal-container {
+	width: 100%;
+	max-width: 860px;
+	height: 480px;
+	margin: 2rem auto;
+	perspective: 1200px;
+	position: relative;
+	user-select: none;
+}
+
+.crt-monitor-casing {
+	width: 100%;
+	height: 100%;
+	position: relative;
+	transform-style: preserve-3d;
+	transition: transform 0.1s ease-out;
+}
+
+/* 3D Casing Sides to create depth */
+.crt-side {
+	position: absolute;
+	background: oklch(0.18 0.015 260);
+	border: 1px solid rgba(255, 255, 255, 0.03);
+	box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.6);
+}
+
+body.light-theme .crt-side {
+	background: #bcccdc;
+	border: 1px solid rgba(0, 0, 0, 0.1);
+	box-shadow: inset 0 0 15px rgba(0, 0, 0, 0.2);
+}
+
+.crt-side.top {
+	width: 100%;
+	height: 60px; /* Depth of the top */
+	left: 0;
+	top: 0;
+	transform-origin: top center;
+	transform: rotateX(90deg) translateZ(0px);
+}
+
+.crt-side.bottom {
+	width: 100%;
+	height: 60px;
+	left: 0;
+	bottom: 0;
+	transform-origin: bottom center;
+	transform: rotateX(-90deg) translateZ(0px);
+}
+
+.crt-side.left {
+	width: 60px;
+	height: 100%;
+	left: 0;
+	top: 0;
+	transform-origin: left center;
+	transform: rotateY(-90deg) translateZ(0px);
+}
+
+.crt-side.right {
+	width: 60px;
+	height: 100%;
+	right: 0;
+	top: 0;
+	transform-origin: right center;
+	transform: rotateY(90deg) translateZ(0px);
+}
+
+/* Bezel - Front Panel */
+.crt-bezel {
+	position: absolute;
+	inset: 0;
+	background: linear-gradient(135deg, oklch(0.22 0.02 260), oklch(0.16 0.015 260));
+	border: 1px solid oklch(0.28 0.03 260 / 0.8);
+	border-radius: 12px;
+	padding: 1.5rem 1.5rem 1rem 1.5rem;
+	box-shadow:
+		0 20px 40px rgba(0, 0, 0, 0.5),
+		inset 0 2px 3px rgba(255, 255, 255, 0.05);
+	display: flex;
+	flex-direction: column;
+	justify-content: space-between;
+	transform: translateZ(30px); /* Brings front panel forward */
+	transform-style: preserve-3d;
+}
+
+body.light-theme .crt-bezel {
+	background: linear-gradient(135deg, #d9e2ec, #bcccdc);
+	border: 1px solid #9fb3c8;
+	box-shadow:
+		0 20px 40px rgba(0, 0, 0, 0.15),
+		inset 0 2px 3px rgba(255, 255, 255, 0.4);
+}
+
+/* CRT Screen Wrapper - Recessed container */
+.crt-screen-wrapper {
+	flex: 1;
+	background: #000;
+	border-radius: 20px / 12px;
+	border: 12px solid oklch(0.14 0.01 260);
+	box-shadow:
+		inset 0 5px 15px rgba(0, 0, 0, 0.8),
+		0 1px 1px rgba(255, 255, 255, 0.05);
+	position: relative;
+	overflow: hidden;
+}
+
+body.light-theme .crt-screen-wrapper {
+	border-color: #9fb3c8;
+}
+
+/* CRT Screen Glass Layer */
+.crt-screen-glass {
+	width: 100%;
+	height: 100%;
+	background: #09181a;
+	position: relative;
+	overflow: hidden;
+}
+
+body.light-theme .crt-screen-glass {
+	background: #061214;
+}
+
+.crt-screen-content {
+	position: absolute;
+	inset: 0;
+	padding: 1rem;
+	display: flex;
+	flex-direction: column;
+	pointer-events: auto;
+}
+
+/* Phosphor glow, scanlines & flicker overlay */
+.crt-glow-overlay {
+	position: absolute;
+	inset: 0;
+	background: radial-gradient(circle, rgba(34, 211, 238, 0.08) 0%, rgba(0, 0, 0, 0) 80%);
+	pointer-events: none;
+	z-index: 4;
+}
+
+.crt-scanlines {
+	position: absolute;
+	inset: 0;
+	background: repeating-linear-gradient(
+		rgba(0, 0, 0, 0) 0px,
+		rgba(0, 0, 0, 0.35) 2px,
+		rgba(0, 0, 0, 0) 4px
+	);
+	pointer-events: none;
+	z-index: 5;
+}
+
+.crt-flicker {
+	position: absolute;
+	inset: 0;
+	background: rgba(34, 211, 238, 0.015);
+	pointer-events: none;
+	z-index: 6;
+	animation: crt-flicker-anim 0.15s infinite;
+}
+
+/* Retro Console Header */
+.crt-terminal-header {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	border-bottom: 1px solid rgba(34, 211, 238, 0.25);
+	padding-bottom: 0.5rem;
+	margin-bottom: 0.75rem;
+	font-family: var(--font-mono);
+	font-size: 0.75rem;
+	color: oklch(0.82 0.17 195);
+	text-shadow: 0 0 4px rgba(34, 211, 238, 0.5);
+	z-index: 2;
+}
+
+.crt-dots {
+	display: flex;
+	gap: 4px;
+}
+
+.crt-dot {
+	width: 6px;
+	height: 6px;
+	border-radius: 50%;
+	display: inline-block;
+}
+.dot-red {
+	background: #ef4444;
+}
+.dot-yellow {
+	background: #eab308;
+}
+.dot-green {
+	background: #22c55e;
+}
+
+.crt-terminal-title {
+	font-weight: bold;
+	letter-spacing: 0.05em;
+}
+
+.crt-terminal-status {
+	background: rgba(34, 211, 238, 0.15);
+	border: 1px solid oklch(0.82 0.17 195);
+	padding: 1px 6px;
+	border-radius: 3px;
+	font-size: 0.65rem;
+	animation: pulse 2s infinite;
+}
+
+/* Scrollable XML Content */
+.crt-xml-preview {
+	flex: 1;
+	margin: 0;
+	overflow-y: auto;
+	font-family: var(--font-mono);
+	font-size: 0.8rem;
+	line-height: 1.4;
+	color: oklch(0.82 0.17 195);
+	text-shadow: 0 0 3px rgba(34, 211, 238, 0.4);
+	text-align: left;
+	z-index: 2;
+	scrollbar-width: thin;
+	scrollbar-color: rgba(34, 211, 238, 0.3) rgba(0, 0, 0, 0.2);
+}
+
+.crt-xml-preview code {
+	white-space: pre-wrap;
+	word-break: break-all;
+	user-select: text;
+}
+
+/* Custom Scrollbar for CRT Terminal */
+.crt-xml-preview::-webkit-scrollbar {
+	width: 6px;
+}
+
+.crt-xml-preview::-webkit-scrollbar-track {
+	background: rgba(0, 0, 0, 0.3);
+}
+
+.crt-xml-preview::-webkit-scrollbar-thumb {
+	background: rgba(34, 211, 238, 0.35);
+	border-radius: 3px;
+}
+
+.crt-xml-preview::-webkit-scrollbar-thumb:hover {
+	background: rgba(34, 211, 238, 0.6);
+}
+
+/* Controls Area at bottom of Bezel */
+.crt-controls {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	padding-top: 1rem;
+	border-top: 1px solid rgba(255, 255, 255, 0.05);
+	font-family: var(--font-sans);
+}
+
+body.light-theme .crt-controls {
+	border-top: 1px solid rgba(0, 0, 0, 0.08);
+}
+
+.crt-brand {
+	display: flex;
+	flex-direction: column;
+	font-weight: 800;
+	font-size: 0.85rem;
+	letter-spacing: 0.1em;
+	color: var(--color-text-primary);
+}
+
+.crt-brand-model {
+	font-size: 0.6rem;
+	opacity: 0.6;
+	font-weight: 400;
+}
+
+.crt-dials {
+	display: flex;
+	gap: 1.25rem;
+	align-items: center;
+}
+
+.crt-dial-group {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	gap: 4px;
+}
+
+.crt-dial-label {
+	font-size: 0.5rem;
+	font-weight: bold;
+	color: var(--color-text-secondary);
+	opacity: 0.7;
+}
+
+.crt-dial {
+	width: 14px;
+	height: 14px;
+	border-radius: 50%;
+	background: oklch(0.14 0.01 260);
+	border: 1px solid rgba(255, 255, 255, 0.15);
+	position: relative;
+}
+
+body.light-theme .crt-dial {
+	background: #bcccdc;
+	border: 1px solid rgba(0, 0, 0, 0.2);
+}
+
+.crt-dial::after {
+	content: "";
+	position: absolute;
+	top: 0;
+	left: 50%;
+	width: 1.5px;
+	height: 50%;
+	background: var(--color-primary);
+	transform-origin: bottom center;
+}
+
+.crt-power-group {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	margin-left: 0.5rem;
+}
+
+.crt-power-led {
+	width: 6px;
+	height: 6px;
+	border-radius: 50%;
+	background: #ef4444;
+	box-shadow: 0 0 2px rgba(239, 68, 68, 0.8);
+}
+
+.crt-power-led.active {
+	background: #22c55e;
+	box-shadow: 0 0 8px rgba(34, 197, 94, 0.8);
+}
+
+.crt-power-switch {
+	width: 14px;
+	height: 24px;
+	background: oklch(0.12 0.01 260);
+	border: 1px solid rgba(255, 255, 255, 0.1);
+	border-radius: 2px;
+	position: relative;
+	cursor: pointer;
+}
+
+body.light-theme .crt-power-switch {
+	background: #9fb3c8;
+	border: 1px solid rgba(0, 0, 0, 0.2);
+}
+
+.crt-power-switch::after {
+	content: "";
+	position: absolute;
+	left: 1px;
+	width: 10px;
+	height: 10px;
+	background: #475569;
+	border-radius: 1px;
+	box-shadow: 0 1px 2px rgba(0, 0, 0, 0.4);
+	transition: top 0.1s ease;
+}
+
+/* Switch position toggling */
+.crt-power-switch.active::after {
+	top: 1px;
+}
+
+.crt-power-switch:not(.active)::after {
+	top: 11px;
+}
+
+/* Animations */
+@keyframes crt-flicker-anim {
+	0% {
+		opacity: 0.985;
+	}
+	50% {
+		opacity: 1;
+	}
+	100% {
+		opacity: 0.99;
+	}
+}
+
+@keyframes pulse {
+	0%,
+	100% {
+		opacity: 1;
+	}
+	50% {
+		opacity: 0.4;
+	}
+}

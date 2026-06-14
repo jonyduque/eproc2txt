@@ -1,5 +1,6 @@
 import { useRef, useState } from "react";
 import { parseZipStructure } from "../../../utils/parser.js";
+import DataVortex3D from "./DataVortex3D";
 
 interface DropzoneProps {
 	onZipParsed: (
@@ -90,6 +91,7 @@ export default function Dropzone({ onZipParsed, onLoadingChange }: DropzoneProps
 
 				{/* Upload visual core */}
 				<div className="dropzone-icon-wrapper">
+					<DataVortex3D isHovered={hover} isLoading={loading} />
 					<div className="dropzone-circle-outer" />
 					<div className="dropzone-circle-orbit" />
 					<div className="dropzone-circle-glow" />

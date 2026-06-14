@@ -19,11 +19,38 @@
 .loaded-layout-grid {
 	display: grid;
 	gap: var(--gap-6);
+	grid-template-columns: 1fr;
 }
 
 @media (min-width: 1024px) {
 	.loaded-layout-grid {
 		grid-template-columns: 1fr 360px;
+	}
+	.docs-tree-card {
+		grid-column: 1;
+		grid-row: span 2;
+	}
+	.binder-3d-scene {
+		grid-column: 2;
+	}
+	.config-panel {
+		grid-column: 2;
+	}
+}
+
+@media (min-width: 1280px) {
+	.loaded-layout-grid {
+		grid-template-columns: 1fr 280px 360px;
+	}
+	.docs-tree-card {
+		grid-column: 1;
+		grid-row: span 1;
+	}
+	.binder-3d-scene {
+		grid-column: 2;
+	}
+	.config-panel {
+		grid-column: 3;
 	}
 }
 
