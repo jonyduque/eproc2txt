@@ -1,5 +1,6 @@
-import { memo, useEffect, useState } from "react";
+import { memo, useEffect, useRef, useState } from "react";
 import FileIcon from "../FileIcon";
+import HolographicSonar3D from "./HolographicSonar3D";
 import "./ProcessingScreen.css";
 import { formatDuration } from "../../utils/format";
 
@@ -234,6 +235,28 @@ export default function ProcessingScreen({
 	onCancel,
 	tree,
 }: ProcessingScreenProps) {
+	const [rotation, setRotation] = useState({ x: 55, y: -10 });
+	const boardRef = useRef<HTMLDivElement | null>(null);
+
+	useEffect(() => {
+		const handleMouseMove = (e: MouseEvent) => {
+			const dx = e.clientX - window.innerWidth / 2;
+			const dy = e.clientY - window.innerHeight / 2;
+
+			// Tilt (X-axis) between 50 and 60 degrees
+			const rotX = 55 + (dy / window.innerHeight) * 10;
+			// Yaw (Y-axis) between -18 and -2 degrees
+			const rotY = -10 + (dx / window.innerWidth) * 16;
+
+			setRotation({ x: rotX, y: rotY });
+		};
+
+		window.addEventListener("mousemove", handleMouseMove);
+		return () => {
+			window.removeEventListener("mousemove", handleMouseMove);
+		};
+	}, []);
+
 	// Calculate derived values internally
 	const totalPages = Object.values(docStatuses).reduce((s, d) => s + (d.pageCount || 0), 0) || 1;
 	const completedPages = pdfPages + ocrPages;
@@ -393,26 +416,47 @@ export default function ProcessingScreen({
 						<span className="workers-list-count">{activeWorkersCount} ativos</span>
 					</div>
 
-					<div className="radar-console-board">
+					<div
+						ref={boardRef}
+						className="radar-console-board"
+						style={{
+							transform: `rotateX(${rotation.x}deg) rotateY(${rotation.y}deg)`,
+						}}
+					>
 						{/* Left: Document Stacks */}
-						<div className="radar-console-left">
+						<div
+							className="radar-console-left"
+							style={{
+								transform: `rotateY(${-rotation.y}deg) rotateX(${-rotation.x}deg) translateZ(12px)`,
+							}}
+						>
 							{renderStack(eventsPileHeight, "petições", "stack-event")}
 							{renderStack(pendingDocsPileHeight, "anexos", "stack-pending")}
 							{renderStack(completedDocsPileHeight, "concluídos", "stack-done")}
 						</div>
 
 						{/* Center: Sonar */}
-						<div className="radar-console-center">
-							<div className="radar-sonar-circle">
-								<div className="radar-ring ring-1" />
-								<div className="radar-ring ring-2" />
-								<div className="radar-ring ring-3" />
-								<div className="radar-sweep" />
-							</div>
+						<div
+							className="radar-console-center"
+							style={{
+								transform: `rotateY(${-rotation.y}deg) rotateX(${-rotation.x}deg) translateZ(6px)`,
+							}}
+						>
+							<HolographicSonar3D
+								workerStatuses={workerStatuses}
+								maxWorkers={maxWorkers}
+								rotationX={rotation.x}
+								rotationY={rotation.y}
+							/>
 						</div>
 
 						{/* Right: Output File size display */}
-						<div className="radar-console-right">
+						<div
+							className="radar-console-right"
+							style={{
+								transform: `rotateY(${-rotation.y}deg) rotateX(${-rotation.x}deg) translateZ(12px)`,
+							}}
+						>
 							<div className="retro-text-file-box">
 								<div className="retro-file-icon">
 									<div className="file-lines-container">
@@ -434,7 +478,11 @@ export default function ProcessingScreen({
 							return (
 								<div
 									key={w.index}
-									style={{ left: `${pos.x}%`, top: `${pos.y}%` }}
+									style={{
+										left: `${pos.x}%`,
+										top: `${pos.y}%`,
+										transform: `translate(-50%, -50%) translateZ(14px) rotateY(${-rotation.y}deg) rotateX(${-rotation.x}deg)`,
+									}}
 									className="radar-worker-wrapper"
 								>
 									<RetroComputer index={w.index} status={w.status} job={w.job} tree={tree} />

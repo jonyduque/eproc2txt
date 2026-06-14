@@ -321,6 +321,8 @@
 	flex-direction: column;
 	max-height: var(--max-h-panel);
 	position: relative;
+	perspective: 1200px;
+	transform-style: preserve-3d;
 }
 
 /* Radar Console Board Main wrapper */
@@ -334,6 +336,8 @@
 	box-sizing: border-box;
 	min-height: 380px;
 	overflow: hidden;
+	transform-style: preserve-3d;
+	transition: transform 0.1s ease-out;
 }
 
 /* Document Stacks (Left) */
@@ -864,4 +868,13 @@
 	to {
 		stroke-dashoffset: -16;
 	}
+}
+
+/* Common 3D Parallax and Billboarding Support */
+.radar-console-left,
+.radar-console-right,
+.radar-console-center,
+.radar-worker-wrapper {
+	transform-style: preserve-3d;
+	transition: transform 0.1s ease-out;
 }
