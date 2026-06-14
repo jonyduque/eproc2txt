@@ -4,6 +4,7 @@ import BackgroundFX from "./components/Layout/Background/BackgroundFX.jsx";
 import { BackgroundGradientAnimation } from "./components/Layout/Background/BackgroundGradient.tsx";
 import Footer from "./components/Layout/Footer.jsx";
 import Header from "./components/Layout/Header.jsx";
+import IsometricViewport3D from "./components/Layout/IsometricViewport3D";
 import LoadingScreen from "./components/LoadingScreen/LoadingScreen.jsx";
 import ProcessingScreen from "./components/ProcessingScreen/ProcessingScreen.jsx";
 import usePipeline from "./hooks/usePipeline.js";
@@ -130,7 +131,16 @@ export default function App() {
 
 			<Header statusClass={statusClass} statusLabel={statusLabel} />
 
-			<section className="app-content-wrapper">{renderScreen()}</section>
+			<section className="app-content-wrapper">
+				<IsometricViewport3D
+					status={status}
+					maxWorkers={maxWorkers}
+					workerStatuses={workerStatuses}
+					docStatuses={docStatuses}
+					globalLoading={globalLoading}
+				/>
+				{renderScreen()}
+			</section>
 
 			<Footer mockState={mockState} setMockState={setMockState} />
 		</main>
