@@ -39,7 +39,12 @@ self.onmessage = async (event) => {
 			const {
 				data: { text },
 			} = await worker.recognize(canvas);
-			const cleanedText = text ? text.replace(/\s+/g, " ").trim() : "";
+			const cleanedText = text
+				? text
+						.replace(/(?:\r?\n\s*)+/g, "\n")
+						.replace(/[ \t]+/g, " ")
+						.trim()
+				: "";
 
 			// Retorna o resultado para a Main Thread, devolvendo o buffer de imagem se necessário (opcional)
 			self.postMessage(

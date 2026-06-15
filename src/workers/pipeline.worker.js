@@ -193,7 +193,8 @@ function cleanHtmlContent(html) {
 		.replace(/&#x([0-9a-fA-F]+);/g, (_match, hex) => String.fromCharCode(parseInt(hex, 16)));
 
 	// Collapse excess whitespace
-	text = text.replace(/\s+/g, " ");
+	text = text.replace(/(?:\r?\n\s*)+/g, "\n");
+	text = text.replace(/[ \t]+/g, " ");
 
 	return text.trim();
 }
@@ -338,7 +339,10 @@ async function processPipeline(zipData, selectedFiles) {
 
 					let text = page.getText();
 					if (text) {
-						text = text.replace(/\s+/g, " ").trim();
+						text = text
+							.replace(/(?:\r?\n\s*)+/g, "\n")
+							.replace(/[ \t]+/g, " ")
+							.trim();
 					}
 
 					if (text && text.length > 5) {
