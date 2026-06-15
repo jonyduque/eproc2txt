@@ -165,8 +165,30 @@ function pipelineReducer(state, action) {
 	}
 }
 
+// @ts-expect-error
+Symbol.dispose ??= Symbol("Symbol.dispose");
+
+class PipelineSession {
+	constructor(coordinator, cleanupFn) {
+		this.coordinator = coordinator;
+		this.cleanupFn = cleanupFn;
+		this.active = true;
+	}
+
+	[Symbol.dispose]() {
+		if (this.active) {
+			this.active = false;
+			if (typeof this.cleanupFn === "function") {
+				this.cleanupFn();
+			}
+			console.log("[eproc2txt] PipelineSession disposed.");
+		}
+	}
+}
+
 export default function usePipeline() {
 	const [state, dispatch] = useReducer(pipelineReducer, initialState);
+	const activeSessionRef = useRef(null);
 
 	// Track pause state in ref to avoid scheduleStateUpdate dependency churn
 	const isPausedRef = useRef(false);
@@ -337,6 +359,11 @@ export default function usePipeline() {
 				updateOverallProgress(fileName, page, pageCount);
 			},
 			onFinished: (processedDocs, currentTree) => {
+				if (activeSessionRef.current) {
+					activeSessionRef.current.active = false;
+					activeSessionRef.current[Symbol.dispose]();
+					activeSessionRef.current = null;
+				}
 				stopTimer();
 				stopSilentAudio();
 				releaseWakeLock();
@@ -408,6 +435,11 @@ export default function usePipeline() {
 				}
 			},
 			onError: (_message) => {
+				if (activeSessionRef.current) {
+					activeSessionRef.current.active = false;
+					activeSessionRef.current[Symbol.dispose]();
+					activeSessionRef.current = null;
+				}
 				stopTimer();
 				dispatch({ type: "PIPELINE_ERROR" });
 				flushStateUpdates();
@@ -426,6 +458,10 @@ export default function usePipeline() {
 			if (throttleTimeoutRef.current) {
 				clearTimeout(throttleTimeoutRef.current);
 				throttleTimeoutRef.current = null;
+			}
+
+			if (activeSessionRef.current) {
+				activeSessionRef.current[Symbol.dispose]();
 			}
 
 			// Initialize pending state refs
@@ -471,6 +507,14 @@ export default function usePipeline() {
 			const activeZipData = state.mockState ? "mock-zip-data" : state.zipData;
 			const activeTree = state.mockState ? mockTreeData : state.tree;
 
+			const session = new PipelineSession(coordinatorRef.current, () => {
+				coordinatorRef.current.cancel();
+				stopTimer();
+				stopSilentAudio();
+				releaseWakeLock();
+			});
+			activeSessionRef.current = session;
+
 			// Dispatch coordinator start
 			coordinatorRef.current.start(
 				activeZipData,
@@ -480,7 +524,15 @@ export default function usePipeline() {
 				activeTree,
 			);
 		},
-		[startTimer, state.maxWorkers, state.tessModel, state.tree, state.mockState, state.zipData],
+		[
+			startTimer,
+			state.maxWorkers,
+			state.tessModel,
+			state.tree,
+			state.mockState,
+			state.zipData,
+			stopTimer,
+		],
 	);
 
 	const cancelPipeline = useCallback(() => {
@@ -489,10 +541,15 @@ export default function usePipeline() {
 			throttleTimeoutRef.current = null;
 		}
 
-		coordinatorRef.current.cancel();
-		stopTimer();
-		stopSilentAudio();
-		releaseWakeLock();
+		if (activeSessionRef.current) {
+			activeSessionRef.current[Symbol.dispose]();
+			activeSessionRef.current = null;
+		} else {
+			coordinatorRef.current.cancel();
+			stopTimer();
+			stopSilentAudio();
+			releaseWakeLock();
+		}
 		dispatch({ type: "CANCEL_PIPELINE" });
 	}, [stopTimer]);
 
@@ -502,6 +559,10 @@ export default function usePipeline() {
 			throttleTimeoutRef.current = null;
 		}
 
+		if (activeSessionRef.current) {
+			activeSessionRef.current[Symbol.dispose]();
+			activeSessionRef.current = null;
+		}
 		coordinatorRef.current.reset();
 		stopTimer();
 		stopSilentAudio();
@@ -565,17 +626,18 @@ export default function usePipeline() {
 	// Cleanup on unmount
 	useEffect(() => {
 		return () => {
+			if (activeSessionRef.current) {
+				activeSessionRef.current[Symbol.dispose]();
+				activeSessionRef.current = null;
+			}
 			if (coordinatorRef.current) {
 				coordinatorRef.current.terminateAllWorkers();
 			}
-			stopTimer();
-			stopSilentAudio();
-			releaseWakeLock();
 			if (throttleTimeoutRef.current) {
 				clearTimeout(throttleTimeoutRef.current);
 			}
 		};
-	}, [stopTimer]);
+	}, []);
 
 	// Derive mocked values if mockState is active
 	const mockVal = state.mockState;

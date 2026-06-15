@@ -1,6 +1,16 @@
 import { useRef, useState } from "react";
 import { parseZipStructure } from "../../../utils/parser.js";
 
+// @ts-expect-error
+Promise.try ??= (fn) =>
+	new Promise((resolve, reject) => {
+		try {
+			resolve(fn());
+		} catch (e) {
+			reject(e);
+		}
+	});
+
 interface DropzoneProps {
 	onZipParsed: (
 		zipData: Uint8Array,
@@ -27,33 +37,28 @@ export default function Dropzone({ onZipParsed, onLoadingChange }: DropzoneProps
 		setLoading(true);
 		if (onLoadingChange) onLoadingChange(true);
 
-		const reader = new FileReader();
-		reader.onload = async (e) => {
-			try {
-				if (!e.target?.result) {
-					throw new Error("Falha ao ler o conteúdo do arquivo.");
-				}
-				const zipData = new Uint8Array(e.target.result as ArrayBuffer);
-				const result = parseZipStructure(zipData);
+		try {
+			// @ts-expect-error
+			const zipData = await Promise.try(async () => {
+				const buffer = await file.arrayBuffer();
+				return new Uint8Array(buffer);
+			});
+			const result = parseZipStructure(zipData);
 
-				if (result.tree.length === 0) {
-					setError("Nenhum arquivo válido ou PDF encontrado no ZIP.");
-					setLoading(false);
-					if (onLoadingChange) onLoadingChange(false);
-					return;
-				}
-
-				const zipName = file.name.substring(0, file.name.lastIndexOf(".")) || file.name;
-				onZipParsed(zipData, zipName, result.tree, result.ignored);
-			} catch (err) {
-				console.error(err);
-				setError(`Erro ao ler arquivo ZIP: ${err instanceof Error ? err.message : String(err)}`);
-			} finally {
-				setLoading(false);
-				if (onLoadingChange) onLoadingChange(false);
+			if (result.tree.length === 0) {
+				setError("Nenhum arquivo válido ou PDF encontrado no ZIP.");
+				return;
 			}
-		};
-		reader.readAsArrayBuffer(file);
+
+			const zipName = file.name.substring(0, file.name.lastIndexOf(".")) || file.name;
+			onZipParsed(zipData, zipName, result.tree, result.ignored);
+		} catch (err) {
+			console.error(err);
+			setError(`Erro ao ler arquivo ZIP: ${err instanceof Error ? err.message : String(err)}`);
+		} finally {
+			setLoading(false);
+			if (onLoadingChange) onLoadingChange(false);
+		}
 	};
 
 	return (

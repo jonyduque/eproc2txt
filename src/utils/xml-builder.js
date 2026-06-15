@@ -35,40 +35,40 @@ export function buildConsolidatedXml(tree) {
 
 	// 1. Generate Indice
 	xml += "<indice>\n";
-	for (const event of tree) {
+	tree.values().forEach((event) => {
 		if (event.eventNumber === 0) {
 			// Sum pages of all docs in event 0 (should typically be just 1 cover document)
-			let pageCount = 0;
-			for (const doc of event.documents) {
-				pageCount += doc.pages ? doc.pages.length : 0;
-			}
+			const pageCount = event.documents
+				.values()
+				.map((doc) => (doc.pages ? doc.pages.length : 0))
+				.reduce((sum, count) => sum + count, 0);
 			const pageLabel = pageCount === 1 ? "1 página" : `${pageCount} páginas`;
 			xml += `- Capa do processo: ${pageLabel}\n`;
 		} else if (event.eventNumber === -1) {
 			xml += `- Arquivos fora de padrão:\n`;
-			for (const doc of event.documents) {
+			event.documents.values().forEach((doc) => {
 				const pageCount = doc.pages ? doc.pages.length : 0;
 				const pageLabel = pageCount === 1 ? "1 página" : `${pageCount} páginas`;
 				xml += `\t- ${doc.fileName}: ${pageLabel}\n`;
-			}
+			});
 		} else {
 			xml += `- Evento ${event.eventNumber}\n`;
-			for (const doc of event.documents) {
+			event.documents.values().forEach((doc) => {
 				const pageCount = doc.pages ? doc.pages.length : 0;
 				const pageLabel = pageCount === 1 ? "1 página" : `${pageCount} páginas`;
 				xml += `\t- Doc ${doc.docNumber}: ${pageLabel}\n`;
-			}
+			});
 		}
-	}
+	});
 	xml += "</indice>\n";
 
 	// 2. Generate content elements
-	for (const event of tree) {
+	tree.values().forEach((event) => {
 		if (event.eventNumber === 0) {
 			xml += `<capa>\n`;
-			for (const doc of event.documents) {
+			event.documents.values().forEach((doc) => {
 				if (doc.pages) {
-					for (const page of doc.pages) {
+					doc.pages.values().forEach((page) => {
 						const escapedContent = escapeXml(page.content);
 						xml += `\t<pag n="${page.pagId}">\n`;
 						const lines = escapedContent.split("\n");
@@ -81,15 +81,15 @@ export function buildConsolidatedXml(tree) {
 							xml += `${indentedContent}\n`;
 						}
 						xml += `\t</pag>\n`;
-					}
+					});
 				}
-			}
+			});
 			xml += `</capa>\n`;
 		} else if (event.eventNumber === -1) {
-			for (const doc of event.documents) {
+			event.documents.values().forEach((doc) => {
 				xml += `<arquivo_fora_padrao nome="${escapeXml(doc.fileName)}">\n`;
 				if (doc.pages) {
-					for (const page of doc.pages) {
+					doc.pages.values().forEach((page) => {
 						const escapedContent = escapeXml(page.content);
 						xml += `\t<pag n="${page.pagId}">\n`;
 						const lines = escapedContent.split("\n");
@@ -102,16 +102,16 @@ export function buildConsolidatedXml(tree) {
 							xml += `${indentedContent}\n`;
 						}
 						xml += `\t</pag>\n`;
-					}
+					});
 				}
 				xml += `</arquivo_fora_padrao>\n`;
-			}
+			});
 		} else {
 			xml += `<evento n="${event.eventNumber}">\n`;
-			for (const doc of event.documents) {
+			event.documents.values().forEach((doc) => {
 				xml += `\t<doc n="${doc.docNumber}">\n`;
 				if (doc.pages) {
-					for (const page of doc.pages) {
+					doc.pages.values().forEach((page) => {
 						const escapedContent = escapeXml(page.content);
 						xml += `\t\t<pag n="${page.pagId}">\n`;
 						// Indent content for readability, preserving lines but trimming start/end of whole block
@@ -125,13 +125,13 @@ export function buildConsolidatedXml(tree) {
 							xml += `${indentedContent}\n`;
 						}
 						xml += `\t\t</pag>\n`;
-					}
+					});
 				}
 				xml += `\t</doc>\n`;
-			}
+			});
 			xml += `</evento>\n`;
 		}
-	}
+	});
 
 	return xml;
 }

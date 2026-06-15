@@ -49,14 +49,13 @@ export default function Tree({
 			!isCompleted
 		) {
 			const allPaths = new Set<string>(
-				tree.values()
+				tree
+					.values()
 					.flatMap((event) => event.documents)
 					.filter((doc) => doc.eventNumber !== -1 || doc.isValidExtension)
-					.map((doc) => doc.originalPath)
+					.map((doc) => doc.originalPath),
 			);
-			const initialCollapsed = new Set<number>(
-				tree.values().map((event) => event.eventNumber)
-			);
+			const initialCollapsed = new Set<number>(tree.values().map((event) => event.eventNumber));
 			setSelectedPaths(allPaths);
 			setCollapsedEvents(initialCollapsed);
 			hasInitializedRef.current = true;
@@ -65,9 +64,7 @@ export default function Tree({
 	}, [tree, isProcessing, isCompleted, setSelectedPaths]);
 
 	const handleCollapseAllEvents = () => {
-		const collapsed = new Set<number>(
-			tree.values().map((event) => event.eventNumber)
-		);
+		const collapsed = new Set<number>(tree.values().map((event) => event.eventNumber));
 		setCollapsedEvents(collapsed);
 	};
 
@@ -81,10 +78,11 @@ export default function Tree({
 
 	const handleSelectAll = () => {
 		const allPaths = new Set<string>(
-			tree.values()
+			tree
+				.values()
 				.flatMap((event) => event.documents)
 				.filter((doc) => doc.eventNumber !== -1 || doc.isValidExtension)
-				.map((doc) => doc.originalPath)
+				.map((doc) => doc.originalPath),
 		);
 		setSelectedPaths(allPaths);
 	};

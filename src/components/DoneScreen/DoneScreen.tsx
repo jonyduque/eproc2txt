@@ -1,6 +1,19 @@
 import { useState } from "react";
 import "./DoneScreen.css";
 
+// @ts-expect-error
+Symbol.dispose ??= Symbol("Symbol.dispose");
+
+class DisposableUrl {
+	url: string;
+	constructor(url: string) {
+		this.url = url;
+	}
+	[Symbol.dispose]() {
+		URL.revokeObjectURL(this.url);
+	}
+}
+
 interface DoneScreenProps {
 	totalDocsCount: number;
 	pdfPages: number;
@@ -41,14 +54,13 @@ export default function DoneScreen({
 		const blob = new Blob([consolidatedXml], {
 			type: "text/plain;charset=utf-8",
 		});
-		const url = URL.createObjectURL(blob);
+		using disposable = new DisposableUrl(URL.createObjectURL(blob));
 		const a = document.createElement("a");
-		a.href = url;
+		a.href = disposable.url;
 		a.download = "consolidado.txt";
 		document.body.appendChild(a);
 		a.click();
 		document.body.removeChild(a);
-		URL.revokeObjectURL(url);
 	};
 
 	return (
