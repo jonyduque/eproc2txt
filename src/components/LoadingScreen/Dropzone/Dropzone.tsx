@@ -58,63 +58,82 @@ export default function Dropzone({ onZipParsed, onLoadingChange }: DropzoneProps
 	};
 
 	return (
-		<>
-			<label
-				onDragOver={(e) => {
-					e.preventDefault();
-					setHover(true);
-				}}
-				onDragLeave={() => setHover(false)}
-				onDrop={(e) => {
-					e.preventDefault();
-					setHover(false);
-					const f = e.dataTransfer.files?.[0];
-					if (f) handleFile(f);
-				}}
-				className={`dropzone-card panel scanlines ${hover ? "hovered" : ""} ${loading ? "loading" : ""}`}
-			>
-				<input
-					type="file"
-					ref={fileInputRef}
-					accept=".zip"
-					className="visually-hidden"
-					onChange={(e) => {
-						if (e.target.files && e.target.files.length > 0) {
-							handleFile(e.target.files[0]);
-						}
-					}}
-					disabled={loading}
-				/>
+		<div className="crt-monitor-frame">
+			<div className="crt-chassis">
+				<div className="crt-bezel">
+					<div className="crt-screen-container">
+						<label
+							onDragOver={(e) => {
+								e.preventDefault();
+								setHover(true);
+							}}
+							onDragLeave={() => setHover(false)}
+							onDrop={(e) => {
+								e.preventDefault();
+								setHover(false);
+								const f = e.dataTransfer.files?.[0];
+								if (f) handleFile(f);
+							}}
+							className={`dropzone-card panel scanlines crt-screen ${hover ? "hovered" : ""} ${loading ? "loading" : ""}`}
+						>
+							<input
+								type="file"
+								ref={fileInputRef}
+								accept=".zip"
+								className="visually-hidden"
+								onChange={(e) => {
+									if (e.target.files && e.target.files.length > 0) {
+										handleFile(e.target.files[0]);
+									}
+								}}
+								disabled={loading}
+							/>
 
-				{/* Scan line active when loading */}
-				{loading && <div className="scan-line" />}
+							{loading && <div className="scan-line" />}
 
-				<IsometricViewport3D
-					status="idle"
-					maxWorkers={0}
-					workerStatuses={[]}
-					docStatuses={{}}
-					globalLoading={false}
-					isDragHovered={hover}
-				/>
+							<IsometricViewport3D
+								status="idle"
+								maxWorkers={0}
+								workerStatuses={[]}
+								docStatuses={{}}
+								globalLoading={false}
+								isDragHovered={hover}
+							/>
 
-				{/* Upload visual core */}
-				<div className="dropzone-icon-wrapper">
-					<div className="dropzone-circle-outer" />
-					<div className="dropzone-circle-orbit" />
-					<div className="dropzone-circle-glow" />
+							<div className="dropzone-icon-wrapper">
+								<div className="dropzone-circle-glow" />
+								<span className="material-icons dropzone-svg-icon-material">upload_file</span>
+							</div>
 
-					<span className="material-icons dropzone-svg-icon-material">upload_file</span>
+							<div className="dropzone-text-group">
+								<p className="dropzone-prompt">
+									{loading ? "Lendo arquivo…" : "Arraste o .zip aqui ou clique para selecionar"}
+								</p>
+							</div>
+						</label>
+					</div>
 				</div>
-
-				<div className="dropzone-text-group">
-					<p className="dropzone-prompt">
-						{loading ? "Lendo arquivo…" : "Arraste o .zip aqui ou clique para selecionar"}
-					</p>
+				<div className="crt-control-bar">
+					<div className="crt-brand">EPROC-TXT CRT-80</div>
+					<div className="crt-dials">
+						<div className="crt-dial" />
+						<div className="crt-dial" />
+					</div>
+					<div className="crt-power-section">
+						<span className="crt-power-label">POWER</span>
+						<div className={`crt-power-led ${loading ? "busy" : "active"}`} />
+						<button
+							type="button"
+							className="crt-power-btn"
+							onClick={() => fileInputRef.current?.click()}
+							title="Carregar arquivo .zip"
+						/>
+					</div>
 				</div>
-			</label>
-
+			</div>
+			<div className="crt-neck" />
+			<div className="crt-base" />
 			{error && <p className="dropzone-error animate-fade-in">{error}</p>}
-		</>
+		</div>
 	);
 }
