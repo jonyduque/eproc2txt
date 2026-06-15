@@ -1,7 +1,12 @@
 :root {
+	--txt-floating-width: 70px;
+	--txt-floating-height: 90px;
+	--txt-floating-bg: oklch(from var(--color-primary) l c h / 0.05);
+	/* biome-ignore lint/suspicious/noDuplicateCustomProperties: CSS relative color fallback */
 	--txt-floating-bg: --transparent(var(--color-primary), 0.05);
 	--txt-floating-border: var(--color-primary);
 	--txt-floating-line-title: var(--color-primary);
+	--txt-floating-line-sub: oklch(from var(--color-primary) l c h / 0.4);
 	--txt-floating-line-sub: --transparent(var(--color-primary), 0.4);
 }
 
@@ -27,9 +32,11 @@
 }
 
 .txt-floating {
-	width: 70px;
-	height: 90px;
-	background: var(--txt-floating-bg);
+	width: var(--txt-floating-width);
+	height: var(--txt-floating-height);
+	background: oklch(from var(--color-primary) l c h / 0.05);
+	/* biome-ignore lint/suspicious/noDuplicateProperties: CSS relative color fallback */
+	background: --transparent(var(--color-primary), 0.05);
 	border: 2.5px solid var(--txt-floating-border);
 	border-radius: var(--border-radius-md);
 	display: flex;
@@ -39,6 +46,9 @@
 	transform: rotateX(25deg) rotateY(-20deg) rotateZ(10deg);
 	animation: txtFloat 3s ease-in-out infinite alternate;
 	position: relative;
+	box-shadow:
+		6px 10px 25px rgba(0, 0, 0, 0.35),
+		0 0 20px oklch(from var(--color-primary) l c h / 0.25);
 	box-shadow:
 		6px 10px 25px rgba(0, 0, 0, 0.35),
 		0 0 20px --transparent(var(--color-primary), 0.25);
@@ -58,7 +68,9 @@
 
 .txt-floating .file-line {
 	height: 4px;
-	background: var(--txt-floating-line-sub);
+	background: oklch(from var(--color-primary) l c h / 0.4);
+	/* biome-ignore lint/suspicious/noDuplicateProperties: CSS relative color fallback */
+	background: --transparent(var(--color-primary), 0.4);
 	border-radius: 2px;
 }
 
@@ -92,12 +104,21 @@
 @keyframes txtFloat {
 	0% {
 		transform: rotateX(25deg) rotateY(-20deg) rotateZ(10deg) translateY(0px);
+		box-shadow:
+			6px 10px 25px rgba(0, 0, 0, 0.35),
+			0 0 20px oklch(from var(--color-primary) l c h / 0.25);
+		box-shadow:
+			6px 10px 25px rgba(0, 0, 0, 0.35),
+			0 0 20px --transparent(var(--color-primary), 0.25);
 	}
 	100% {
 		transform: rotateX(25deg) rotateY(-20deg) rotateZ(10deg) translateY(-12px);
 		box-shadow:
 			10px 16px 35px rgba(0, 0, 0, 0.45),
-			0 0 30px var(--color-primary);
+			0 0 30px oklch(from var(--color-primary) l c h / 0.4);
+		box-shadow:
+			10px 16px 35px rgba(0, 0, 0, 0.45),
+			0 0 30px --transparent(var(--color-primary), 0.4);
 	}
 }
 
