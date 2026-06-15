@@ -1,0 +1,384 @@
+<style>
+  .title-area {
+    text-align: center;
+    margin-bottom: 2rem;
+    padding: 1rem;
+    background: linear-gradient(135deg, rgba(79, 70, 229, 0.05) 0%, rgba(16, 185, 129, 0.05) 100%);
+    border-radius: 16px;
+    border: 1px dashed var(--border);
+  }
+
+  /* Interactive Stage Selector */
+  .stage-selector {
+    display: flex;
+    justify-content: center;
+    gap: 0.5rem;
+    margin-bottom: 1.5rem;
+    background: var(--bg-secondary);
+    padding: 8px;
+    border-radius: 12px;
+    border: 1px solid var(--border);
+    max-width: 600px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  .stage-btn {
+    flex: 1;
+    padding: 0.6rem 1rem;
+    border: none;
+    border-radius: 8px;
+    background: transparent;
+    color: var(--text-secondary);
+    font-weight: 600;
+    font-size: 0.85rem;
+    cursor: pointer;
+    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .stage-btn.active {
+    background: var(--accent);
+    color: white;
+    box-shadow: 0 4px 10px rgba(79, 70, 229, 0.3);
+  }
+
+  /* 3D Canvas Box */
+  .isometric-viewport {
+    height: 380px;
+    background: #0b0f19;
+    border-radius: 20px;
+    position: relative;
+    overflow: hidden;
+    margin-bottom: 2rem;
+    border: 1px solid #1e293b;
+    perspective: 1000px;
+  }
+
+  .iso-grid {
+    position: absolute;
+    width: 200%;
+    height: 200%;
+    background-image: 
+      linear-gradient(rgba(255,255,255,0.02) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255,255,255,0.02) 1px, transparent 1px);
+    background-size: 40px 40px;
+    transform: rotateX(60deg) rotateZ(-45deg) translateZ(-50px);
+    opacity: 0.5;
+  }
+
+  .scene-container {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    transform-style: preserve-3d;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+
+  /* Base elements */
+  .object-3d {
+    position: absolute;
+    transform-style: preserve-3d;
+    transform: rotateX(60deg) rotateZ(-45deg);
+    transition: all 1s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+
+  /* pile styling */
+  .pile {
+    width: 80px;
+    height: 100px;
+  }
+
+  .pile-base {
+    width: 80px;
+    height: 100px;
+    background: #ffffff;
+    border: 2px solid #64748b;
+    border-radius: 4px;
+    position: absolute;
+  }
+
+  .pile-pages {
+    position: absolute;
+    width: 80px;
+    height: 100px;
+    background: #f8fafc;
+    border: 2px solid #94a3b8;
+    border-radius: 4px;
+    transition: transform 0.5s;
+  }
+  
+  /* stacked page visual */
+  .pile-pages::before {
+    content: '';
+    position: absolute;
+    width: 76px; height: 96px;
+    background: #cbd5e1;
+    border: 1px solid #94a3b8;
+    transform: translate3d(2px, 2px, -4px);
+    border-radius: 4px;
+  }
+
+  /* processor styling */
+  .processor {
+    width: 100px;
+    height: 100px;
+    opacity: 0;
+    transform: rotateX(60deg) rotateZ(-45deg) scale(0);
+  }
+
+  .proc-box {
+    width: 100px;
+    height: 100px;
+    background: #1e293b;
+    border: 3px solid #334155;
+    border-radius: 12px;
+    position: absolute;
+  }
+
+  .proc-core {
+    width: 60px;
+    height: 60px;
+    background: #4f46e5;
+    border: 2px solid #818cf8;
+    border-radius: 8px;
+    position: absolute;
+    top: 17px; left: 17px;
+    box-shadow: 0 0 20px rgba(79, 70, 229, 0.4);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-family: monospace;
+    font-size: 10px;
+    font-weight: bold;
+  }
+
+  /* output styling */
+  .output {
+    width: 90px;
+    height: 90px;
+    opacity: 0;
+    transform: rotateX(60deg) rotateZ(-45deg) scale(0);
+  }
+
+  .out-box-back {
+    width: 90px;
+    height: 70px;
+    background: #065f46;
+    border: 2px solid #10b981;
+    border-radius: 6px;
+    position: absolute;
+  }
+
+  .out-box-front {
+    width: 90px;
+    height: 55px;
+    background: #047857;
+    border: 2px solid #10b981;
+    border-radius: 6px;
+    position: absolute;
+    transform: translate3d(0, 15px, 15px);
+  }
+
+  /* STAGE SPECIFIC POSITIONING CLASSES */
+  /* Stage 1: Waiting ZIP */
+  .scene-container.stage-waiting .pile {
+    transform: rotateX(60deg) rotateZ(-45deg) translate3d(0, 0, 0) scale(1.3);
+  }
+  .scene-container.stage-waiting .pile-pages {
+    transform: translate3d(0, 0, -20px) scale(0.8);
+    opacity: 0;
+  }
+
+  /* Stage 2: Configuring (ZIP uploaded) */
+  .scene-container.stage-configuring .pile {
+    transform: rotateX(60deg) rotateZ(-45deg) translate3d(-150px, 0, 0) scale(1);
+  }
+  .scene-container.stage-configuring .pile-pages {
+    transform: translate3d(0, 0, 10px);
+    opacity: 1;
+  }
+  .scene-container.stage-configuring .processor {
+    opacity: 0.8;
+    transform: rotateX(60deg) rotateZ(-45deg) translate3d(0, 0, 0) scale(1);
+  }
+  .scene-container.stage-configuring .output {
+    opacity: 0.8;
+    transform: rotateX(60deg) rotateZ(-45deg) translate3d(150px, 0, 0) scale(1);
+  }
+
+  /* Stage 3: Processing (Running) */
+  .scene-container.stage-processing .pile {
+    transform: rotateX(60deg) rotateZ(-45deg) translate3d(-150px, 0, 0) scale(1);
+  }
+  .scene-container.stage-processing .pile-pages {
+    transform: translate3d(0, 0, 10px);
+    opacity: 1;
+  }
+  .scene-container.stage-processing .processor {
+    opacity: 1;
+    transform: rotateX(60deg) rotateZ(-45deg) translate3d(0, 0, 0) scale(1);
+  }
+  .scene-container.stage-processing .processor .proc-core {
+    animation: procPulse 1s infinite alternate;
+  }
+  .scene-container.stage-processing .output {
+    opacity: 1;
+    transform: rotateX(60deg) rotateZ(-45deg) translate3d(150px, 0, 0) scale(1);
+  }
+
+  @keyframes procPulse {
+    0% { box-shadow: 0 0 15px rgba(79, 70, 229, 0.4); }
+    100% { box-shadow: 0 0 30px rgba(99, 102, 241, 0.8); background: #6366f1; }
+  }
+
+  /* Stage 4: Finished */
+  .scene-container.stage-finished .pile {
+    transform: rotateX(60deg) rotateZ(-45deg) translate3d(-150px, 0, 0) scale(0.8);
+    opacity: 0.5;
+  }
+  .scene-container.stage-finished .pile-pages {
+    transform: translate3d(0, 0, 0);
+    opacity: 0.2;
+  }
+  .scene-container.stage-finished .processor {
+    transform: rotateX(60deg) rotateZ(-45deg) translate3d(0, 0, 0) scale(0.8);
+    opacity: 0.5;
+  }
+  .scene-container.stage-finished .output {
+    opacity: 1;
+    transform: rotateX(60deg) rotateZ(-45deg) translate3d(50px, 0, 20px) scale(1.3);
+  }
+  .scene-container.stage-finished .output .out-box-front {
+    transform: translate3d(0, 25px, 20px) rotateX(-25deg);
+  }
+
+  /* Big XML File Float Out */
+  .final-xml-file {
+    position: absolute;
+    width: 60px;
+    height: 75px;
+    background: #ecfdf5;
+    border: 2px solid #10b981;
+    border-radius: 4px;
+    box-shadow: 0 10px 25px rgba(16, 185, 129, 0.3);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    color: #047857;
+    font-size: 11px;
+    transform: translate3d(0, 0, 80px);
+    opacity: 0;
+    transition: all 1s ease;
+    pointer-events: none;
+  }
+
+  .scene-container.stage-finished .final-xml-file {
+    opacity: 1;
+    animation: floatFile 2.5s ease-in-out infinite alternate;
+  }
+
+  @keyframes floatFile {
+    0% { transform: translate3d(0, -10px, 80px); }
+    100% { transform: translate3d(0, -10px, 95px); }
+  }
+
+  /* Flow particle lines (only in stage-processing) */
+  .flow-line {
+    position: absolute;
+    width: 60px;
+    height: 80px;
+    background: rgba(255,255,255,0.95);
+    border: 2px solid #4f46e5;
+    border-radius: 4px;
+    opacity: 0;
+    transform: rotateX(60deg) rotateZ(-45deg) translate3d(-150px, 0, 20px);
+  }
+
+  .scene-container.stage-processing .flow-line {
+    animation: simpleFlow 3s infinite linear;
+  }
+
+  @keyframes simpleFlow {
+    0% { transform: rotateX(60deg) rotateZ(-45deg) translate3d(-150px, 0, 20px); opacity: 0; }
+    15% { opacity: 1; }
+    45% { transform: rotateX(60deg) rotateZ(-45deg) translate3d(0px, 0, 30px); opacity: 1; }
+    55% { transform: rotateX(60deg) rotateZ(-45deg) translate3d(0px, 0, 10px); opacity: 0.5; background: #ecfdf5; border-color:#10b981; }
+    85% { opacity: 1; }
+    100% { transform: rotateX(60deg) rotateZ(-45deg) translate3d(150px, 0, 10px); opacity: 0; }
+  }
+</style>
+
+<div class="title-area">
+  <h2>Transição de Estados e Movimento dos Objetos</h2>
+  <p class="subtitle">Clique nas etapas abaixo para ver como os objetos 3D isométricos se reorganizam, se movem e escalam de acordo com o estado do aplicativo.</p>
+</div>
+
+<div class="stage-selector">
+  <button class="stage-btn active" data-stage="stage-waiting">1. Aguardando ZIP</button>
+  <button class="stage-btn" data-stage="stage-configuring">2. Configuração</button>
+  <button class="stage-btn" data-stage="stage-processing">3. Processando OCR</button>
+  <button class="stage-btn" data-stage="stage-finished">4. Concluído</button>
+</div>
+
+<div class="isometric-viewport">
+  <div class="iso-grid"></div>
+  
+  <div class="scene-container stage-waiting" id="main-scene">
+    <!-- Flow animation line -->
+    <div class="flow-line"></div>
+
+    <!-- 1. PILHA DE DOCUMENTOS (Input) -->
+    <div class="object-3d pile">
+      <div class="pile-base"></div>
+      <div class="pile-pages"></div>
+    </div>
+
+    <!-- 2. PROCESSADOR (Center) -->
+    <div class="object-3d processor">
+      <div class="proc-box"></div>
+      <div class="proc-core">OCR</div>
+    </div>
+
+    <!-- 3. PASTA DE SAÍDA (Right) -->
+    <div class="object-3d output">
+      <div class="out-box-back"></div>
+      
+      <!-- Big final file that floats out in finish state -->
+      <div class="final-xml-file">XML</div>
+      
+      <div class="out-box-front"></div>
+    </div>
+  </div>
+</div>
+
+<div class="options">
+  <div class="option" data-choice="approve-state-transitions" onclick="toggleSelect(this)">
+    <div class="letter">✓</div>
+    <div class="content">
+      <h3>Aprovado! Amei esse comportamento dinâmico de transição</h3>
+      <p>A reorganização espacial dos blocos 3D deixa o app vivo e comunica as fases do processo de forma super clara.</p>
+    </div>
+  </div>
+</div>
+
+<script>
+  // Handle interactive stage changes in mockup
+  document.addEventListener('click', function(e) {
+    const btn = e.target.closest('.stage-btn');
+    if (!btn) return;
+    
+    // Toggle active button
+    document.querySelectorAll('.stage-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    
+    // Change scene class
+    const stage = btn.getAttribute('data-stage');
+    const scene = document.getElementById('main-scene');
+    scene.className = 'scene-container ' + stage;
+  });
+</script>

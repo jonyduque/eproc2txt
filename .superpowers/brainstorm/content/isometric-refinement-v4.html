@@ -1,0 +1,510 @@
+<style>
+  :root {
+    --color-paper: #ffffff;
+    --color-paper-border: #64748b;
+    --color-processor: #4f46e5;
+    --color-processor-glow: rgba(79, 70, 229, 0.4);
+    --color-output-file: #10b981;
+    --color-output-glow: rgba(16, 185, 129, 0.3);
+    /* NEW ROTATION ANGLE: Rotates more towards the right side (result) to bring it closer */
+    --rotate-x: 52deg;
+    --rotate-z: -35deg;
+  }
+
+  .title-area {
+    text-align: center;
+    margin-bottom: 1.5rem;
+    padding: 1rem;
+    background: linear-gradient(135deg, rgba(79, 70, 229, 0.05) 0%, rgba(16, 185, 129, 0.05) 100%);
+    border-radius: 16px;
+    border: 1px dashed var(--border);
+  }
+
+  /* Control Panel */
+  .demo-controls {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 1.5rem;
+    margin-bottom: 1.5rem;
+    background: var(--bg-secondary);
+    padding: 1rem;
+    border-radius: 12px;
+    border: 1px solid var(--border);
+    max-width: 700px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  .control-item {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .slider-label {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--text-primary);
+  }
+
+  /* 3D Canvas Viewport - Height increased for larger elements */
+  .isometric-viewport {
+    height: 460px;
+    background: #090d16;
+    border-radius: 20px;
+    position: relative;
+    overflow: hidden;
+    margin-bottom: 2rem;
+    border: 1px solid #1e293b;
+    perspective: 1000px;
+  }
+
+  .iso-grid {
+    position: absolute;
+    width: 200%;
+    height: 200%;
+    background-image: 
+      linear-gradient(rgba(255,255,255,0.015) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255,255,255,0.015) 1px, transparent 1px);
+    background-size: 45px 45px;
+    transform: rotateX(var(--rotate-x)) rotateZ(var(--rotate-z)) translateZ(-50px);
+    opacity: 0.5;
+  }
+
+  .scene-container {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    transform-style: preserve-3d;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+
+  /* Base 3D Object */
+  .object-3d {
+    position: absolute;
+    transform-style: preserve-3d;
+  }
+
+  /* 1. DOCUMENT PILE (Left) */
+  .pile-container {
+    /* Repositioned slightly closer to center due to camera angle */
+    transform: rotateX(var(--rotate-x)) rotateZ(var(--rotate-z)) translate3d(-200px, 0, 0);
+  }
+
+  .pile-box {
+    width: 90px;
+    height: 115px;
+    background: #1e293b;
+    border: 2px solid #475569;
+    border-radius: 6px;
+    position: relative;
+    transform-style: preserve-3d;
+  }
+
+  /* Individual documents inside the pile - sizes increased */
+  .doc-sheet {
+    position: absolute;
+    width: 86px;
+    height: 111px;
+    background: #ffffff;
+    border: 1.5px solid #475569;
+    border-radius: 4px;
+    padding: 8px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .doc-sheet::after {
+    content: '';
+    position: absolute;
+    top: 0; right: 0;
+    width: 0; height: 0;
+    border-style: solid;
+    border-width: 0 16px 16px 0;
+    border-color: transparent #cbd5e1 transparent transparent;
+  }
+
+  .doc-line {
+    height: 4px;
+    background: #cbd5e1;
+    border-radius: 2px;
+  }
+  .doc-line.sh { width: 40%; }
+  .doc-line.md { width: 70%; }
+
+  .doc-sheet:nth-child(1) { transform: translate3d(2px, 2px, 16px); }
+  .doc-sheet:nth-child(2) { transform: translate3d(4px, 0px, 12px); }
+  .doc-sheet:nth-child(3) { transform: translate3d(0px, 4px, 8px); }
+  .doc-sheet:nth-child(4) { transform: translate3d(2px, 2px, 4px); }
+
+  /* 2. THE PROCESSOR (Center) */
+  .processor-container {
+    transform: rotateX(var(--rotate-x)) rotateZ(var(--rotate-z)) translate3d(0, 0, 0);
+    width: 160px;
+    height: 160px;
+  }
+
+  .proc-box {
+    width: 160px;
+    height: 160px;
+    background: #0f172a;
+    border: 3px solid #334155;
+    border-radius: 16px;
+    box-shadow: inset 0 0 20px rgba(0,0,0,0.6);
+    position: relative;
+    transform-style: preserve-3d;
+  }
+
+  /* Individual processing cores inside the CPU block - sizes increased */
+  .mini-core {
+    position: absolute;
+    width: 34px;
+    height: 34px;
+    background: #1e293b;
+    border: 1.5px solid #475569;
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 9px;
+    font-weight: bold;
+    color: var(--text-secondary);
+    font-family: monospace;
+    transition: all 0.3s;
+  }
+
+  .mini-core.active {
+    background: #4f46e5;
+    border-color: #818cf8;
+    color: white;
+    box-shadow: 0 0 12px rgba(79, 70, 229, 0.6);
+  }
+
+  .core-laser {
+    position: absolute;
+    width: 30px;
+    height: 2px;
+    background: #818cf8;
+    box-shadow: 0 0 8px #6366f1;
+    opacity: 0;
+  }
+
+  .mini-core.active .core-laser {
+    opacity: 1;
+    animation: coreScan 1s infinite alternate;
+  }
+
+  @keyframes coreScan {
+    0% { top: 2px; }
+    100% { top: 30px; }
+  }
+
+  /* 3. REPOSITIONED & ENLARGED: ISOMETRIC TEXT FILE ICON (Right) */
+  .output-file-container {
+    /* Brought closer to center/viewer: y value adjusted and scale increased */
+    transform: rotateX(var(--rotate-x)) rotateZ(var(--rotate-z)) translate3d(190px, -20px, 0) scale(1.25);
+    transform-style: preserve-3d;
+  }
+
+  /* A glowing platform representing the file slot */
+  .output-platform {
+    width: 100px;
+    height: 125px;
+    background: rgba(16, 185, 129, 0.08);
+    border: 2px dashed rgba(16, 185, 129, 0.5);
+    border-radius: 8px;
+    position: relative;
+    transform-style: preserve-3d;
+    box-shadow: 0 0 20px rgba(16, 185, 129, 0.15);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  /* The actual Text Document in 3D isometric view - size increased significantly */
+  .isometric-text-file {
+    width: 80px;
+    height: 105px;
+    background: #ecfdf5;
+    border: 2.5px solid var(--color-output-file);
+    border-radius: 6px;
+    position: absolute;
+    transform-style: preserve-3d;
+    transform: translateZ(15px);
+    box-shadow: 6px 10px 25px rgba(0,0,0,0.35), 0 0 20px rgba(16, 185, 129, 0.25);
+    display: flex;
+    flex-direction: column;
+    padding: 12px;
+    gap: 5px;
+    transition: transform 0.3s;
+  }
+
+  /* Folded corner on the document */
+  .isometric-text-file::after {
+    content: '';
+    position: absolute;
+    top: -2.5px;
+    right: -2.5px;
+    width: 0;
+    height: 0;
+    border-style: solid;
+    border-width: 0 16px 16px 0;
+    border-color: transparent #10b981 transparent transparent;
+    border-bottom-left-radius: 3px;
+  }
+
+  /* Visual text lines inside the final TXT document */
+  .file-line {
+    height: 4px;
+    background: #a7f3d0;
+    border-radius: 2px;
+  }
+  .file-line.title {
+    background: var(--color-output-file);
+    width: 50%;
+    margin-bottom: 3px;
+  }
+  .file-line.sh { width: 40%; }
+  .file-line.md { width: 75%; }
+
+  /* Giant TXT badge at bottom */
+  .file-type-badge {
+    position: absolute;
+    bottom: 8px;
+    right: 8px;
+    font-size: 9px;
+    font-family: monospace;
+    font-weight: 900;
+    background: var(--color-output-file);
+    color: white;
+    padding: 2px 5px;
+    border-radius: 3px;
+  }
+
+  /* Pulse animation on document hover/process */
+  .output-platform.active .isometric-text-file {
+    animation: filePulse 2s infinite alternate;
+  }
+
+  @keyframes filePulse {
+    0% { transform: translateZ(15px); box-shadow: 6px 10px 25px rgba(0,0,0,0.35), 0 0 20px rgba(16, 185, 129, 0.25); }
+    100% { transform: translateZ(30px); box-shadow: 10px 16px 35px rgba(0,0,0,0.45), 0 0 35px rgba(16, 185, 129, 0.5); }
+  }
+
+  /* 4. MULTIPLE ANIMATION LANES */
+  #dynamic-lanes-container {
+    position: absolute;
+    width: 0;
+    height: 0;
+    transform-style: preserve-3d;
+    z-index: 100;
+  }
+
+  /* Base styling for flying document page - sizes increased */
+  .page-particle {
+    position: absolute;
+    width: 28px;
+    height: 38px;
+    background: #ffffff;
+    border: 1.5px solid #475569;
+    border-radius: 2px;
+    box-shadow: 2px 2px 5px rgba(0,0,0,0.15);
+    margin-left: -14px;
+    margin-top: -19px;
+    opacity: 0;
+    pointer-events: none;
+    transform-style: preserve-3d;
+  }
+
+  /* Base styling for flying word text */
+  .text-particle {
+    position: absolute;
+    font-family: monospace;
+    font-size: 9px;
+    font-weight: bold;
+    color: #818cf8;
+    text-shadow: 0 0 6px #4f46e5;
+    white-space: nowrap;
+    opacity: 0;
+    pointer-events: none;
+    transform-style: preserve-3d;
+  }
+</style>
+
+<div class="title-area">
+  <h2>Aproximação e Zoom do Arquivo Resultado (V4)</h2>
+  <p class="subtitle">Ajustamos o ângulo de visualização isométrica para focar no resultado final, aumentando o tamanho do documento TXT e destacando-o com mais profundidade.</p>
+</div>
+
+<div class="demo-controls">
+  <div class="control-item">
+    <span class="slider-label">Simular Workers Ativos:</span>
+    <div class="counter-control" style="background:var(--bg-secondary)">
+      <button class="counter-btn" onclick="changeWorkers(-1)">-</button>
+      <span class="counter-val" id="worker-count">4</span>
+      <button class="counter-btn" onclick="changeWorkers(1)">+</button>
+    </div>
+  </div>
+</div>
+
+<div class="isometric-viewport">
+  <div class="iso-grid"></div>
+  
+  <div class="scene-container">
+    
+    <!-- Circuit Lines and Animation Paths -->
+    <div id="dynamic-lanes-container">
+      <!-- JavaScript will inject lanes and flying particles here -->
+    </div>
+
+    <!-- 1. PILHA DE DOCUMENTOS (Left) -->
+    <div class="object-3d pile-container">
+      <div class="pile-box">
+        <div class="doc-sheet"><div class="doc-line md"></div><div class="doc-line"></div><div class="doc-line sh"></div></div>
+        <div class="doc-sheet"><div class="doc-line md"></div><div class="doc-line sh"></div></div>
+        <div class="doc-sheet"><div class="doc-line"></div><div class="doc-line sh"></div></div>
+        <div class="doc-sheet"><div class="doc-line md"></div></div>
+      </div>
+    </div>
+
+    <!-- 2. PROCESSADOR (Center) -->
+    <div class="object-3d processor-container">
+      <div class="proc-box" id="cpu-block">
+        <!-- Core 1 -->
+        <div class="mini-core active" style="top:15px; left:15px;" id="core-0">W1<div class="core-laser"></div></div>
+        <!-- Core 2 -->
+        <div class="mini-core active" style="top:15px; left:111px;" id="core-1">W2<div class="core-laser"></div></div>
+        <!-- Core 3 -->
+        <div class="mini-core active" style="top:111px; left:15px;" id="core-2">W3<div class="core-laser"></div></div>
+        <!-- Core 4 -->
+        <div class="mini-core active" style="top:111px; left:111px;" id="core-3">W4<div class="core-laser"></div></div>
+        <!-- Core 5 -->
+        <div class="mini-core" style="top:63px; left:63px;" id="core-4">W5<div class="core-laser"></div></div>
+      </div>
+    </div>
+
+    <!-- 3. ENLARGED & ROTATED TEXT FILE ICON (Right) -->
+    <div class="object-3d output-file-container">
+      <div class="output-platform active">
+        <div class="isometric-text-file">
+          <div class="file-line title"></div>
+          <div class="file-line md"></div>
+          <div class="file-line sh"></div>
+          <div class="file-line md"></div>
+          <div class="file-line"></div>
+          <div class="file-type-badge">TXT</div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<div class="options">
+  <div class="option" data-choice="approve-zoomed-file-isometric" onclick="toggleSelect(this)">
+    <div class="letter">✓</div>
+    <div class="content">
+      <h3>Aprovado! O novo ângulo com destaque no resultado ficou fantástico</h3>
+      <p>O foco maior no arquivo TXT à direita deu muito mais importância ao resultado do processamento. Ficou perfeito!</p>
+    </div>
+  </div>
+</div>
+
+<script>
+  let activeWorkers = 4;
+
+  // Initialize and run animations
+  function initLanes() {
+    const container = document.getElementById('dynamic-lanes-container');
+    if (!container) return;
+    
+    container.innerHTML = '';
+    
+    // Core locations in 160x160 processor box:
+    // W1: top 15, left 15 -> offset from center: x = -48, y = -48
+    // W2: top 15, left 111 -> offset: x = 48, y = -48
+    // W3: top 111, left 15 -> offset: x = -48, y = 48
+    // W4: top 111, left 111 -> offset: x = 48, y = 48
+    // W5: top 63, left 63 -> offset: x = 0, y = 0
+    const corePositions = [
+      { x: -48, y: -48 }, // W1
+      { x: 48, y: -48 },  // W2
+      { x: -48, y: 48 },  // W3
+      { x: 48, y: 48 },   // W4
+      { x: 0, y: 0 }      // W5
+    ];
+
+    // Build paths for each active worker
+    for (let i = 0; i < 5; i++) {
+      const core = document.getElementById('core-' + i);
+      if (i < activeWorkers) {
+        core.classList.add('active');
+        createLaneParticles(container, i, corePositions[i]);
+      } else {
+        core.classList.remove('active');
+      }
+    }
+  }
+
+  function createLaneParticles(container, index, pos) {
+    // Left stack is at -200px in translate3d. Right Text File is at 190px, -20px.
+    // Create page particle
+    const page = document.createElement('div');
+    page.className = 'page-particle';
+    page.style.animation = `flowPageLane-${index} 4s infinite cubic-bezier(0.4, 0, 0.2, 1)`;
+    page.style.animationDelay = `${index * 0.8}s`;
+    
+    // Create text particle (word stream)
+    const text = document.createElement('div');
+    text.className = 'text-particle';
+    const words = ["PETIÇÃO INICIAL", "SENTENÇA.pdf", "<xml_dados>", "CONTESTAÇÃO", "PROCESSO.zip"];
+    text.textContent = words[index % words.length] + '_';
+    text.style.animation = `flowTextLane-${index} 4s infinite linear`;
+    text.style.animationDelay = `${index * 0.8 + 1.8}s`;
+
+    // Inject dynamic CSS animations for the specific lane
+    const style = document.createElement('style');
+    style.innerHTML = `
+      @keyframes flowPageLane-${index} {
+        /* Start at the Input Document Pile (x: -200px, y: 0px) */
+        0% { transform: rotateX(var(--rotate-x)) rotateZ(var(--rotate-z)) translate3d(-200px, 0, 20px) scale(0.95); opacity: 0; }
+        10% { opacity: 1; }
+        /* Travel to the specific Core in the Processor */
+        40% { transform: rotateX(var(--rotate-x)) rotateZ(var(--rotate-z)) translate3d(${pos.x}px, ${pos.y}px, 20px) scale(0.7); opacity: 1; background: #ffffff; border-color: #4f46e5; }
+        /* Scanning and dissolving inside the core */
+        45%, 55% { transform: rotateX(var(--rotate-x)) rotateZ(var(--rotate-z)) translate3d(${pos.x}px, ${pos.y}px, 5px) scale(0.6); opacity: 0.8; background: #c7d2fe; border-color: #818cf8; }
+        60% { opacity: 0; transform: rotateX(var(--rotate-x)) rotateZ(var(--rotate-z)) translate3d(${pos.x}px, ${pos.y}px, 5px) scale(0.45); }
+        100% { opacity: 0; }
+      }
+
+      @keyframes flowTextLane-${index} {
+        /* Start dissolving from the Core in the Processor */
+        0% { transform: rotateX(var(--rotate-x)) rotateZ(var(--rotate-z)) translate3d(${pos.x}px, ${pos.y}px, 10px); opacity: 0; }
+        10% { opacity: 1; color: #818cf8; }
+        80% { opacity: 1; color: #10b981; }
+        /* Final destination at the Output Text File (x: 190px, y: -20px) */
+        100% { transform: rotateX(var(--rotate-x)) rotateZ(var(--rotate-z)) translate3d(190px, -20px, 30px); opacity: 0; }
+      }
+    `;
+
+    container.appendChild(style);
+    container.appendChild(page);
+    container.appendChild(text);
+  }
+
+  function changeWorkers(amount) {
+    const newVal = activeWorkers + amount;
+    if (newVal >= 1 && newVal <= 5) {
+      activeWorkers = newVal;
+      document.getElementById('worker-count').textContent = activeWorkers;
+      initLanes();
+    }
+  }
+
+  // Initial setup
+  setTimeout(initLanes, 100);
+</script>

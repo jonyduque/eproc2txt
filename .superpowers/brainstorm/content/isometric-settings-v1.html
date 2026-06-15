@@ -1,0 +1,235 @@
+<style>
+  .title-area {
+    text-align: center;
+    margin-bottom: 2rem;
+    padding: 1rem;
+    background: linear-gradient(135deg, rgba(79, 70, 229, 0.05) 0%, rgba(16, 185, 129, 0.05) 100%);
+    border-radius: 16px;
+    border: 1px dashed var(--border);
+  }
+
+  .mock-settings-panel {
+    max-width: 600px;
+    margin: 0 auto 2rem auto;
+    background: var(--bg-secondary);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    overflow: hidden;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+  }
+
+  .panel-header {
+    background: var(--bg-tertiary);
+    padding: 1rem 1.5rem;
+    font-weight: 600;
+    font-size: 1.1rem;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .panel-body {
+    padding: 1.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+  }
+
+  .setting-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .setting-label {
+    font-weight: 600;
+    font-size: 0.9rem;
+    color: var(--text-primary);
+  }
+
+  .setting-description {
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+    margin-bottom: 0.5rem;
+  }
+
+  .grid-2col {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+  }
+
+  /* Custom Select styling */
+  .custom-select {
+    width: 100%;
+    padding: 0.75rem;
+    background: var(--bg-primary);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    color: var(--text-primary);
+    font-size: 0.9rem;
+    cursor: pointer;
+  }
+
+  /* Slider / Counter control styling */
+  .counter-control {
+    display: flex;
+    align-items: center;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    overflow: hidden;
+    background: var(--bg-primary);
+    width: fit-content;
+  }
+
+  .counter-btn {
+    padding: 0.75rem 1.25rem;
+    background: var(--bg-secondary);
+    border: none;
+    cursor: pointer;
+    font-weight: bold;
+    color: var(--text-primary);
+    transition: background 0.15s;
+  }
+
+  .counter-btn:hover {
+    background: var(--bg-tertiary);
+  }
+
+  .counter-val {
+    padding: 0.75rem 1.5rem;
+    font-weight: 600;
+    min-width: 50px;
+    text-align: center;
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* Segmented control for animation choices */
+  .segmented-control {
+    display: flex;
+    background: var(--bg-primary);
+    padding: 4px;
+    border-radius: 10px;
+    border: 1px solid var(--border);
+    gap: 4px;
+  }
+
+  .segment-btn {
+    flex: 1;
+    padding: 0.6rem;
+    text-align: center;
+    font-size: 0.85rem;
+    font-weight: 500;
+    border-radius: 8px;
+    cursor: pointer;
+    border: none;
+    background: transparent;
+    color: var(--text-secondary);
+    transition: all 0.2s;
+  }
+
+  .segment-btn.active {
+    background: var(--bg-secondary);
+    color: var(--accent);
+    font-weight: 600;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+  }
+
+  .button-primary {
+    background: var(--accent);
+    color: white;
+    font-weight: 600;
+    border: none;
+    padding: 0.85rem;
+    border-radius: 8px;
+    cursor: pointer;
+    text-align: center;
+    transition: background 0.15s;
+  }
+
+  .button-primary:hover {
+    background: var(--accent-hover);
+  }
+</style>
+
+<div class="title-area">
+  <h2>Painel de Configuração com Estilos de Animação</h2>
+  <p class="subtitle">Podemos colocar todos os estilos no aplicativo! O usuário escolhe o que prefere nas configurações. Veja como ficaria no painel:</p>
+</div>
+
+<div class="mock-settings-panel">
+  <div class="panel-header">
+    <span>Configurações do Processamento</span>
+    <span class="label" style="margin: 0; background: #e0f2fe; color: #0369a1; padding: 2px 8px; border-radius: 12px;">e-Proc ZIP</span>
+  </div>
+  
+  <div class="panel-body">
+    <div class="grid-2col">
+      <!-- Worker pool -->
+      <div class="setting-group">
+        <label class="setting-label">Pool de OCR Workers</label>
+        <div class="setting-description">Número de threads em paralelo (Tesseract)</div>
+        <div class="counter-control">
+          <button class="counter-btn">-</button>
+          <span class="counter-val">4</span>
+          <button class="counter-btn">+</button>
+        </div>
+      </div>
+
+      <!-- Tesseract Model -->
+      <div class="setting-group">
+        <label class="setting-label">Modelo Tesseract</label>
+        <div class="setting-description">Qualidade vs. velocidade do OCR</div>
+        <select class="custom-select">
+          <option selected>Linguagem Português (Rápido)</option>
+          <option>Linguagem Português (Melhor Qualidade)</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- NEW SETTING: Animation selector -->
+    <div class="setting-group" style="border-top: 1px solid var(--border); padding-top: 1.5rem;">
+      <label class="setting-label">Efeito Visual do Fluxo (3D Isométrico)</label>
+      <div class="setting-description">Selecione o tipo de animação exibido durante o OCR</div>
+      
+      <div class="segmented-control">
+        <button class="segment-btn" data-val="document">A. Páginas</button>
+        <button class="segment-btn" data-val="words">B. Palavras</button>
+        <button class="segment-btn active" data-val="hybrid">C. Híbrido (Ambos)</button>
+        <button class="segment-btn" data-val="none">D. Desativado</button>
+      </div>
+    </div>
+
+    <button class="button-primary">Iniciar Conversão (Processar ZIP)</button>
+  </div>
+</div>
+
+<div class="options">
+  <div class="option" data-choice="accept-configurable" onclick="toggleSelect(this)">
+    <div class="letter">✓</div>
+    <div class="content">
+      <h3>Excelente! Quero que o painel de configurações tenha essa opção de escolha</h3>
+      <p>O usuário escolhe entre as 3 opções de efeitos ou pode até desativar caso prefira desempenho máximo.</p>
+    </div>
+  </div>
+  <div class="option" data-choice="accept-hybrid-only" onclick="toggleSelect(this)">
+    <div class="letter">★</div>
+    <div class="content">
+      <h3>Prefiro apenas o efeito Híbrido como padrão fixo</h3>
+      <p>Não há necessidade de colocar o seletor no painel. O efeito híbrido (combinação de páginas e palavras) será o único padrão visual de processamento.</p>
+    </div>
+  </div>
+</div>
+
+<script>
+  // Handle segment button clicks in mockup
+  document.addEventListener('click', function(e) {
+    const btn = e.target.closest('.segment-btn');
+    if (!btn) return;
+    
+    const container = btn.closest('.segmented-control');
+    container.querySelectorAll('.segment-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+  });
+</script>

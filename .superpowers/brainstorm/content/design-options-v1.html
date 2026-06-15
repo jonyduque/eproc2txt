@@ -1,0 +1,335 @@
+<style>
+  /* Base custom aesthetics to override defaults with a premium feel */
+  :root {
+    --quantum-glow: #00f0ff;
+    --quantum-purple: #bd00ff;
+    --retro-amber: #ffb000;
+    --retro-green: #33ff33;
+    --retro-beige: #e6dfd3;
+    --minimal-primary: #4f46e5;
+  }
+
+  .title-area {
+    text-align: center;
+    margin-bottom: 2.5rem;
+    padding: 1rem;
+    background: linear-gradient(135deg, rgba(79, 70, 229, 0.05) 0%, rgba(189, 0, 255, 0.05) 100%);
+    border-radius: 16px;
+    border: 1px dashed var(--border);
+  }
+
+  .cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    gap: 2rem;
+    margin-bottom: 2rem;
+  }
+
+  .card {
+    background: var(--bg-secondary);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    overflow: hidden;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+    box-shadow: 0 4px 6px rgba(0,0,0,0.02);
+  }
+
+  .card:hover {
+    border-color: var(--accent);
+    transform: translateY(-6px);
+    box-shadow: 0 12px 24px rgba(0,0,0,0.1);
+  }
+
+  .card.selected {
+    border-color: var(--selected-border);
+    border-width: 2px;
+    box-shadow: 0 0 0 4px rgba(10, 132, 255, 0.15);
+  }
+
+  .card-image {
+    position: relative;
+    height: 180px;
+    background: #0f172a;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    perspective: 800px;
+  }
+
+  /* Concept A Preview: Quantum Data Loom */
+  .preview-quantum {
+    background: radial-gradient(circle at center, #1e1b4b 0%, #09090b 100%);
+    width: 100%;
+    height: 100%;
+    position: relative;
+  }
+
+  .grid-3d {
+    position: absolute;
+    width: 200%;
+    height: 200%;
+    top: -50%;
+    left: -50%;
+    background-image: 
+      linear-gradient(rgba(0, 240, 255, 0.1) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(0, 240, 255, 0.1) 1px, transparent 1px);
+    background-size: 20px 20px;
+    transform: rotateX(60deg) translateZ(-40px);
+    animation: gridScroll 10s linear infinite;
+  }
+
+  @keyframes gridScroll {
+    0% { transform: rotateX(60deg) translateZ(-40px) translateY(0); }
+    100% { transform: rotateX(60deg) translateZ(-40px) translateY(40px); }
+  }
+
+  .quantum-folder {
+    position: absolute;
+    width: 60px;
+    height: 45px;
+    background: rgba(0, 240, 255, 0.2);
+    border: 2px solid var(--quantum-glow);
+    border-radius: 6px;
+    box-shadow: 0 0 15px rgba(0, 240, 255, 0.4);
+    transform: rotateY(-25deg) rotateX(20deg) translate3d(-40px, -10px, 0);
+  }
+
+  .quantum-particles {
+    position: absolute;
+    width: 6px;
+    height: 6px;
+    background: #ffffff;
+    border-radius: 50%;
+    box-shadow: 0 0 8px #ffffff, 0 0 15px var(--quantum-purple);
+    animation: flowParticles 2s ease-in-out infinite;
+  }
+
+  @keyframes flowParticles {
+    0% { transform: translate3d(-30px, 0, 10px); opacity: 0; }
+    30% { opacity: 1; }
+    70% { opacity: 1; }
+    100% { transform: translate3d(50px, -20px, 40px); opacity: 0; }
+  }
+
+  .quantum-output {
+    position: absolute;
+    width: 50px;
+    height: 50px;
+    background: rgba(189, 0, 255, 0.2);
+    border: 2px solid var(--quantum-purple);
+    border-radius: 8px;
+    box-shadow: 0 0 15px rgba(189, 0, 255, 0.4);
+    transform: rotateY(15deg) rotateX(20deg) translate3d(40px, 10px, 0);
+  }
+
+  /* Concept B Preview: Retro CRT */
+  .preview-retro {
+    background: #18181b;
+    width: 100%;
+    height: 100%;
+    position: relative;
+  }
+
+  .retro-cabinet {
+    position: absolute;
+    width: 100px;
+    height: 80px;
+    background: var(--retro-beige);
+    border: 2px solid #5a5245;
+    border-radius: 10px;
+    transform: rotateY(20deg) rotateX(15deg);
+    box-shadow: 5px 10px 20px rgba(0,0,0,0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .retro-screen {
+    width: 80px;
+    height: 60px;
+    background: #092c09;
+    border-radius: 8px;
+    border: 3px solid #7c7262;
+    position: relative;
+    overflow: hidden;
+    box-shadow: inset 0 0 10px rgba(0,0,0,0.8);
+  }
+
+  .retro-screen::before {
+    content: '';
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.06), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.06));
+    background-size: 100% 4px, 6px 100%;
+    z-index: 2;
+  }
+
+  .retro-text {
+    font-family: monospace;
+    font-size: 7px;
+    color: var(--retro-green);
+    padding: 4px;
+    white-space: pre-wrap;
+    animation: textFlicker 0.15s infinite;
+  }
+
+  @keyframes textFlicker {
+    0% { opacity: 0.98; }
+    50% { opacity: 1; }
+    100% { opacity: 0.95; }
+  }
+
+  /* Concept C Preview: Minimalist Isometric Vector */
+  .preview-minimal {
+    background: linear-gradient(135deg, #f1f5f9 0%, #cbd5e1 100%);
+    width: 100%;
+    height: 100%;
+    position: relative;
+  }
+
+  .minimal-scene {
+    position: relative;
+    width: 120px;
+    height: 120px;
+    transform: rotateX(55deg) rotateZ(-45deg);
+    transform-style: preserve-3d;
+  }
+
+  .iso-box {
+    position: absolute;
+    width: 40px;
+    height: 40px;
+    background: var(--minimal-primary);
+    transform: translate3d(0, 0, 0);
+    box-shadow: 15px 15px 20px rgba(0,0,0,0.15);
+  }
+
+  .iso-box::before {
+    content: '';
+    position: absolute;
+    width: 10px;
+    height: 40px;
+    background: #3730a3;
+    transform: rotateY(90deg) translate3d(-5px, 0, -5px);
+  }
+
+  .iso-box::after {
+    content: '';
+    position: absolute;
+    width: 40px;
+    height: 10px;
+    background: #4338ca;
+    transform: rotateX(90deg) translate3d(0, 5px, -5px);
+  }
+
+  .iso-doc {
+    position: absolute;
+    width: 30px;
+    height: 38px;
+    background: #ffffff;
+    border: 1.5px solid #64748b;
+    box-shadow: 5px 5px 10px rgba(0,0,0,0.1);
+    transform: translate3d(50px, 10px, 15px);
+    animation: isoBounce 1.5s ease-in-out infinite alternate;
+  }
+
+  @keyframes isoBounce {
+    0% { transform: translate3d(50px, 10px, 15px); }
+    100% { transform: translate3d(50px, 10px, 25px); }
+  }
+
+  /* Custom responsive grid */
+  .details-container {
+    margin-top: 2rem;
+    background: var(--bg-secondary);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 1.5rem;
+  }
+</style>
+
+<div class="title-area">
+  <h2>Escolha a Identidade Visual 3D do eproc2txt</h2>
+  <p class="subtitle">Selecione uma das abordagens conceituais abaixo para iniciarmos o desenvolvimento da interface em 3D.</p>
+</div>
+
+<div class="cards">
+  <!-- Concept A: Quantum Data Loom -->
+  <div class="card" data-choice="concept-quantum" onclick="toggleSelect(this)">
+    <div class="card-image">
+      <div class="preview-quantum">
+        <div class="grid-3d"></div>
+        <div class="quantum-folder"></div>
+        <div class="quantum-particles"></div>
+        <div class="quantum-output"></div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>1. Quantum Data Loom</h3>
+      <p class="subtitle" style="margin-bottom:0.5rem">True 3D WebGL (Three.js)</p>
+      <p>Um espaço virtual escuro e cibernético onde documentos são digitalizados como feixes holográficos de luz, se dissolvendo em partículas e re-formando em arquivos estruturados XML de forma fluida.</p>
+    </div>
+  </div>
+
+  <!-- Concept B: Retro CRT & Mechanical Factory -->
+  <div class="card" data-choice="concept-retro" onclick="toggleSelect(this)">
+    <div class="card-image">
+      <div class="preview-retro">
+        <div class="retro-cabinet">
+          <div class="retro-screen">
+            <div class="retro-text">> OCR IN PROGRESS
+> PAGE 04/12
+> SCANNING...</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>2. Retro CRT & Mechanical Factory</h3>
+      <p class="subtitle" style="margin-bottom:0.5rem">CSS 3D DOM Meshes</p>
+      <p>Um painel mecânico retro-futurista de madeira e metal. Os arquivos físicos alimentam uma tela de monitor CRT fosforescente que analisa as palavras, imprimindo cartões ou arquivos perfurados.</p>
+    </div>
+  </div>
+
+  <!-- Concept C: Isometric Minimalist Space -->
+  <div class="card" data-choice="concept-minimal" onclick="toggleSelect(this)">
+    <div class="card-image">
+      <div class="preview-minimal">
+        <div class="minimal-scene">
+          <div class="iso-box"></div>
+          <div class="iso-doc"></div>
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>3. Isometric Minimalist Vector</h3>
+      <p class="subtitle" style="margin-bottom:0.5rem">Isometric 2D/3D Canvas Layer</p>
+      <p>Uma estética de design corporativo limpa, leve e moderna. Ícones vetoriais isométricos se movem com transições suaves e elásticas. Focado na máxima performance e elegância sem sobrecarga.</p>
+    </div>
+  </div>
+</div>
+
+<div class="details-container">
+  <h3>Visão Geral Comparativa</h3>
+  <div class="pros-cons">
+    <div class="pros">
+      <h4>Vantagens Gerais de Abordagens 3D</h4>
+      <ul>
+        <li>Experiência de usuário altamente imersiva e divertida</li>
+        <li>Feedback em tempo real tangível (vê as páginas se movendo)</li>
+        <li>Visual de software "premium" de alto valor agregado</li>
+      </ul>
+    </div>
+    <div class="cons">
+      <h4>Pontos de Atenção</h4>
+      <ul>
+        <li>Uso de CPU/GPU durante o processamento OCR paralelo</li>
+        <li>Tempo de carregamento inicial dos scripts 3D</li>
+        <li>Complexidade de manutenção e responsividade em telas móveis</li>
+      </ul>
+    </div>
+  </div>
+</div>

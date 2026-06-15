@@ -105,11 +105,51 @@ export default function Dropzone({ onZipParsed, onLoadingChange }: DropzoneProps
 								isDragHovered={hover}
 							/>
 
-							<div className="dropzone-icon-wrapper">
-								<div className="dropzone-circle-outer" />
-								<div className="dropzone-circle-orbit" />
-								<div className="dropzone-circle-glow" />
-								<span className="material-icons dropzone-svg-icon-material">upload_file</span>
+							<div
+								className={`dropzone-icon-area ${hover ? "hovered" : ""} ${loading ? "loading" : ""}`}
+							>
+								<div className="dropzone-dashed-ring" />
+								<svg
+									className={`dropzone-folder-icon ${loading ? "loading" : ""}`}
+									viewBox="0 0 64 64"
+									fill="none"
+									xmlns="http://www.w3.org/2000/svg"
+									aria-hidden="true"
+								>
+									{/* Folder body */}
+									<path
+										className="folder-body"
+										d="M6 16C6 13.8 7.8 12 10 12H26L30 16H54C56.2 16 58 17.8 58 20V50C58 52.2 56.2 54 54 54H10C7.8 54 6 52.2 6 50V16Z"
+									/>
+									{/* Folder tab */}
+									<path className="folder-tab" d="M6 16C6 13.8 7.8 12 10 12H26L30 16H10" />
+									{/* Upload arrow shaft */}
+									<line
+										className="upload-arrow"
+										x1="32"
+										y1="42"
+										x2="32"
+										y2="26"
+										strokeLinecap="round"
+									/>
+									{/* Upload arrow head */}
+									<polyline
+										className="upload-arrow"
+										points="24,33 32,25 40,33"
+										strokeLinecap="round"
+										strokeLinejoin="round"
+									/>
+									{/* Loading spinner arc (only visible when loading) */}
+									{loading && (
+										<circle
+											className="folder-spinner"
+											cx="32"
+											cy="34"
+											r="10"
+											strokeLinecap="round"
+										/>
+									)}
+								</svg>
 							</div>
 
 							<div className="dropzone-text-group">

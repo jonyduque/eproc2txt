@@ -1,0 +1,444 @@
+<style>
+  :root {
+    --color-paper: #ffffff;
+    --color-paper-border: #64748b;
+    --color-processor: #4f46e5;
+    --color-processor-glow: rgba(79, 70, 229, 0.4);
+    --color-output: #10b981;
+    --color-output-glow: rgba(16, 185, 129, 0.3);
+  }
+
+  .title-area {
+    text-align: center;
+    margin-bottom: 2rem;
+    padding: 1rem;
+    background: linear-gradient(135deg, rgba(79, 70, 229, 0.05) 0%, rgba(16, 185, 129, 0.05) 100%);
+    border-radius: 16px;
+    border: 1px dashed var(--border);
+  }
+
+  /* Main container representing the Processing Screen */
+  .isometric-canvas-wrapper {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 350px;
+    background: #0f172a;
+    border-radius: 20px;
+    position: relative;
+    overflow: hidden;
+    margin-bottom: 2rem;
+    border: 1px solid #334155;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+  }
+
+  /* Isometric Grid background */
+  .iso-grid {
+    position: absolute;
+    width: 200%;
+    height: 200%;
+    background-image: 
+      linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px);
+    background-size: 40px 40px;
+    transform: rotateX(60deg) rotateZ(-45deg) translateZ(-50px);
+    opacity: 0.8;
+  }
+
+  /* 3D Scene container */
+  .iso-scene {
+    position: relative;
+    width: 600px;
+    height: 300px;
+    transform-style: preserve-3d;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 50px;
+  }
+
+  /* Standard 3D Object helper */
+  .iso-object {
+    position: relative;
+    transform-style: preserve-3d;
+    transform: rotateX(60deg) rotateZ(-45deg);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  /* 1. DOCUMENT PILE (Input) */
+  .document-pile {
+    width: 80px;
+    height: 100px;
+  }
+
+  .pile-shadow {
+    position: absolute;
+    width: 80px;
+    height: 100px;
+    background: rgba(0, 0, 0, 0.4);
+    filter: blur(8px);
+    transform: translate3d(10px, 10px, -2px);
+  }
+
+  .pile-sheet {
+    position: absolute;
+    width: 80px;
+    height: 100px;
+    background: var(--color-paper);
+    border: 2px solid var(--color-paper-border);
+    border-radius: 4px;
+    display: flex;
+    flex-direction: column;
+    padding: 8px;
+    gap: 4px;
+  }
+
+  .pile-sheet::after {
+    content: '';
+    width: 0; height: 0;
+    border-style: solid;
+    border-width: 0 16px 16px 0;
+    border-color: transparent #e2e8f0 transparent transparent;
+    position: absolute;
+    top: -2px; right: -2px;
+  }
+
+  /* Draw lines representing text inside page */
+  .sheet-line {
+    height: 4px;
+    background: #cbd5e1;
+    border-radius: 2px;
+  }
+  .sheet-line.short { width: 50%; }
+  .sheet-line.medium { width: 75%; }
+
+  .pile-sheet:nth-child(1) { transform: translate3d(0, 0, 15px); }
+  .pile-sheet:nth-child(2) { transform: translate3d(2px, -2px, 10px); }
+  .pile-sheet:nth-child(3) { transform: translate3d(4px, -4px, 5px); }
+  .pile-sheet:nth-child(4) { transform: translate3d(6px, -6px, 0px); }
+
+  /* 2. THE PROCESSOR (Center) */
+  .processor-block {
+    width: 120px;
+    height: 120px;
+  }
+
+  .proc-shadow {
+    position: absolute;
+    width: 120px;
+    height: 120px;
+    background: rgba(0, 0, 0, 0.5);
+    filter: blur(12px);
+    transform: translate3d(15px, 15px, -5px);
+  }
+
+  .proc-base {
+    position: absolute;
+    width: 120px;
+    height: 120px;
+    background: #1e293b;
+    border: 3px solid #475569;
+    border-radius: 12px;
+    transform: translate3d(0, 0, 0);
+  }
+
+  .proc-core {
+    position: absolute;
+    width: 70px;
+    height: 70px;
+    background: var(--color-processor);
+    border: 2px solid #818cf8;
+    border-radius: 8px;
+    transform: translate3d(22px, 22px, 10px);
+    box-shadow: 0 0 25px var(--color-processor-glow);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-weight: bold;
+    font-size: 10px;
+    font-family: monospace;
+    letter-spacing: 1px;
+  }
+
+  /* Scan laser line */
+  .proc-laser {
+    position: absolute;
+    width: 90px;
+    height: 4px;
+    background: #a5b4fc;
+    box-shadow: 0 0 12px #6366f1, 0 0 25px #4f46e5;
+    left: 15px;
+    animation: laserScan 2s ease-in-out infinite alternate;
+  }
+
+  @keyframes laserScan {
+    0% { transform: translate3d(0, 15px, 12px); }
+    100% { transform: translate3d(0, 95px, 12px); }
+  }
+
+  /* 3. OUTPUT FOLDER (Right) */
+  .output-box {
+    width: 90px;
+    height: 90px;
+  }
+
+  .out-shadow {
+    position: absolute;
+    width: 90px;
+    height: 90px;
+    background: rgba(0, 0, 0, 0.4);
+    filter: blur(8px);
+    transform: translate3d(10px, 10px, -2px);
+  }
+
+  .out-folder-back {
+    position: absolute;
+    width: 90px;
+    height: 70px;
+    background: #065f46;
+    border: 2px solid var(--color-output);
+    border-radius: 6px;
+    transform: translate3d(0, 0, 0);
+  }
+
+  .out-folder-front {
+    position: absolute;
+    width: 90px;
+    height: 55px;
+    background: #047857;
+    border: 2px solid var(--color-output);
+    border-radius: 6px;
+    transform: translate3d(0, 15px, 15px) rotateX(-15deg);
+    box-shadow: 0 -5px 15px rgba(0,0,0,0.3);
+  }
+
+  /* 4. ANIMATED FLYING PAGE */
+  .flying-sheet {
+    position: absolute;
+    width: 60px;
+    height: 80px;
+    background: rgba(255, 255, 255, 0.95);
+    border: 1.5px solid var(--color-processor);
+    border-radius: 4px;
+    padding: 6px;
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    animation: processFlow 4s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+    z-index: 10;
+  }
+
+  @keyframes processFlow {
+    /* 1. Lift from Document Stack (Left) */
+    0% {
+      transform: rotateX(60deg) rotateZ(-45deg) translate3d(-150px, 10px, 30px);
+      opacity: 0;
+      border-color: var(--color-paper-border);
+      box-shadow: 2px 2px 5px rgba(0,0,0,0.15);
+    }
+    10% {
+      opacity: 1;
+    }
+    /* 2. Enter Processor (Center) */
+    40% {
+      transform: rotateX(60deg) rotateZ(-45deg) translate3d(5px, 20px, 50px) scale(0.9);
+      opacity: 1;
+      background: rgba(255, 255, 255, 0.9);
+      border-color: var(--color-processor);
+      box-shadow: 0 0 15px var(--color-processor-glow);
+    }
+    /* 3. Processing / Dissolving in core */
+    45%, 55% {
+      transform: rotateX(60deg) rotateZ(-45deg) translate3d(5px, 20px, 15px) scale(0.8);
+      opacity: 0.7;
+      background: rgba(129, 140, 248, 0.8);
+      border-color: #ffffff;
+      box-shadow: 0 0 25px #818cf8;
+    }
+    /* 4. Exit Processor as Structured XML File */
+    60% {
+      opacity: 1;
+      background: #ecfdf5;
+      border-color: var(--color-output);
+      box-shadow: 0 0 15px var(--color-output-glow);
+    }
+    /* 5. Enter Output Folder (Right) */
+    90% {
+      opacity: 1;
+      transform: rotateX(60deg) rotateZ(-45deg) translate3d(145px, 15px, 20px) scale(0.95);
+    }
+    100% {
+      transform: rotateX(60deg) rotateZ(-45deg) translate3d(145px, 15px, 5px) scale(0.9);
+      opacity: 0;
+      border-color: var(--color-output);
+      box-shadow: none;
+    }
+  }
+
+  /* Dynamic glowing word stream option */
+  .flying-word-stream {
+    position: absolute;
+    font-family: monospace;
+    font-size: 10px;
+    font-weight: bold;
+    color: #00f0ff;
+    text-shadow: 0 0 8px #00f0ff;
+    white-space: nowrap;
+    animation: wordFlow 3s linear infinite;
+    opacity: 0;
+    pointer-events: none;
+    z-index: 9;
+  }
+
+  @keyframes wordFlow {
+    0% { transform: rotateX(60deg) rotateZ(-45deg) translate3d(-120px, -20px, 30px); opacity: 0; }
+    20% { opacity: 1; }
+    80% { opacity: 1; }
+    100% { transform: rotateX(60deg) rotateZ(-45deg) translate3d(120px, 15px, 15px); opacity: 0; }
+  }
+
+  .stream-1 { animation-delay: 0s; top: 25%; }
+  .stream-2 { animation-delay: 1s; top: 45%; color: #34c759; text-shadow: 0 0 8px #34c759; }
+  .stream-3 { animation-delay: 2s; top: 35%; color: #ff9f0a; text-shadow: 0 0 8px #ff9f0a; }
+
+  /* Option cards style overrides */
+  .options {
+    margin-top: 1rem;
+  }
+</style>
+
+<div class="title-area">
+  <h2>Design da Animação de Fluxo Isométrico</h2>
+  <p class="subtitle">Abaixo está uma demonstração interativa dos elementos isométricos em movimento. Selecione o tipo de fluxo de animação que você prefere.</p>
+</div>
+
+<div class="isometric-canvas-wrapper">
+  <div class="iso-grid"></div>
+  
+  <div class="iso-scene">
+    <!-- Flying page animation -->
+    <div class="flying-sheet" id="anim-sheet">
+      <div class="sheet-line medium"></div>
+      <div class="sheet-line"></div>
+      <div class="sheet-line short"></div>
+      <div class="sheet-line medium" style="background: #a7f3d0"></div>
+    </div>
+
+    <!-- Word streams -->
+    <div class="flying-word-stream stream-1">PETIÇÃO INICIAL_</div>
+    <div class="flying-word-stream stream-2">&lt;xml_dados&gt;</div>
+    <div class="flying-word-stream stream-3">SENTENÇA.pdf</div>
+
+    <!-- 1. Document Pile -->
+    <div class="iso-object document-pile">
+      <div class="pile-shadow"></div>
+      <div class="pile-sheet"><div class="sheet-line medium"></div><div class="sheet-line"></div><div class="sheet-line short"></div></div>
+      <div class="pile-sheet"><div class="sheet-line"></div><div class="sheet-line medium"></div><div class="sheet-line short"></div></div>
+      <div class="pile-sheet"><div class="sheet-line medium"></div><div class="sheet-line short"></div></div>
+      <div class="pile-sheet"><div class="sheet-line"></div><div class="sheet-line short"></div></div>
+    </div>
+
+    <!-- 2. Processor -->
+    <div class="iso-object processor-block">
+      <div class="proc-shadow"></div>
+      <div class="proc-base"></div>
+      <div class="proc-core">OCR</div>
+      <div class="proc-laser"></div>
+    </div>
+
+    <!-- 3. Output Folder -->
+    <div class="iso-object output-box">
+      <div class="out-shadow"></div>
+      <div class="out-folder-back"></div>
+      <!-- Inside folder sheet mockup -->
+      <div class="pile-sheet" style="transform: translate3d(5px, 5px, 5px) scale(0.85); background: #ecfdf5; border-color: var(--color-output)">
+        <div class="sheet-line medium" style="background:#a7f3d0"></div>
+        <div class="sheet-line short" style="background:#a7f3d0"></div>
+      </div>
+      <div class="out-folder-front"></div>
+    </div>
+  </div>
+</div>
+
+<div class="options">
+  <!-- Option A: Document Flow -->
+  <div class="option" data-choice="flow-document" onclick="toggleSelect(this)">
+    <div class="letter">A</div>
+    <div class="content">
+      <h3>Fluxo de Documentos (Páginas Físicas ➔ Arquivo XML)</h3>
+      <p>Páginas de papel sobem da pilha na esquerda, voam até o processador central onde brilham e mudam de cor, e então descem para a pasta de destino como arquivos estruturados.</p>
+    </div>
+  </div>
+
+  <!-- Option B: Word Particles Stream -->
+  <div class="option" data-choice="flow-words" onclick="toggleSelect(this)">
+    <div class="letter">B</div>
+    <div class="content">
+      <h3>Fluxo de Fluxos de Texto (Palavras e Códigos Digitais)</h3>
+      <p>Em vez de páginas de papel inteiras, vemos linhas compostas por palavras reais (ex: "PETIÇÃO INICIAL", "SENTENÇA", "&lt;xml_dados&gt;") fluindo em alta velocidade do arquivo para a pasta.</p>
+    </div>
+  </div>
+
+  <!-- Option C: Hybrid Flow -->
+  <div class="option" data-choice="flow-hybrid" onclick="toggleSelect(this)">
+    <div class="letter">C</div>
+    <div class="content">
+      <h3>Fluxo Híbrido (Páginas com Rastro de Texto)</h3>
+      <p>As páginas físicas se movem até o processador, mas ao entrar nele, elas "desintegram" em um rastro de linhas de código ou palavras que entram diretamente no arquivo de saída.</p>
+    </div>
+  </div>
+</div>
+
+<script>
+  // Robustly handle clicks by listening directly to document clicks
+  document.addEventListener('click', function(e) {
+    const target = e.target.closest('[data-choice]');
+    if (!target) return;
+    
+    const choice = target.getAttribute('data-choice');
+    updateVisualFlow(choice);
+  });
+
+  function updateVisualFlow(choice) {
+    const flyingSheet = document.getElementById('anim-sheet');
+    const wordStreams = document.querySelectorAll('.flying-word-stream');
+    
+    if (choice === 'flow-document') {
+      // Show document, hide word stream
+      if (flyingSheet) {
+        flyingSheet.style.display = 'block';
+        flyingSheet.style.animationPlayState = 'running';
+      }
+      wordStreams.forEach(ws => {
+        ws.style.opacity = '0';
+        ws.style.animationPlayState = 'paused';
+      });
+    } else if (choice === 'flow-words') {
+      // Hide document, show word stream
+      if (flyingSheet) {
+        flyingSheet.style.display = 'none';
+        flyingSheet.style.animationPlayState = 'paused';
+      }
+      wordStreams.forEach(ws => {
+        ws.style.opacity = '1';
+        ws.style.animationPlayState = 'running';
+      });
+    } else if (choice === 'flow-hybrid') {
+      // Show both
+      if (flyingSheet) {
+        flyingSheet.style.display = 'block';
+        flyingSheet.style.animationPlayState = 'running';
+      }
+      wordStreams.forEach(ws => {
+        ws.style.opacity = '0.7';
+        ws.style.animationPlayState = 'running';
+      });
+    }
+  }
+
+  // Set initial state
+  updateVisualFlow('flow-document');
+</script>

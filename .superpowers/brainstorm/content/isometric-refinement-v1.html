@@ -1,0 +1,544 @@
+<style>
+  :root {
+    --color-paper: #ffffff;
+    --color-paper-border: #64748b;
+    --color-processor: #4f46e5;
+    --color-processor-glow: rgba(79, 70, 229, 0.4);
+    --color-output: #10b981;
+    --color-output-glow: rgba(16, 185, 129, 0.3);
+    --metal-dark: #334155;
+    --metal-light: #94a3b8;
+    --gold: #f59e0b;
+  }
+
+  .title-area {
+    text-align: center;
+    margin-bottom: 2rem;
+    padding: 1rem;
+    background: linear-gradient(135deg, rgba(79, 70, 229, 0.05) 0%, rgba(16, 185, 129, 0.05) 100%);
+    border-radius: 16px;
+    border: 1px dashed var(--border);
+  }
+
+  /* Control Panel inside Mockup for User to Interact */
+  .demo-controls {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 1.5rem;
+    margin-bottom: 1.5rem;
+    background: var(--bg-secondary);
+    padding: 1rem;
+    border-radius: 12px;
+    border: 1px solid var(--border);
+    max-width: 700px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  .control-item {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .slider-label {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--text-primary);
+  }
+
+  /* 3D Canvas Viewport */
+  .isometric-viewport {
+    height: 420px;
+    background: #090d16;
+    border-radius: 20px;
+    position: relative;
+    overflow: hidden;
+    margin-bottom: 2rem;
+    border: 1px solid #1e293b;
+    perspective: 1200px;
+  }
+
+  .iso-grid {
+    position: absolute;
+    width: 200%;
+    height: 200%;
+    background-image: 
+      linear-gradient(rgba(255,255,255,0.015) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255,255,255,0.015) 1px, transparent 1px);
+    background-size: 40px 40px;
+    transform: rotateX(60deg) rotateZ(-45deg) translateZ(-50px);
+    opacity: 0.5;
+  }
+
+  .scene-container {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    transform-style: preserve-3d;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+
+  /* Base 3D Object */
+  .object-3d {
+    position: absolute;
+    transform-style: preserve-3d;
+    transform: rotateX(60deg) rotateZ(-45deg);
+  }
+
+  /* 1. DOCUMENT PILE (Left) */
+  .pile-container {
+    transform: rotateX(60deg) rotateZ(-45deg) translate3d(-180px, 0, 0);
+  }
+
+  .pile-box {
+    width: 80px;
+    height: 100px;
+    background: #1e293b;
+    border: 2px solid #475569;
+    border-radius: 6px;
+    position: relative;
+    transform-style: preserve-3d;
+  }
+
+  /* Individual documents inside the pile */
+  .doc-sheet {
+    position: absolute;
+    width: 76px;
+    height: 96px;
+    background: #ffffff;
+    border: 1.5px solid #475569;
+    border-radius: 4px;
+    padding: 6px;
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+  }
+
+  .doc-sheet::after {
+    content: '';
+    position: absolute;
+    top: 0; right: 0;
+    width: 0; height: 0;
+    border-style: solid;
+    border-width: 0 12px 12px 0;
+    border-color: transparent #cbd5e1 transparent transparent;
+  }
+
+  .doc-line {
+    height: 3px;
+    background: #cbd5e1;
+    border-radius: 1px;
+  }
+  .doc-line.sh { width: 40%; }
+  .doc-line.md { width: 70%; }
+
+  .doc-sheet:nth-child(1) { transform: translate3d(2px, 2px, 16px); }
+  .doc-sheet:nth-child(2) { transform: translate3d(4px, 0px, 12px); }
+  .doc-sheet:nth-child(3) { transform: translate3d(0px, 4px, 8px); }
+  .doc-sheet:nth-child(4) { transform: translate3d(2px, 2px, 4px); }
+
+  /* 2. THE PROCESSOR (Center) - Renders multiple cores based on workers */
+  .processor-container {
+    transform: rotateX(60deg) rotateZ(-45deg) translate3d(0, 0, 0);
+    width: 140px;
+    height: 140px;
+  }
+
+  .proc-box {
+    width: 140px;
+    height: 140px;
+    background: #0f172a;
+    border: 3px solid #334155;
+    border-radius: 16px;
+    box-shadow: inset 0 0 20px rgba(0,0,0,0.6);
+    position: relative;
+    transform-style: preserve-3d;
+  }
+
+  /* Glowing circuit lanes linking pile to processor and output */
+  .circuit-lane {
+    position: absolute;
+    height: 2px;
+    background: rgba(99, 102, 241, 0.2);
+    transform-style: preserve-3d;
+    transform: translateZ(2px);
+  }
+
+  /* Individual processing cores inside the CPU block */
+  .mini-core {
+    position: absolute;
+    width: 28px;
+    height: 28px;
+    background: #1e293b;
+    border: 1.5px solid #475569;
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 8px;
+    font-weight: bold;
+    color: var(--text-secondary);
+    font-family: monospace;
+    transition: all 0.3s;
+  }
+
+  .mini-core.active {
+    background: #4f46e5;
+    border-color: #818cf8;
+    color: white;
+    box-shadow: 0 0 12px rgba(79, 70, 229, 0.6);
+  }
+
+  .core-laser {
+    position: absolute;
+    width: 24px;
+    height: 2px;
+    background: #818cf8;
+    box-shadow: 0 0 8px #6366f1;
+    opacity: 0;
+  }
+
+  .mini-core.active .core-laser {
+    opacity: 1;
+    animation: coreScan 1s infinite alternate;
+  }
+
+  @keyframes coreScan {
+    0% { top: 2px; }
+    100% { top: 24px; }
+  }
+
+  /* 3. DETAILED FILE CABINET / DRAWER (Right) */
+  .cabinet-container {
+    transform: rotateX(60deg) rotateZ(-45deg) translate3d(180px, 0, 0);
+  }
+
+  .cabinet {
+    width: 100px;
+    height: 100px;
+    background: #27272a;
+    border: 3px solid #52525b;
+    border-radius: 8px;
+    position: relative;
+    transform-style: preserve-3d;
+    box-shadow: 10px 15px 30px rgba(0,0,0,0.5);
+  }
+
+  /* A sliding drawer face that can open/close */
+  .cabinet-drawer {
+    position: absolute;
+    width: 90px;
+    height: 42px;
+    background: #3f3f46;
+    border: 2px solid #71717a;
+    border-radius: 4px;
+    left: 3px;
+    transform-style: preserve-3d;
+    transition: transform 0.5s ease;
+  }
+
+  .drawer-top { top: 4px; }
+  .drawer-bottom { top: 50px; }
+
+  /* Metal handle */
+  .cabinet-handle {
+    position: absolute;
+    width: 30px;
+    height: 6px;
+    background: #a1a1aa;
+    border-radius: 2px;
+    top: 18px;
+    left: 28px;
+    border-bottom: 2px solid #52525b;
+  }
+
+  /* Label card slot */
+  .cabinet-label {
+    position: absolute;
+    width: 20px;
+    height: 10px;
+    background: #f4f4f5;
+    border: 1px solid #71717a;
+    top: 4px;
+    left: 33px;
+    font-size: 6px;
+    font-family: monospace;
+    text-align: center;
+    color: #27272a;
+  }
+
+  /* File folders inside the drawer (visible when open) */
+  .drawer-contents {
+    position: absolute;
+    width: 82px;
+    height: 80px;
+    background: #18181b;
+    top: 6px;
+    left: 4px;
+    transform: translateZ(-20px);
+    display: flex;
+    gap: 2px;
+    padding: 4px;
+    overflow: hidden;
+  }
+
+  .mini-folder {
+    width: 12px;
+    height: 70px;
+    background: #eab308;
+    border: 1px solid #ca8a04;
+    border-radius: 2px;
+    flex-shrink: 0;
+  }
+
+  .mini-folder.xml-done {
+    background: #10b981;
+    border-color: #059669;
+  }
+
+  /* Active Open Drawer Style */
+  .cabinet.drawer-open .drawer-top {
+    transform: translate3d(0, 30px, 15px);
+  }
+
+  /* 4. MULTIPLE ANIMATION LANES */
+  .lane-path {
+    position: absolute;
+    transform-style: preserve-3d;
+    transform: rotateX(60deg) rotateZ(-45deg);
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  .lane-path.active {
+    opacity: 1;
+  }
+
+  /* Flow animations */
+  .page-particle {
+    position: absolute;
+    width: 24px;
+    height: 32px;
+    background: #ffffff;
+    border: 1px solid #475569;
+    border-radius: 2px;
+    box-shadow: 2px 2px 5px rgba(0,0,0,0.15);
+    z-index: 5;
+    opacity: 0;
+  }
+
+  .text-particle {
+    position: absolute;
+    font-family: monospace;
+    font-size: 8px;
+    font-weight: bold;
+    color: #818cf8;
+    text-shadow: 0 0 6px #4f46e5;
+    white-space: nowrap;
+    opacity: 0;
+    z-index: 6;
+  }
+
+  /* Animation rules dynamically added by JavaScript based on lanes */
+</style>
+
+<div class="title-area">
+  <h2>Refinamento do Fluxo Isométrico: Múltiplas Threads & Detalhe Visual</h2>
+  <p class="subtitle">Ajuste o número de Workers no painel abaixo e assista como o processador isométrico abre canais em paralelo e direciona as palavras para a nova gaveta de arquivos de metal.</p>
+</div>
+
+<div class="demo-controls">
+  <div class="control-item">
+    <span class="slider-label">Simular Workers Ativos:</span>
+    <div class="counter-control" style="background:var(--bg-secondary)">
+      <button class="counter-btn" onclick="changeWorkers(-1)">-</button>
+      <span class="counter-val" id="worker-count">4</span>
+      <button class="counter-btn" onclick="changeWorkers(1)">+</button>
+    </div>
+  </div>
+
+  <div class="control-item">
+    <span class="slider-label">Status da Gaveta:</span>
+    <button class="mock-button" id="drawer-toggle" onclick="toggleDrawer()" style="font-size:0.75rem; padding: 0.4rem 0.8rem">Abrir/Fechar Gaveta</button>
+  </div>
+</div>
+
+<div class="isometric-viewport">
+  <div class="iso-grid"></div>
+  
+  <div class="scene-container">
+    
+    <!-- Circut Lines and Animation Paths -->
+    <div id="dynamic-lanes-container" style="position:absolute; width:100%; height:100%; transform-style:preserve-3d;">
+      <!-- JavaScript will inject lanes and flying particles here -->
+    </div>
+
+    <!-- 1. PILHA DE DOCUMENTOS (Left) -->
+    <div class="object-3d pile-container">
+      <div class="pile-box">
+        <div class="doc-sheet"><div class="doc-line md"></div><div class="doc-line"></div><div class="doc-line sh"></div></div>
+        <div class="doc-sheet"><div class="doc-line md"></div><div class="doc-line sh"></div></div>
+        <div class="doc-sheet"><div class="doc-line"></div><div class="doc-line sh"></div></div>
+        <div class="doc-sheet"><div class="doc-line md"></div></div>
+      </div>
+    </div>
+
+    <!-- 2. PROCESSADOR (Center) -->
+    <div class="object-3d processor-container">
+      <div class="proc-box" id="cpu-block">
+        <!-- Core 1 -->
+        <div class="mini-core active" style="top:15px; left:15px;" id="core-0">W1<div class="core-laser"></div></div>
+        <!-- Core 2 -->
+        <div class="mini-core active" style="top:15px; left:95px;" id="core-1">W2<div class="core-laser"></div></div>
+        <!-- Core 3 -->
+        <div class="mini-core active" style="top:95px; left:15px;" id="core-2">W3<div class="core-laser"></div></div>
+        <!-- Core 4 -->
+        <div class="mini-core active" style="top:95px; left:95px;" id="core-3">W4<div class="core-laser"></div></div>
+        <!-- Core 5 -->
+        <div class="mini-core" style="top:55px; left:55px;" id="core-4">W5<div class="core-laser"></div></div>
+      </div>
+    </div>
+
+    <!-- 3. PASTA DE ARQUIVOS / CLASSIFICADOR (Right) -->
+    <div class="object-3d cabinet-container">
+      <div class="cabinet drawer-open" id="file-cabinet">
+        
+        <!-- Top Drawer (active folder results) -->
+        <div class="cabinet-drawer drawer-top">
+          <!-- Folder contents inside -->
+          <div class="drawer-contents">
+            <div class="mini-folder"></div>
+            <div class="mini-folder xml-done"></div>
+            <div class="mini-folder"></div>
+            <div class="mini-folder xml-done"></div>
+            <div class="mini-folder xml-done"></div>
+          </div>
+          <div class="cabinet-label">e-Proc</div>
+          <div class="cabinet-handle"></div>
+        </div>
+
+        <!-- Bottom Drawer (archives) -->
+        <div class="cabinet-drawer drawer-bottom">
+          <div class="cabinet-label">HIST</div>
+          <div class="cabinet-handle"></div>
+        </div>
+
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<div class="options">
+  <div class="option" data-choice="approve-refined-isometric" onclick="toggleSelect(this)">
+    <div class="letter">✓</div>
+    <div class="content">
+      <h3>Excelente! Esta versão refinada resolve os problemas</h3>
+      <p>O arquivo de metal com gaveta móvel ficou muito melhor representado. O fluxo paralelo com múltiplos caminhos baseado em Workers ativos é incrível!</p>
+    </div>
+  </div>
+</div>
+
+<script>
+  let activeWorkers = 4;
+  let drawerOpen = true;
+
+  // Initialize and run animations
+  function initLanes() {
+    const container = document.getElementById('dynamic-lanes-container');
+    if (!container) return;
+    
+    container.innerHTML = '';
+    
+    // Core centers inside CPU block relative to the viewport center
+    // Viewport coordinates offset mappings
+    const corePositions = [
+      { x: -25, y: -25 }, // W1
+      { x: 25, y: -25 },  // W2
+      { x: -25, y: 25 },  // W3
+      { x: 25, y: 25 },   // W4
+      { x: 0, y: 0 }      // W5
+    ];
+
+    // Build paths for each active worker
+    for (let i = 0; i < 5; i++) {
+      const core = document.getElementById('core-' + i);
+      if (i < activeWorkers) {
+        core.classList.add('active');
+        
+        // Create SVG/HTML lines connecting Input -> Core -> Output
+        // For mockup simplicity we trigger CSS animations directly with offsets
+        createLaneParticles(container, i, corePositions[i]);
+      } else {
+        core.classList.remove('active');
+      }
+    }
+  }
+
+  function createLaneParticles(container, index, pos) {
+    // Left stack is at -180px, center processor at 0px, right drawer at 180px
+    // Create page particle
+    const page = document.createElement('div');
+    page.className = 'page-particle';
+    page.style.animation = `flowPageLane-${index} 4s infinite cubic-bezier(0.4, 0, 0.2, 1)`;
+    page.style.animationDelay = `${index * 0.8}s`;
+    
+    // Create text particle (word stream)
+    const text = document.createElement('div');
+    text.className = 'text-particle';
+    const words = ["PETIÇÃO INITIAL", "SENTENÇA.pdf", "<xml_dados>", "CONTESTAÇÃO", "PROCESSO.zip"];
+    text.textContent = words[index % words.length] + '_';
+    text.style.animation = `flowTextLane-${index} 4s infinite linear`;
+    text.style.animationDelay = `${index * 0.8 + 1.8}s`;
+
+    // Inject dynamic CSS animations for the specific lane
+    const style = document.createElement('style');
+    style.innerHTML = `
+      @keyframes flowPageLane-${index} {
+        0% { transform: rotateX(60deg) rotateZ(-45deg) translate3d(-180px, 0, 10px) scale(0.8); opacity: 0; }
+        10% { opacity: 1; }
+        40% { transform: rotateX(60deg) rotateZ(-45deg) translate3d(${pos.x}px, ${pos.y}px, 20px) scale(0.6); opacity: 1; background: #ffffff; border-color: #4f46e5; }
+        45%, 55% { transform: rotateX(60deg) rotateZ(-45deg) translate3d(${pos.x}px, ${pos.y}px, 12px) scale(0.5); opacity: 0.8; background: #c7d2fe; border-color: #818cf8; }
+        60% { opacity: 0; transform: rotateX(60deg) rotateZ(-45deg) translate3d(${pos.x}px, ${pos.y}px, 10px) scale(0.4); }
+        100% { opacity: 0; }
+      }
+
+      @keyframes flowTextLane-${index} {
+        0% { transform: rotateX(60deg) rotateZ(-45deg) translate3d(${pos.x}px, ${pos.y}px, 15px); opacity: 0; }
+        10% { opacity: 1; color: #818cf8; }
+        70% { opacity: 1; color: #10b981; }
+        100% { transform: rotateX(60deg) rotateZ(-45deg) translate3d(180px, 0, 30px); opacity: 0; }
+      }
+    `;
+
+    container.appendChild(style);
+    container.appendChild(page);
+    container.appendChild(text);
+  }
+
+  function changeWorkers(amount) {
+    const newVal = activeWorkers + amount;
+    if (newVal >= 1 && newVal <= 5) {
+      activeWorkers = newVal;
+      document.getElementById('worker-count').textContent = activeWorkers;
+      initLanes();
+    }
+  }
+
+  function toggleDrawer() {
+    drawerOpen = !drawerOpen;
+    const cabinet = document.getElementById('file-cabinet');
+    if (drawerOpen) {
+      cabinet.classList.add('drawer-open');
+    } else {
+      cabinet.classList.remove('drawer-open');
+    }
+  }
+
+  // Initial setup
+  setTimeout(initLanes, 100);
+</script>
