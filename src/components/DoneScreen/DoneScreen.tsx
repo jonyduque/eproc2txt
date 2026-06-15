@@ -1,4 +1,5 @@
 import { useState } from "react";
+import IsometricViewport3D from "../Layout/IsometricViewport3D";
 import CRTTerminal3D from "./CRTTerminal3D";
 import "./DoneScreen.css";
 
@@ -54,6 +55,14 @@ export default function DoneScreen({
 
 	return (
 		<div className="done-view-container animate-fade-up">
+			<IsometricViewport3D
+				status="completed"
+				maxWorkers={maxWorkers}
+				workerStatuses={[]}
+				docStatuses={{}}
+				globalLoading={false}
+			/>
+
 			<div className="done-header-banner">
 				<div className="done-success-icon-wrapper animate-glow-pulse">
 					<span className="material-icons done-success-material">check_circle</span>

@@ -90,6 +90,13 @@
 @media (min-width: 1024px) {
 	.processing-layout-grid {
 		grid-template-columns: 380px 1fr;
+		align-items: stretch;
+	}
+	.processing-layout-grid .isometric-viewport {
+		height: 100%;
+		min-height: 400px;
+		max-height: var(--max-h-panel);
+		margin-bottom: 0;
 	}
 }
 

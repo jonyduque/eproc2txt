@@ -56,13 +56,12 @@
 
 .isometric-viewport {
 	height: var(--viewport-height);
-	background: var(--viewport-bg);
-	border-radius: var(--border-radius-lg);
+	border-radius: var(--radius);
 	position: relative;
 	overflow: hidden;
-	border: var(--viewport-border);
 	perspective: var(--viewport-perspective);
 	margin-bottom: var(--viewport-margin-bottom);
+	box-shadow: var(--shadow-md);
 }
 
 .iso-grid {

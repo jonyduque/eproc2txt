@@ -1,5 +1,6 @@
 import { memo, useEffect, useState } from "react";
 import FileIcon from "../FileIcon";
+import IsometricViewport3D from "../Layout/IsometricViewport3D";
 import "./ProcessingScreen.css";
 import { formatDuration } from "../../utils/format";
 
@@ -238,6 +239,14 @@ export default function ProcessingScreen({
 						))}
 					</ul>
 				</div>
+
+				<IsometricViewport3D
+					status="processing"
+					maxWorkers={maxWorkers}
+					workerStatuses={workerStatuses}
+					docStatuses={docStatuses}
+					globalLoading={false}
+				/>
 			</div>
 		</div>
 	);

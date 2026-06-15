@@ -129,7 +129,7 @@ export default function IsometricViewport3D({
 	];
 
 	return (
-		<div className={`isometric-viewport ${getStageClass()}`}>
+		<div className={`panel isometric-viewport ${getStageClass()}`}>
 			<div className="iso-grid" />
 			{styleMarkup && <style>{styleMarkup}</style>}
 

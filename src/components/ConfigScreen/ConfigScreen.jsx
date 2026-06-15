@@ -1,3 +1,4 @@
+import IsometricViewport3D from "../Layout/IsometricViewport3D";
 import ConfigPanel from "./ConfigPanel/ConfigPanel";
 import FileSummaryBar from "./FileSummaryBar/FileSummaryBar";
 import Tree from "./Tree/Tree";
@@ -69,6 +70,16 @@ export default function ConfigScreen({
 					setSelectedPaths={setSelectedPaths}
 					isProcessing={false}
 					isCompleted={false}
+				/>
+
+				<IsometricViewport3D
+					status="configuring"
+					maxWorkers={workers}
+					workerStatuses={[]}
+					docStatuses={Object.fromEntries(
+						Array.from(selectedPaths).map((p) => [p, { status: "queued", fileName: p }]),
+					)}
+					globalLoading={false}
 				/>
 
 				<ConfigPanel

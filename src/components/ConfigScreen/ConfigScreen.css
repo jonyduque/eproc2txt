@@ -30,7 +30,7 @@
 		grid-column: 1;
 		grid-row: span 2;
 	}
-	.binder-3d-scene {
+	.isometric-viewport {
 		grid-column: 2;
 	}
 	.config-panel {
@@ -46,7 +46,7 @@
 		grid-column: 1;
 		grid-row: span 1;
 	}
-	.binder-3d-scene {
+	.isometric-viewport {
 		grid-column: 2;
 	}
 	.config-panel {
