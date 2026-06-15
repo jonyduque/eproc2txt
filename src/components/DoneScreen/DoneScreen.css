@@ -1,3 +1,10 @@
+:root {
+	--txt-floating-bg: --transparent(var(--color-primary), 0.05);
+	--txt-floating-border: var(--color-primary);
+	--txt-floating-line-title: var(--color-primary);
+	--txt-floating-line-sub: --transparent(var(--color-primary), 0.4);
+}
+
 .done-view-container {
 	display: flex;
 	flex-direction: column;
@@ -8,7 +15,7 @@
 	text-align: center;
 }
 
-.done-floating-xml-container {
+.done-floating-txt-container {
 	perspective: 800px;
 	width: 120px;
 	height: 120px;
@@ -19,25 +26,25 @@
 	position: relative;
 }
 
-.xml-floating {
+.txt-floating {
 	width: 70px;
 	height: 90px;
-	background: #ecfdf5;
-	border: 2.5px solid var(--color-success);
+	background: var(--txt-floating-bg);
+	border: 2.5px solid var(--txt-floating-border);
 	border-radius: var(--border-radius-md);
 	display: flex;
 	flex-direction: column;
 	padding: 10px;
 	gap: 4px;
 	transform: rotateX(25deg) rotateY(-20deg) rotateZ(10deg);
-	animation: xmlFloat 3s ease-in-out infinite alternate;
+	animation: txtFloat 3s ease-in-out infinite alternate;
 	position: relative;
 	box-shadow:
 		6px 10px 25px rgba(0, 0, 0, 0.35),
-		0 0 20px rgba(16, 185, 129, 0.25);
+		0 0 20px --transparent(var(--color-primary), 0.25);
 }
 
-.xml-floating::after {
+.txt-floating::after {
 	content: "";
 	position: absolute;
 	top: -2.5px;
@@ -46,43 +53,43 @@
 	height: 0;
 	border-style: solid;
 	border-width: 0 14px 14px 0;
-	border-color: transparent var(--color-success) transparent transparent;
+	border-color: transparent var(--txt-floating-border) transparent transparent;
 }
 
-.xml-floating .file-line {
+.txt-floating .file-line {
 	height: 4px;
-	background: #a7f3d0;
+	background: var(--txt-floating-line-sub);
 	border-radius: 2px;
 }
 
-.xml-floating .file-line.title {
-	background: var(--color-success);
+.txt-floating .file-line.title {
+	background: var(--txt-floating-line-title);
 	width: 50%;
 	margin-bottom: 2px;
 }
 
-.xml-floating .file-line.sh {
+.txt-floating .file-line.sh {
 	width: 40%;
 }
 
-.xml-floating .file-line.md {
+.txt-floating .file-line.md {
 	width: 75%;
 }
 
-.xml-floating .file-type-badge {
+.txt-floating .file-type-badge {
 	position: absolute;
 	bottom: 8px;
 	right: 8px;
 	font-size: 8px;
 	font-family: var(--font-mono);
 	font-weight: 900;
-	background: var(--color-success);
-	color: white;
+	background: var(--txt-floating-border);
+	color: black;
 	padding: 1px 4px;
 	border-radius: 3px;
 }
 
-@keyframes xmlFloat {
+@keyframes txtFloat {
 	0% {
 		transform: rotateX(25deg) rotateY(-20deg) rotateZ(10deg) translateY(0px);
 	}
@@ -90,7 +97,7 @@
 		transform: rotateX(25deg) rotateY(-20deg) rotateZ(10deg) translateY(-12px);
 		box-shadow:
 			10px 16px 35px rgba(0, 0, 0, 0.45),
-			0 0 30px var(--color-success);
+			0 0 30px var(--color-primary);
 	}
 }
 

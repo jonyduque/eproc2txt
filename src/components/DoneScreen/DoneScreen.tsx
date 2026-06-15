@@ -53,14 +53,14 @@ export default function DoneScreen({
 	return (
 		<div className="done-view-container animate-fade-up">
 			<div className="done-header-banner">
-				<div className="done-floating-xml-container">
-					<div className="xml-floating">
+				<div className="done-floating-txt-container">
+					<div className="txt-floating">
 						<div className="file-line title" />
 						<div className="file-line md" />
 						<div className="file-line sh" />
 						<div className="file-line md" />
 						<div className="file-line" />
-						<div className="file-type-badge">XML</div>
+						<div className="file-type-badge">TXT</div>
 					</div>
 				</div>
 				<p className="done-status-tagline">{"// processamento concluído"}</p>
