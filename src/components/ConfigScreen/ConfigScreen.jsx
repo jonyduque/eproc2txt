@@ -70,7 +70,6 @@ export default function ConfigScreen({
 					isProcessing={false}
 					isCompleted={false}
 				/>
-
 				<ConfigPanel
 					workers={workers}
 					setWorkers={setWorkers}

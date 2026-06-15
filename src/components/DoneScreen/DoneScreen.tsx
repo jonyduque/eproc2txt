@@ -62,12 +62,18 @@ export default function DoneScreen({
 		a.click();
 		document.body.removeChild(a);
 	};
-
 	return (
 		<div className="done-view-container animate-fade-up">
 			<div className="done-header-banner">
-				<div className="done-success-icon-wrapper animate-glow-pulse">
-					<span className="material-icons done-success-material">check_circle</span>
+				<div className="done-floating-txt-container">
+					<div className="txt-floating">
+						<div className="file-line title" />
+						<div className="file-line md" />
+						<div className="file-line sh" />
+						<div className="file-line md" />
+						<div className="file-line" />
+						<div className="file-type-badge">TXT</div>
+					</div>
 				</div>
 				<p className="done-status-tagline">{"// processamento concluído"}</p>
 				<h2 className="done-title">{totalDocsCount} documentos convertidos</h2>
