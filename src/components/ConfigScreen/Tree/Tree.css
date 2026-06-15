@@ -88,7 +88,9 @@ body.light-theme .tree-node-header:hover {
 
 body.light-theme .tree-node-header:has(.tree-checkbox:checked),
 body.light-theme .tree-node-header:has(.tree-checkbox:indeterminate) {
-	background: var(--color-accent-alpha-10);
+	background: oklch(from var(--color-accent) l c h / 0.1);
+	/* biome-ignore lint/suspicious/noDuplicateProperties: relative color fallback */
+	background: --transparent(var(--color-accent), 0.1);
 }
 
 /* Unselected State Dimming */
@@ -170,12 +172,16 @@ body.light-theme .tree-checkbox {
 
 .tree-checkbox:hover:not(:disabled) {
 	border-color: var(--color-accent);
-	box-shadow: 0 0 0 3px var(--color-accent-glow);
+	box-shadow: 0 0 0 3px oklch(from var(--color-accent) l c h / 0.25);
+	/* biome-ignore lint/suspicious/noDuplicateProperties: relative color fallback */
+	box-shadow: 0 0 0 3px --transparent(var(--color-accent), 0.25);
 }
 
 .tree-checkbox:checked {
 	border-color: var(--color-accent);
-	box-shadow: 0 0 8px var(--color-accent-glow);
+	box-shadow: 0 0 8px oklch(from var(--color-accent) l c h / 0.25);
+	/* biome-ignore lint/suspicious/noDuplicateProperties: relative color fallback */
+	box-shadow: 0 0 8px --transparent(var(--color-accent), 0.25);
 }
 
 .tree-checkbox:checked::after {
@@ -193,7 +199,9 @@ body.light-theme .tree-checkbox {
 .tree-checkbox:indeterminate {
 	background-color: var(--color-accent);
 	border-color: var(--color-accent);
-	box-shadow: 0 0 8px var(--color-accent-glow);
+	box-shadow: 0 0 8px oklch(from var(--color-accent) l c h / 0.25);
+	/* biome-ignore lint/suspicious/noDuplicateProperties: relative color fallback */
+	box-shadow: 0 0 8px --transparent(var(--color-accent), 0.25);
 }
 
 .tree-checkbox:indeterminate::after {
