@@ -7,14 +7,17 @@
 	gap: 0.75rem;
 }
 
-/* Fallback layout rules */
 .dashboard-grid {
 	display: grid;
 	grid-template-columns: 1fr;
+	/* biome-ignore lint/suspicious/noDuplicateProperties: fallback override */
+	grid-template-columns: --responsive-lg(1fr, 1fr 1fr);
 	gap: 1rem;
 	flex: 1;
 	min-height: 0;
 	overflow-y: auto;
+	/* biome-ignore lint/suspicious/noShorthandPropertyOverrides: fallback override */
+	overflow: --responsive-lg(auto, hidden);
 }
 
 @media (min-width: 1024px) {
@@ -28,6 +31,8 @@
 	display: grid;
 	gap: var(--gap-6);
 	grid-template-columns: 1fr;
+	/* biome-ignore lint/suspicious/noDuplicateProperties: fallback override */
+	grid-template-columns: --responsive-lg(1fr, 1fr 380px);
 }
 
 @media (min-width: 1024px) {
@@ -42,20 +47,14 @@
 	}
 }
 
-/* CSS Custom Function overrides */
-.dashboard-grid {
-	grid-template-columns: --responsive-lg(1fr, 1fr 1fr);
-	overflow: --responsive-lg(auto, hidden);
-}
-
-.loaded-layout-grid {
-	grid-template-columns: --responsive-lg(1fr, 1fr 380px);
-}
-
 .docs-tree-card {
+	grid-column: auto;
+	/* biome-ignore lint/suspicious/noDuplicateProperties: fallback override */
 	grid-column: --responsive-lg(auto, 1);
 }
 
 .config-panel {
+	grid-column: auto;
+	/* biome-ignore lint/suspicious/noDuplicateProperties: fallback override */
 	grid-column: --responsive-lg(auto, 2);
 }
