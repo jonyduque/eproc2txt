@@ -209,45 +209,47 @@ export default function ProcessingScreen({
 				</div>
 			</div>
 
-			{/* Side-by-side grids */}
+			{/* Shared isometric scene panel with overlays */}
 			<div className="processing-layout-grid">
-				{/* Left panel: docs list */}
-				<div className="panel docs-list-card">
-					<div className="docs-list-header">
-						<span className="docs-list-header-title">documentos</span>
-						<div className="processing-actions-group">
-							<button
-								type="button"
-								className={`btn-pause-process ${isPaused ? "paused" : ""}`}
-								onClick={isPaused ? onResume : onPause}
-							>
-								<span className="material-icons" style={{ fontSize: "14px" }}>
-									{isPaused ? "play_arrow" : "pause"}
-								</span>
-								{isPaused ? "Retomar" : "Pausar"}
-							</button>
-							<button type="button" className="btn-stop-process" onClick={onCancel}>
-								<span className="material-icons" style={{ fontSize: "14px" }}>
-									stop
-								</span>
-								Parar
-							</button>
-						</div>
-					</div>
-					<ul className="docs-list-items">
-						{Object.values(docStatuses).map((d) => (
-							<DocRow key={d.fileName} doc={d} />
-						))}
-					</ul>
-				</div>
-
 				<IsometricViewport3D
 					status="processing"
 					maxWorkers={maxWorkers}
 					workerStatuses={workerStatuses}
 					docStatuses={docStatuses}
 					globalLoading={false}
-				/>
+				>
+					{/* Transparent document list overlay */}
+					<div className="processing-docs-overlay">
+						<div className="docs-list-header-simple">
+							<span className="docs-list-header-title">documentos</span>
+						</div>
+						<ul className="docs-list-items">
+							{Object.values(docStatuses).map((d) => (
+								<DocRow key={d.fileName} doc={d} />
+							))}
+						</ul>
+					</div>
+
+					{/* Upper right control actions overlay */}
+					<div className="processing-actions-overlay">
+						<button
+							type="button"
+							className={`btn-pause-process ${isPaused ? "paused" : ""}`}
+							onClick={isPaused ? onResume : onPause}
+						>
+							<span className="material-icons" style={{ fontSize: "14px" }}>
+								{isPaused ? "play_arrow" : "pause"}
+							</span>
+							{isPaused ? "Retomar" : "Pausar"}
+						</button>
+						<button type="button" className="btn-stop-process" onClick={onCancel}>
+							<span className="material-icons" style={{ fontSize: "14px" }}>
+								stop
+							</span>
+							Parar
+						</button>
+					</div>
+				</IsometricViewport3D>
 			</div>
 		</div>
 	);

@@ -1,5 +1,6 @@
 import { useRef, useState } from "react";
 import { parseZipStructure } from "../../../utils/parser.js";
+import IsometricViewport3D from "../../Layout/IsometricViewport3D";
 
 interface DropzoneProps {
 	onZipParsed: (
@@ -87,6 +88,15 @@ export default function Dropzone({ onZipParsed, onLoadingChange }: DropzoneProps
 
 				{/* Scan line active when loading */}
 				{loading && <div className="scan-line" />}
+
+				<IsometricViewport3D
+					status="idle"
+					maxWorkers={0}
+					workerStatuses={[]}
+					docStatuses={{}}
+					globalLoading={false}
+					isDragHovered={hover}
+				/>
 
 				{/* Upload visual core */}
 				<div className="dropzone-icon-wrapper">

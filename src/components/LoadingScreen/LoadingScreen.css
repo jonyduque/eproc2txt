@@ -248,3 +248,17 @@ body.light-theme .dropzone-card::after {
 	font-size: var(--font-size-xs);
 	color: var(--color-error);
 }
+
+.dropzone-card .isometric-viewport {
+	position: absolute;
+	inset: 0;
+	width: 100%;
+	height: 100%;
+	background: transparent;
+	border: none;
+	backdrop-filter: none;
+	box-shadow: none;
+	margin: 0;
+	pointer-events: none;
+	z-index: 3;
+}

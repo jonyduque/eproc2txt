@@ -14,6 +14,7 @@ interface IsometricViewport3DProps {
 	docStatuses: Record<string, { status: string; fileName: string }>;
 	globalLoading: boolean;
 	isDragHovered?: boolean;
+	children?: React.ReactNode;
 }
 
 export default function IsometricViewport3D({
@@ -23,6 +24,7 @@ export default function IsometricViewport3D({
 	docStatuses,
 	globalLoading: _globalLoading,
 	isDragHovered = false,
+	children,
 }: IsometricViewport3DProps) {
 	const activeWorkers = workerStatuses.filter((w) => w.status === "active").length;
 
@@ -193,6 +195,8 @@ export default function IsometricViewport3D({
 					</div>
 				</div>
 			</div>
+
+			{children}
 		</div>
 	);
 }

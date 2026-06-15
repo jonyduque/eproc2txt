@@ -415,3 +415,7 @@
 	opacity: 1;
 	transform: var(--transform-isometric-base) translate3d(0, -10px, 20px) scale(1.5);
 }
+
+.viewport-processing .scene-container {
+	transform: translate3d(120px, 0, 0);
+}

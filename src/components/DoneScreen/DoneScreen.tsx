@@ -1,6 +1,4 @@
 import { useState } from "react";
-import IsometricViewport3D from "../Layout/IsometricViewport3D";
-import CRTTerminal3D from "./CRTTerminal3D";
 import "./DoneScreen.css";
 
 interface DoneScreenProps {
@@ -52,20 +50,18 @@ export default function DoneScreen({
 		document.body.removeChild(a);
 		URL.revokeObjectURL(url);
 	};
-
 	return (
 		<div className="done-view-container animate-fade-up">
-			<IsometricViewport3D
-				status="completed"
-				maxWorkers={maxWorkers}
-				workerStatuses={[]}
-				docStatuses={{}}
-				globalLoading={false}
-			/>
-
 			<div className="done-header-banner">
-				<div className="done-success-icon-wrapper animate-glow-pulse">
-					<span className="material-icons done-success-material">check_circle</span>
+				<div className="done-floating-xml-container">
+					<div className="xml-floating">
+						<div className="file-line title" />
+						<div className="file-line md" />
+						<div className="file-line sh" />
+						<div className="file-line md" />
+						<div className="file-line" />
+						<div className="file-type-badge">XML</div>
+					</div>
 				</div>
 				<p className="done-status-tagline">{"// processamento concluído"}</p>
 				<h2 className="done-title">{totalDocsCount} documentos convertidos</h2>
@@ -90,9 +86,6 @@ export default function DoneScreen({
 					<p className="ticker done-stats-value">{completedPages}</p>
 				</div>
 			</div>
-
-			{/* Interactive 3D CRT Console for XML Preview */}
-			<CRTTerminal3D xmlText={consolidatedXml} />
 
 			{/* Export actions */}
 			<div className="done-actions-row">
