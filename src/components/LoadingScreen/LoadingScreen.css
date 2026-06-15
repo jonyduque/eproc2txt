@@ -3,11 +3,6 @@
 	--crt-bezel-bg: #1c1d24;
 	--crt-border-color: #3b3d4a;
 	--crt-shadow-color: rgba(0, 0, 0, 0.7);
-	--dropzone-circle-border: oklch(from var(--color-primary) l c h / 0.4);
-	/* biome-ignore lint/suspicious/noDuplicateCustomProperties: relative color fallback */
-	--dropzone-circle-border: --transparent(var(--color-primary), 0.4);
-	--dropzone-glow-bg: oklch(from var(--color-primary) l c h / 0.1);
-	--dropzone-glow-bg: --transparent(var(--color-primary), 0.1);
 }
 
 body.light-theme {
@@ -234,14 +229,16 @@ body.light-theme .dropzone-card::after {
 	position: absolute;
 	inset: 0;
 	border-radius: 999px;
-	border: var(--border-width-default) solid var(--color-primary-alpha-40);
+	border: var(--border-width-default) solid oklch(from var(--color-primary) l c h / 0.4);
+	border-color: --transparent(var(--color-primary), 0.4);
 }
 
 .dropzone-circle-orbit {
 	position: absolute;
 	inset: var(--space-2);
 	border-radius: 999px;
-	border: var(--border-width-default) dashed var(--color-primary-alpha-40);
+	border: var(--border-width-default) dashed oklch(from var(--color-primary) l c h / 0.4);
+	border-color: --transparent(var(--color-primary), 0.4);
 	animation: orbit 10s linear infinite;
 }
 
@@ -249,7 +246,9 @@ body.light-theme .dropzone-card::after {
 	position: absolute;
 	inset: var(--space-5);
 	border-radius: 999px;
-	background: var(--color-primary-alpha-10);
+	background: oklch(from var(--color-primary) l c h / 0.1);
+	/* biome-ignore lint/suspicious/noDuplicateProperties: relative color fallback */
+	background: --transparent(var(--color-primary), 0.1);
 	animation: glow-pulse 2s ease-in-out infinite alternate;
 }
 
@@ -475,16 +474,4 @@ body.light-theme .dropzone-card::after {
 	box-shadow:
 		0 10px 20px rgba(0, 0, 0, 0.3),
 		inset 1px 1px 0 rgba(255, 255, 255, 0.1);
-}
-
-.dropzone-circle-outer {
-	border-color: var(--dropzone-circle-border);
-}
-
-.dropzone-circle-orbit {
-	border-color: var(--dropzone-circle-border);
-}
-
-.dropzone-circle-glow {
-	background: var(--dropzone-glow-bg);
 }

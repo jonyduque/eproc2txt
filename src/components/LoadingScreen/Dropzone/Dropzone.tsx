@@ -101,6 +101,8 @@ export default function Dropzone({ onZipParsed, onLoadingChange }: DropzoneProps
 							/>
 
 							<div className="dropzone-icon-wrapper">
+								<div className="dropzone-circle-outer" />
+								<div className="dropzone-circle-orbit" />
 								<div className="dropzone-circle-glow" />
 								<span className="material-icons dropzone-svg-icon-material">upload_file</span>
 							</div>
