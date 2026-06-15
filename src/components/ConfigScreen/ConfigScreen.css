@@ -7,13 +7,21 @@
 	gap: 0.75rem;
 }
 
+/* Fallback layout rules */
 .dashboard-grid {
 	display: grid;
-	grid-template-columns: 1fr 1fr;
+	grid-template-columns: 1fr;
 	gap: 1rem;
 	flex: 1;
 	min-height: 0;
-	overflow: hidden;
+	overflow-y: auto;
+}
+
+@media (min-width: 1024px) {
+	.dashboard-grid {
+		grid-template-columns: 1fr 1fr;
+		overflow: hidden;
+	}
 }
 
 .loaded-layout-grid {
@@ -34,9 +42,20 @@
 	}
 }
 
-@media (max-width: 1024px) {
-	.dashboard-grid {
-		grid-template-columns: 1fr;
-		overflow-y: auto;
-	}
+/* CSS Custom Function overrides */
+.dashboard-grid {
+	grid-template-columns: --responsive-lg(1fr, 1fr 1fr);
+	overflow: --responsive-lg(auto, hidden);
+}
+
+.loaded-layout-grid {
+	grid-template-columns: --responsive-lg(1fr, 1fr 380px);
+}
+
+.docs-tree-card {
+	grid-column: --responsive-lg(auto, 1);
+}
+
+.config-panel {
+	grid-column: --responsive-lg(auto, 2);
 }
