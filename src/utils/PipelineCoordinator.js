@@ -1,3 +1,23 @@
+if (typeof Promise.try !== "function") {
+	Promise.try = (callback, ...args) =>
+		new Promise((resolve, reject) => {
+			try {
+				resolve(callback(...args));
+			} catch (err) {
+				reject(err);
+			}
+		});
+}
+
+if (typeof Symbol.dispose !== "symbol") {
+	Object.defineProperty(Symbol, "dispose", {
+		value: Symbol("Symbol.dispose"),
+		configurable: false,
+		enumerable: false,
+		writable: false,
+	});
+}
+
 export default class PipelineCoordinator {
 	constructor(options = {}) {
 		this.onDocStart = options.onDocStart || (() => {});
@@ -26,6 +46,10 @@ export default class PipelineCoordinator {
 		this.tessDataPath = "";
 		this.maxOcrWorkers = 3;
 		this.currentTree = null;
+	}
+
+	[Symbol.dispose]() {
+		this.terminateAllWorkers();
 	}
 
 	start(zipData, selectedFiles, maxOcrWorkers, tessModel, currentTree) {
@@ -107,7 +131,11 @@ export default class PipelineCoordinator {
 		this.ocrWorkers.forEach((wRecord) => {
 			wRecord.worker.postMessage({ type: "terminate" });
 			wRecord.worker.terminate();
-			this.onWorkerStatusUpdate(wRecord.index, "offline", "Desativado");
+			Promise.try(() => this.onWorkerStatusUpdate(wRecord.index, "offline", "Desativado")).catch(
+				(err) => {
+					console.error("Erro no callback onWorkerStatusUpdate:", err);
+				},
+			);
 		});
 		this.ocrWorkers = [];
 	}
@@ -128,12 +156,18 @@ export default class PipelineCoordinator {
 				currentJob: null,
 			});
 
-			this.onWorkerStatusUpdate(workerIndex, "idle", "Aguardando tarefa");
+			Promise.try(() => this.onWorkerStatusUpdate(workerIndex, "idle", "Aguardando tarefa")).catch(
+				(err) => {
+					console.error("Erro no callback onWorkerStatusUpdate:", err);
+				},
+			);
 		}
 
 		// Update unused slots status
 		for (let i = count; i < 5; i++) {
-			this.onWorkerStatusUpdate(i + 1, "offline", "Desativado");
+			Promise.try(() => this.onWorkerStatusUpdate(i + 1, "offline", "Desativado")).catch((err) => {
+				console.error("Erro no callback onWorkerStatusUpdate:", err);
+			});
 		}
 	}
 
@@ -146,11 +180,15 @@ export default class PipelineCoordinator {
 				wRecord.active = true;
 				wRecord.currentJob = job;
 
-				this.onWorkerStatusUpdate(
-					wRecord.index,
-					"active",
-					`OCR ${job.fileName} (Pág ${job.page}/${job.pageCount})`,
-				);
+				Promise.try(() =>
+					this.onWorkerStatusUpdate(
+						wRecord.index,
+						"active",
+						`OCR ${job.fileName} (Pág ${job.page}/${job.pageCount})`,
+					),
+				).catch((err) => {
+					console.error("Erro no callback onWorkerStatusUpdate:", err);
+				});
 
 				wRecord.worker.postMessage(
 					{
@@ -202,7 +240,9 @@ export default class PipelineCoordinator {
 				break;
 
 			case "doc_start":
-				this.onDocStart(data.fileName);
+				Promise.try(() => this.onDocStart(data.fileName)).catch((err) => {
+					console.error("Erro no callback onDocStart:", err);
+				});
 				break;
 
 			case "doc_info":
@@ -212,7 +252,9 @@ export default class PipelineCoordinator {
 					completedPages: 0,
 				});
 				this.totalEstimatedPages += data.pageCount;
-				this.onDocInfo(data.fileName, data.pageCount);
+				Promise.try(() => this.onDocInfo(data.fileName, data.pageCount)).catch((err) => {
+					console.error("Erro no callback onDocInfo:", err);
+				});
 				break;
 
 			case "page_native": {
@@ -222,15 +264,19 @@ export default class PipelineCoordinator {
 					docState.completedPages++;
 					this.pdfPagesCount++;
 					this.completedPagesCount++;
-					this.onPageNative(
-						data.fileName,
-						data.page,
-						data.pageCount,
-						data.content,
-						this.pdfPagesCount,
-						this.completedPagesCount,
-						this.totalEstimatedPages,
-					);
+					Promise.try(() =>
+						this.onPageNative(
+							data.fileName,
+							data.page,
+							data.pageCount,
+							data.content,
+							this.pdfPagesCount,
+							this.completedPagesCount,
+							this.totalEstimatedPages,
+						),
+					).catch((err) => {
+						console.error("Erro no callback onPageNative:", err);
+					});
 				}
 				break;
 			}
@@ -253,7 +299,11 @@ export default class PipelineCoordinator {
 					pageCount: data.pageCount,
 				});
 
-				this.onPageOcrRequest(data.fileName, data.page, data.pageCount, jobId);
+				Promise.try(() =>
+					this.onPageOcrRequest(data.fileName, data.page, data.pageCount, jobId),
+				).catch((err) => {
+					console.error("Erro no callback onPageOcrRequest:", err);
+				});
 				this.dispatchOcrJobs();
 				break;
 			}
@@ -267,7 +317,9 @@ export default class PipelineCoordinator {
 			case "error":
 				console.error(`Erro crítico no Pipeline: ${data.message}`);
 				this.terminateAllWorkers();
-				this.onError(data.message);
+				Promise.try(() => this.onError(data.message)).catch((err) => {
+					console.error("Erro no callback onError:", err);
+				});
 				break;
 		}
 	}
@@ -282,7 +334,11 @@ export default class PipelineCoordinator {
 			if (job && job.jobId === data.jobId) {
 				wRecord.active = false;
 				wRecord.currentJob = null;
-				this.onWorkerStatusUpdate(workerIndex, "idle", "Aguardando tarefa");
+				Promise.try(() =>
+					this.onWorkerStatusUpdate(workerIndex, "idle", "Aguardando tarefa"),
+				).catch((err) => {
+					console.error("Erro no callback onWorkerStatusUpdate:", err);
+				});
 
 				const jobInfo = this.activeJobs.get(data.jobId);
 				if (jobInfo) {
@@ -300,27 +356,35 @@ export default class PipelineCoordinator {
 						this.completedPagesCount++;
 
 						if (data.type === "ocr_success") {
-							this.onOcrSuccess(
-								data.jobId,
-								text,
-								jobInfo.fileName,
-								jobInfo.page,
-								jobInfo.pageCount,
-								this.ocrPagesCount,
-								this.completedPagesCount,
-								this.totalEstimatedPages,
-							);
+							Promise.try(() =>
+								this.onOcrSuccess(
+									data.jobId,
+									text,
+									jobInfo.fileName,
+									jobInfo.page,
+									jobInfo.pageCount,
+									this.ocrPagesCount,
+									this.completedPagesCount,
+									this.totalEstimatedPages,
+								),
+							).catch((err) => {
+								console.error("Erro no callback onOcrSuccess:", err);
+							});
 						} else {
-							this.onOcrError(
-								data.jobId,
-								data.message,
-								jobInfo.fileName,
-								jobInfo.page,
-								jobInfo.pageCount,
-								this.ocrPagesCount,
-								this.completedPagesCount,
-								this.totalEstimatedPages,
-							);
+							Promise.try(() =>
+								this.onOcrError(
+									data.jobId,
+									data.message,
+									jobInfo.fileName,
+									jobInfo.page,
+									jobInfo.pageCount,
+									this.ocrPagesCount,
+									this.completedPagesCount,
+									this.totalEstimatedPages,
+								),
+							).catch((err) => {
+								console.error("Erro no callback onOcrError:", err);
+							});
 						}
 					}
 				}
@@ -333,7 +397,9 @@ export default class PipelineCoordinator {
 
 	checkCompletion() {
 		if (this.isPipelineFinished && this.activeJobs.size === 0 && this.ocrQueue.length === 0) {
-			this.onFinished(this.processedDocs, this.currentTree);
+			Promise.try(() => this.onFinished(this.processedDocs, this.currentTree)).catch((err) => {
+				console.error("Erro no callback onFinished:", err);
+			});
 			this.terminateAllWorkers();
 		}
 	}

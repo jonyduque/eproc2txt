@@ -48,18 +48,15 @@ export default function Tree({
 			!isProcessing &&
 			!isCompleted
 		) {
-			const allPaths = new Set<string>();
-			const initialCollapsed = new Set<number>();
-			tree.forEach((event) => {
-				initialCollapsed.add(event.eventNumber);
-				event.documents.forEach((doc) => {
-					// Do not select invalid extensions
-					if (doc.eventNumber === -1 && !doc.isValidExtension) {
-						return;
-					}
-					allPaths.add(doc.originalPath);
-				});
-			});
+			const allPaths = new Set<string>(
+				tree.values()
+					.flatMap((event) => event.documents)
+					.filter((doc) => doc.eventNumber !== -1 || doc.isValidExtension)
+					.map((doc) => doc.originalPath)
+			);
+			const initialCollapsed = new Set<number>(
+				tree.values().map((event) => event.eventNumber)
+			);
 			setSelectedPaths(allPaths);
 			setCollapsedEvents(initialCollapsed);
 			hasInitializedRef.current = true;
@@ -68,10 +65,9 @@ export default function Tree({
 	}, [tree, isProcessing, isCompleted, setSelectedPaths]);
 
 	const handleCollapseAllEvents = () => {
-		const collapsed = new Set<number>();
-		tree.forEach((event) => {
-			collapsed.add(event.eventNumber);
-		});
+		const collapsed = new Set<number>(
+			tree.values().map((event) => event.eventNumber)
+		);
 		setCollapsedEvents(collapsed);
 	};
 
@@ -80,28 +76,16 @@ export default function Tree({
 	};
 
 	const toggleEventCollapse = (eventNum: number) => {
-		setCollapsedEvents((prev) => {
-			const next = new Set(prev);
-			if (next.has(eventNum)) {
-				next.delete(eventNum);
-			} else {
-				next.add(eventNum);
-			}
-			return next;
-		});
+		setCollapsedEvents((prev) => prev.symmetricDifference(new Set([eventNum])));
 	};
 
 	const handleSelectAll = () => {
-		const allPaths = new Set<string>();
-		tree.forEach((event) => {
-			event.documents.forEach((doc) => {
-				// Do not select invalid extensions
-				if (doc.eventNumber === -1 && !doc.isValidExtension) {
-					return;
-				}
-				allPaths.add(doc.originalPath);
-			});
-		});
+		const allPaths = new Set<string>(
+			tree.values()
+				.flatMap((event) => event.documents)
+				.filter((doc) => doc.eventNumber !== -1 || doc.isValidExtension)
+				.map((doc) => doc.originalPath)
+		);
 		setSelectedPaths(allPaths);
 	};
 

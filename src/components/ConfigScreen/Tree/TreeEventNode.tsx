@@ -70,25 +70,18 @@ export function TreeEventNode({
 	const selectableDocs = docs.filter((d) => d.eventNumber !== -1 || d.isValidExtension);
 	const selectablePaths = selectableDocs.map((d) => d.originalPath);
 
-	const checkedDocs = selectablePaths.filter((p) => selectedPaths.has(p));
+	const selectableSet = new Set(selectablePaths);
+	const checkedSet = selectedPaths.intersection(selectableSet);
 
-	const isAllChecked = selectablePaths.length > 0 && checkedDocs.length === selectablePaths.length;
-	const isNoneChecked = checkedDocs.length === 0;
+	const isAllChecked = selectablePaths.length > 0 && checkedSet.size === selectablePaths.length;
+	const isNoneChecked = checkedSet.size === 0;
 	const isIndeterminate = !isAllChecked && !isNoneChecked;
 	const isEventDisabled = selectablePaths.length === 0; // Disable if no files can be selected
 
 	const handleEventCheckboxChange = (e: React.ChangeEvent<HTMLInputElement>) => {
 		const checked = e.target.checked;
 		setSelectedPaths((prev) => {
-			const next = new Set(prev);
-			selectablePaths.forEach((p) => {
-				if (checked) {
-					next.add(p);
-				} else {
-					next.delete(p);
-				}
-			});
-			return next;
+			return checked ? prev.union(selectableSet) : prev.difference(selectableSet);
 		});
 	};
 
@@ -147,7 +140,7 @@ export function TreeEventNode({
 					<span className="node-name">
 						<b>{folderLabel}</b>
 						<span className="event-doc-count">
-							({checkedDocs.length}/{selectableDocs.length})
+							({checkedSet.size}/{selectableDocs.length})
 						</span>
 					</span>
 				</span>

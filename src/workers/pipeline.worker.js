@@ -1,6 +1,26 @@
 import { PDFiumLibrary } from "@hyzyla/pdfium/browser/cdn";
 import { unzipSync } from "fflate";
 
+if (typeof Symbol.dispose !== "symbol") {
+	Object.defineProperty(Symbol, "dispose", {
+		value: Symbol("Symbol.dispose"),
+		configurable: false,
+		enumerable: false,
+		writable: false,
+	});
+}
+
+if (typeof Promise.try !== "function") {
+	Promise.try = (callback, ...args) =>
+		new Promise((resolve, reject) => {
+			try {
+				resolve(callback(...args));
+			} catch (err) {
+				reject(err);
+			}
+		});
+}
+
 let pdfiumLib = null;
 let isPaused = false;
 let resolveResume = null;
@@ -253,9 +273,13 @@ async function processPipeline(zipData, selectedFiles) {
 
 		// Extrai os bytes correspondentes do ZIP
 		const targetPath = file.originalPath;
-		const unzipped = unzipSync(zipData, {
+		const rawUnzipped = unzipSync(zipData, {
 			filter: (f) => f.name === targetPath,
 		});
+		rawUnzipped[Symbol.dispose] = () => {
+			delete rawUnzipped[targetPath];
+		};
+		using unzipped = rawUnzipped;
 
 		const fileBytes = unzipped[targetPath];
 		if (!fileBytes) {
@@ -286,7 +310,11 @@ async function processPipeline(zipData, selectedFiles) {
 			});
 		} else if (file.extension === "pdf") {
 			try {
-				const doc = await pdfiumLib.loadDocument(fileBytes);
+				const rawDoc = await pdfiumLib.loadDocument(fileBytes);
+				rawDoc[Symbol.dispose] = () => {
+					rawDoc.destroy();
+				};
+				using doc = rawDoc;
 				const pageCount = doc.getPageCount();
 
 				// Informa os metadados do documento antes de ler as páginas
@@ -300,7 +328,14 @@ async function processPipeline(zipData, selectedFiles) {
 					// Verifica contra-pressão
 					await checkPause();
 
-					const page = doc.getPage(p);
+					const rawPage = doc.getPage(p);
+					rawPage[Symbol.dispose] = () => {
+						if (typeof rawPage.destroy === "function") {
+							rawPage.destroy();
+						}
+					};
+					using page = rawPage;
+
 					let text = page.getText();
 					if (text) {
 						text = text.replace(/\s+/g, " ").trim();
@@ -342,7 +377,6 @@ async function processPipeline(zipData, selectedFiles) {
 						); // Transfere posse do buffer da imagem
 					}
 				}
-				doc.destroy();
 			} catch (err) {
 				self.postMessage({
 					type: "log",
@@ -351,9 +385,6 @@ async function processPipeline(zipData, selectedFiles) {
 				});
 			}
 		}
-
-		// Libera do garbage collector
-		delete unzipped[targetPath];
 	}
 
 	// Notifica conclusão da varredura sequencial
@@ -362,14 +393,12 @@ async function processPipeline(zipData, selectedFiles) {
 	});
 }
 
-self.onmessage = async (event) => {
+self.onmessage = (event) => {
 	const { type, zipData, selectedFiles } = event.data;
 	if (type === "start") {
-		try {
-			await processPipeline(zipData, selectedFiles);
-		} catch (err) {
+		Promise.try(() => processPipeline(zipData, selectedFiles)).catch((err) => {
 			self.postMessage({ type: "error", message: err.message });
-		}
+		});
 	} else if (type === "pause") {
 		isPaused = true;
 	} else if (type === "resume") {

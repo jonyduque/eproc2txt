@@ -85,6 +85,7 @@
 	padding: var(--space-10) var(--space-8) var(--space-16);
 	transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 	background: var(--bg-card);
+	height: 40vh;
 }
 
 /* TV Static Noise Overlay */
@@ -139,15 +140,19 @@ body.light-theme .dropzone-card::after {
 	0% {
 		transform: translate(0, 0) scale(1);
 	}
+
 	25% {
 		transform: translate(-10px, 5px) scale(1.05);
 	}
+
 	50% {
 		transform: translate(5px, -10px) scale(0.95);
 	}
+
 	75% {
 		transform: translate(-5px, -5px) scale(1.02);
 	}
+
 	100% {
 		transform: translate(10px, 10px) scale(1);
 	}
@@ -157,30 +162,39 @@ body.light-theme .dropzone-card::after {
 	0% {
 		opacity: 0.85;
 	}
+
 	12% {
 		opacity: 0.95;
 	}
+
 	24% {
 		opacity: 0.9;
 	}
+
 	36% {
 		opacity: 1;
 	}
+
 	48% {
 		opacity: 0.88;
 	}
+
 	60% {
 		opacity: 0.98;
 	}
+
 	72% {
 		opacity: 0.92;
 	}
+
 	84% {
 		opacity: 1;
 	}
+
 	96% {
 		opacity: 0.86;
 	}
+
 	100% {
 		opacity: 0.95;
 	}
