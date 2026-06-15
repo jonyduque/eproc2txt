@@ -139,6 +139,7 @@ export default function ProcessingScreen({
 	ocrPages,
 	docStatuses,
 	workerStatuses,
+	maxWorkers,
 	onResume,
 	onPause,
 	onCancel,
