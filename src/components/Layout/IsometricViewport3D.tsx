@@ -14,6 +14,7 @@ interface IsometricViewport3DProps {
 	docStatuses: Record<string, { status: string; fileName: string }>;
 	globalLoading: boolean;
 	isDragHovered?: boolean;
+	showUploadIcon?: boolean;
 	children?: React.ReactNode;
 }
 
@@ -24,6 +25,7 @@ export default function IsometricViewport3D({
 	docStatuses,
 	globalLoading: _globalLoading,
 	isDragHovered = false,
+	showUploadIcon = false,
 	children,
 }: IsometricViewport3DProps) {
 	const activeWorkers = workerStatuses.filter((w) => w.status === "active").length;
@@ -156,6 +158,13 @@ export default function IsometricViewport3D({
 								<div className="doc-line sh" />
 							</div>
 						))}
+
+						{showUploadIcon && (
+							<div className="pile-upload-indicator">
+								<span className="material-icons neon-upload-arrow">cloud_upload</span>
+								<span className="neon-upload-label">UPLOAD ZIP</span>
+							</div>
+						)}
 					</div>
 				</div>
 

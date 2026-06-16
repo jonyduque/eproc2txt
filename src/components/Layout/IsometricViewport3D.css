@@ -419,3 +419,61 @@
 .viewport-processing .scene-container {
 	transform: translate3d(120px, 0, 0);
 }
+
+/* ── Pile Upload Indicator ── */
+.pile-upload-indicator {
+	position: absolute;
+	top: 50%;
+	left: 50%;
+	width: 76px;
+	height: 96px;
+	margin-left: -38px;
+	margin-top: -48px;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+	transform-style: preserve-3d;
+	animation: bounceZ 3s ease-in-out infinite alternate;
+	pointer-events: none;
+	z-index: 10;
+}
+
+.pile-upload-indicator .material-icons.neon-upload-arrow {
+	font-size: 32px;
+	color: var(--color-primary);
+	text-shadow:
+		0 0 5px var(--color-primary-glow),
+		0 0 15px var(--color-primary),
+		0 0 30px var(--color-primary);
+	filter: drop-shadow(0 0 4px var(--color-primary));
+	margin-bottom: 2px;
+	transform: translateZ(5px);
+}
+
+.neon-upload-label {
+	font-family: var(--font-mono);
+	font-size: 8px;
+	font-weight: 900;
+	color: #ffffff;
+	background: var(--color-primary);
+	border: 1px solid var(--color-primary);
+	box-shadow:
+		0 0 8px var(--color-primary-glow),
+		0 0 16px var(--color-primary);
+	padding: 2px 5px;
+	border-radius: 4px;
+	white-space: nowrap;
+	text-transform: uppercase;
+	letter-spacing: 0.05em;
+	transform: translateZ(10px);
+}
+
+@keyframes bounceZ {
+	0% {
+		transform: translate3d(2px, -2px, 26px);
+	}
+	100% {
+		transform: translate3d(2px, -2px, 42px);
+	}
+}
