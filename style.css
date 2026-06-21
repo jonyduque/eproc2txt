@@ -646,16 +646,6 @@ body {
 	flex-direction: column;
 }
 
-@media (min-width: 1400px) {
-	.app-main-layout {
-		width: 1400px;
-		margin: 0 auto;
-		border-left: var(--border-width-default) solid var(--border-color);
-		border-right: var(--border-width-default) solid var(--border-color);
-		box-shadow: 0 0 80px rgba(0, 0, 0, 0.5);
-	}
-}
-
 .app-content-wrapper {
 	position: relative;
 	z-index: 10;

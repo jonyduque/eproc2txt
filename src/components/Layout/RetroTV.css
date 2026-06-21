@@ -331,34 +331,112 @@
 }
 
 .crt-power-led {
-	width: 10px;
-	height: 10px;
+	width: 12px;
+	height: 12px;
 	border-radius: 50%;
-	background: var(--crt-led-bg-off);
-	border: 1px solid rgba(0, 0, 0, 0.4);
-	transition: all 0.3s ease;
+	background: radial-gradient(circle at 35% 30%, #2a2b30 0%, #111216 60%, #0a0a0c 100%);
+	border: 1px solid rgba(0, 0, 0, 0.7);
+	box-shadow:
+/* anel externo fosco */
+		0 0 0 1.5px rgba(0, 0, 0, 0.5),
+		/* sombra de profundidade */
+		inset 0 2px 3px rgba(0, 0, 0, 0.8),
+		/* brilho sutil de inativo */
+		inset 0 -1px 2px rgba(255, 255, 255, 0.03);
+	position: relative;
+	transition:
+		background 0.3s ease,
+		box-shadow 0.3s ease;
+	overflow: hidden;
 }
 
+/* Reflexo de lente convexa no LED */
+.crt-power-led::before {
+	content: "";
+	position: absolute;
+	top: 15%;
+	left: 20%;
+	width: 45%;
+	height: 35%;
+	border-radius: 50%;
+	background: radial-gradient(
+		ellipse at 40% 30%,
+		rgba(255, 255, 255, 0.25) 0%,
+		rgba(255, 255, 255, 0.04) 60%,
+		transparent 100%
+	);
+	pointer-events: none;
+	z-index: 2;
+}
+
+/* Estado: laranja pulsante (aguardando arquivo) */
 .crt-power-led.led-orange-pulse {
-	background: #ff9500;
-	box-shadow: 0 0 8px #ff9500;
-	animation: crt-led-blink 1.2s ease-in-out infinite;
+	background: radial-gradient(
+		circle at 35% 30%,
+		#ffcc60 0%,
+		#ff9500 45%,
+		#cc6800 80%,
+		#8a4000 100%
+	);
+	box-shadow:
+		0 0 0 1.5px rgba(180, 80, 0, 0.6),
+		0 0 6px 2px rgba(255, 149, 0, 0.5),
+		0 0 14px 4px rgba(255, 149, 0, 0.25),
+		inset 0 2px 3px rgba(0, 0, 0, 0.4),
+		inset 0 -1px 2px rgba(255, 200, 80, 0.3);
+	animation: crt-led-blink-orange 1.4s ease-in-out infinite;
 }
 
+/* Estado: laranja fixo (pronto para processar) */
 .crt-power-led.led-orange-solid {
-	background: #ff9500;
-	box-shadow: 0 0 8px #ff9500;
+	background: radial-gradient(
+		circle at 35% 30%,
+		#ffd070 0%,
+		#ff9500 45%,
+		#cc6800 80%,
+		#8a4000 100%
+	);
+	box-shadow:
+		0 0 0 1.5px rgba(180, 80, 0, 0.6),
+		0 0 7px 2px rgba(255, 149, 0, 0.55),
+		0 0 16px 5px rgba(255, 149, 0, 0.2),
+		inset 0 2px 3px rgba(0, 0, 0, 0.35),
+		inset 0 -1px 2px rgba(255, 200, 80, 0.35);
 }
 
+/* Estado: verde pulsante (processamento em curso) */
 .crt-power-led.led-green-pulse {
-	background: #34c759;
-	box-shadow: 0 0 10px #34c759;
-	animation: crt-led-blink 0.5s ease-in-out infinite;
+	background: radial-gradient(
+		circle at 35% 30%,
+		#a8ffb0 0%,
+		#34c759 45%,
+		#1a8a3a 80%,
+		#0a4a1e 100%
+	);
+	box-shadow:
+		0 0 0 1.5px rgba(10, 100, 40, 0.6),
+		0 0 6px 2px rgba(52, 199, 89, 0.5),
+		0 0 14px 4px rgba(52, 199, 89, 0.25),
+		inset 0 2px 3px rgba(0, 0, 0, 0.4),
+		inset 0 -1px 2px rgba(120, 255, 140, 0.35);
+	animation: crt-led-blink-green 0.6s ease-in-out infinite;
 }
 
+/* Estado: verde fixo (processamento concluído) */
 .crt-power-led.led-green-solid {
-	background: #34c759;
-	box-shadow: 0 0 8px #34c759;
+	background: radial-gradient(
+		circle at 35% 30%,
+		#b0ffb8 0%,
+		#34c759 45%,
+		#1a8a3a 80%,
+		#0a4a1e 100%
+	);
+	box-shadow:
+		0 0 0 1.5px rgba(10, 100, 40, 0.6),
+		0 0 7px 2px rgba(52, 199, 89, 0.55),
+		0 0 16px 5px rgba(52, 199, 89, 0.2),
+		inset 0 2px 3px rgba(0, 0, 0, 0.35),
+		inset 0 -1px 2px rgba(120, 255, 140, 0.4);
 }
 
 /* Vintage Rectangular Red Power Button */
@@ -663,20 +741,55 @@ body.light-theme .crt-flicker {
 	}
 }
 
-@keyframes crt-led-blink {
+@keyframes crt-led-blink-orange {
 	0%,
 	100% {
-		opacity: 0.3;
+		box-shadow:
+			0 0 0 1.5px rgba(180, 80, 0, 0.4),
+			0 0 3px 1px rgba(255, 149, 0, 0.25),
+			0 0 6px 2px rgba(255, 149, 0, 0.1),
+			inset 0 2px 3px rgba(0, 0, 0, 0.5),
+			inset 0 -1px 2px rgba(255, 200, 80, 0.1);
+		filter: brightness(0.55);
 	}
 	50% {
-		opacity: 1;
+		box-shadow:
+			0 0 0 1.5px rgba(180, 80, 0, 0.7),
+			0 0 8px 3px rgba(255, 149, 0, 0.65),
+			0 0 18px 6px rgba(255, 149, 0, 0.3),
+			inset 0 2px 3px rgba(0, 0, 0, 0.3),
+			inset 0 -1px 2px rgba(255, 200, 80, 0.45);
+		filter: brightness(1.1);
+	}
+}
+
+@keyframes crt-led-blink-green {
+	0%,
+	100% {
+		box-shadow:
+			0 0 0 1.5px rgba(10, 100, 40, 0.4),
+			0 0 3px 1px rgba(52, 199, 89, 0.25),
+			0 0 6px 2px rgba(52, 199, 89, 0.1),
+			inset 0 2px 3px rgba(0, 0, 0, 0.5),
+			inset 0 -1px 2px rgba(120, 255, 140, 0.15);
+		filter: brightness(0.6);
+	}
+	50% {
+		box-shadow:
+			0 0 0 1.5px rgba(10, 100, 40, 0.7),
+			0 0 9px 3px rgba(52, 199, 89, 0.7),
+			0 0 20px 6px rgba(52, 199, 89, 0.3),
+			inset 0 2px 3px rgba(0, 0, 0, 0.3),
+			inset 0 -1px 2px rgba(120, 255, 140, 0.5);
+		filter: brightness(1.15);
 	}
 }
 
 @media (prefers-reduced-motion: reduce) {
 	.crt-static,
 	.crt-flicker,
-	.crt-power-led.led-active {
+	.crt-power-led.led-orange-pulse,
+	.crt-power-led.led-green-pulse {
 		animation: none;
 	}
 }
