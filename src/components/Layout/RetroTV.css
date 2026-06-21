@@ -276,6 +276,16 @@ body.light-theme .crt-fader-knob {
 	border-color: #e2e2da;
 }
 
+.crt-fader-knob.position-best {
+	bottom: 38px;
+}
+.crt-fader-knob.position-standard {
+	bottom: 18px;
+}
+.crt-fader-knob.position-fast {
+	bottom: -2px;
+}
+
 /* Power Section */
 .crt-power-section {
 	display: flex;
