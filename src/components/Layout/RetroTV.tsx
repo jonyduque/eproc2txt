@@ -60,8 +60,9 @@ export default function RetroTV({
 	const dialRef = useRef<HTMLDivElement>(null);
 
 	// Calculate rotation angle for UHF knob (from -135deg to +135deg over 1 to maxAllowedWorkers)
-	const rotateValue =
-		maxAllowedWorkers > 1 ? ((maxWorkers - 1) / (maxAllowedWorkers - 1)) * 270 - 135 : 0;
+	const workersVal = maxWorkers || 1;
+	const maxAllowedVal = maxAllowedWorkers || 1;
+	const rotateValue = maxAllowedVal > 1 ? ((workersVal - 1) / (maxAllowedVal - 1)) * 270 - 135 : 0;
 
 	// Cycle workers on dial click
 	const handleDialClick = () => {
@@ -215,7 +216,7 @@ export default function RetroTV({
 									aria-pressed={tessModel === "fast"}
 									title="Rápido"
 								/>
-								<div className={`crt-fader-knob position-${tessModel}`} />
+								<div className={`crt-fader-knob position-${tessModel || "standard"}`} />
 							</div>
 							<span className="crt-control-value value-yellow">
 								{tessModel === "fast" ? "Rápido" : tessModel === "best" ? "Preciso" : "Normal"}
