@@ -47,8 +47,8 @@
 	--crt-top-handle-bg: #18191f;
 
 	/* Text/value colors */
-	/* Text/value colors */
 	--crt-control-val-color: #ffffff;
+	--crt-control-label-color: #c8cee0;
 
 	/* Ignored placard colors */
 	--crt-placard-bg: rgba(255, 149, 0, 0.08);
@@ -57,45 +57,9 @@
 	--crt-placard-title: #ffa116;
 }
 
-body.light-theme {
-	--crt-cabinet-bg: linear-gradient(135deg, #d8d8d0 0%, #b8b8b0 100%);
-	--crt-bezel-bg: #e2e2da;
-	--crt-border-color: #a4a49c;
-	--crt-shadow-color: rgba(0, 0, 0, 0.2);
-
-	/* Light theme control panel colors */
-	--crt-control-panel-bg: #eaeae2;
-	--crt-control-panel-border: #d2d2ca;
-
-	/* Light theme speaker slots */
-	--crt-speaker-slot-bg: #9a9a90;
-
-	/* Light theme dial colors */
-	--crt-dial-bg: #dcdcd4;
-	--crt-dial-shadow: 1px 2px 4px rgba(0, 0, 0, 0.2), inset 1px 1px 1px rgba(255, 255, 255, 0.6);
-
-	/* Light theme fader colors */
-	--crt-fader-track-bg: #c8c8c0;
-	--crt-fader-track-shadow: inset 1px 1px 2px rgba(0, 0, 0, 0.2);
-	--crt-fader-knob-bg: #94948a;
-	--crt-fader-knob-border: #e2e2da;
-
-	/* Light theme top handle colors */
-	--crt-top-handle-bg: #dcdcd4;
-
-	/* Light theme text/value colors */
-	--crt-control-val-color: #121317;
-
-	/* Light theme ignored placard colors */
-	--crt-placard-bg: rgba(217, 107, 0, 0.05);
-	--crt-placard-border: 1px solid rgba(217, 107, 0, 0.3);
-	--crt-placard-text: #b25e00;
-	--crt-placard-title: #d96b00;
-}
-
 .crt-monitor-frame {
 	margin: var(--space-4) auto;
-	max-width: min(95%, 920px);
+	max-width: 100%;
 	width: 100%;
 	display: flex;
 	flex-direction: column;
@@ -176,6 +140,7 @@ body.light-theme {
 	display: flex;
 	flex-direction: column;
 	height: 100%;
+	padding: 4px;
 }
 
 /* Bezel Controls Column */
@@ -227,7 +192,7 @@ body.light-theme {
 	font-family: var(--font-mono);
 	font-size: 8px;
 	font-weight: var(--font-weight-bold);
-	color: var(--color-text-muted);
+	color: var(--crt-control-label-color);
 	letter-spacing: 0.05em;
 	text-align: center;
 }
@@ -374,20 +339,26 @@ body.light-theme {
 	transition: all 0.3s ease;
 }
 
-.crt-power-led.led-ready {
-	background: var(--crt-led-ready);
-	box-shadow: 0 0 8px var(--crt-led-ready);
+.crt-power-led.led-orange-pulse {
+	background: #ff9500;
+	box-shadow: 0 0 8px #ff9500;
+	animation: crt-led-blink 1.2s ease-in-out infinite;
 }
 
-.crt-power-led.led-active {
-	background: var(--crt-led-active);
-	box-shadow: 0 0 10px var(--crt-led-active);
+.crt-power-led.led-orange-solid {
+	background: #ff9500;
+	box-shadow: 0 0 8px #ff9500;
+}
+
+.crt-power-led.led-green-pulse {
+	background: #34c759;
+	box-shadow: 0 0 10px #34c759;
 	animation: crt-led-blink 0.5s ease-in-out infinite;
 }
 
-.crt-power-led.led-finished {
-	background: var(--crt-led-finished);
-	box-shadow: 0 0 8px var(--crt-led-finished);
+.crt-power-led.led-green-solid {
+	background: #34c759;
+	box-shadow: 0 0 8px #34c759;
 }
 
 /* Vintage Rectangular Red Power Button */
@@ -514,6 +485,8 @@ body.light-theme {
 	overflow-y: auto;
 	min-height: 0;
 	flex: 1;
+	padding: var(--space-4);
+	box-sizing: border-box;
 }
 
 /* ── CRT Screen Overlays ── */
@@ -593,9 +566,9 @@ body.light-theme .crt-flicker {
 	position: absolute;
 	inset: 0;
 	background:
-		radial-gradient(circle at center, transparent 35%, rgba(0, 0, 0, 0.6) 100%),
+		radial-gradient(circle at center, transparent 40%, rgba(0, 0, 0, 0.35) 100%),
 		var(--crt-glass-reflection);
-	box-shadow: inset 0 0 80px rgba(0, 0, 0, 0.95);
+	box-shadow: inset 0 0 50px rgba(0, 0, 0, 0.6);
 }
 
 /* Theme Button styling */

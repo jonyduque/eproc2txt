@@ -16,7 +16,10 @@ body.light-theme {
 	margin-left: auto;
 	margin-right: auto;
 	margin-top: 0;
-	max-width: calc(4 * var(--max-w-xl) / 3);
+	width: 100%;
+	height: 100%;
+	flex: 1;
+	min-height: 0;
 	text-align: center;
 }
 
@@ -91,15 +94,22 @@ body.light-theme {
 /* DROPZONE */
 .dropzone-outer-container {
 	width: 100%;
+	height: 100%;
+	display: flex;
+	flex-direction: column;
 }
 
 .dropzone-screen-area {
-	display: block;
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+	align-items: center;
 	cursor: pointer;
 	position: relative;
 	overflow: hidden;
 	background: var(--bg-card);
-	height: 380px;
+	height: 100%;
+	flex: 1;
 	transition: background-color 0.3s;
 }
 
