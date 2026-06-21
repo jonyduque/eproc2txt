@@ -1,5 +1,4 @@
 import { useEffect, useRef, useState } from "react";
-import ConfigPanel from "./components/ConfigScreen/ConfigPanel/ConfigPanel.tsx";
 import ConfigScreen from "./components/ConfigScreen/ConfigScreen.jsx";
 import DoneScreen from "./components/DoneScreen/DoneScreen.tsx";
 import BackgroundFX from "./components/Layout/Background/BackgroundFX.jsx";
@@ -159,28 +158,21 @@ export default function App() {
 			<Header statusClass={statusClass} statusLabel={statusLabel} />
 
 			<section className="app-content-wrapper">
-				<div className="retro-tv-layout-grid">
-					<div className="retro-tv-left-column">
-						<RetroTV
-							isSwitchingChannel={isSwitchingChannel}
-							isLoading={globalLoading || status === "processing"}
-						>
-							{renderScreen()}
-						</RetroTV>
-					</div>
-					<div className="retro-tv-right-column">
-						<ConfigPanel
-							disabled={status !== "configuring"}
-							workers={maxWorkers}
-							setWorkers={setWorkers}
-							maxAllowedWorkers={Math.max(navigator.hardwareConcurrency || 3, 3)}
-							tessModel={tessModel}
-							setTessModel={setTessModel}
-							selectedPathsSize={selectedPaths?.size || 0}
-							handleStartClick={handleStartClick}
-							ignoredFiles={ignoredFiles}
-						/>
-					</div>
+				<div className="retro-tv-layout-grid-single">
+					<RetroTV
+						isSwitchingChannel={isSwitchingChannel}
+						status={status}
+						maxWorkers={maxWorkers}
+						setWorkers={setWorkers}
+						maxAllowedWorkers={Math.max(navigator.hardwareConcurrency || 3, 3)}
+						tessModel={tessModel}
+						setTessModel={setTessModel}
+						selectedPathsSize={selectedPaths?.size || 0}
+						handleStartClick={handleStartClick}
+						ignoredFiles={ignoredFiles}
+					>
+						{renderScreen()}
+					</RetroTV>
 				</div>
 			</section>
 
