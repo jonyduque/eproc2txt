@@ -4,7 +4,6 @@ import DoneScreen from "./components/DoneScreen/DoneScreen.tsx";
 import BackgroundFX from "./components/Layout/Background/BackgroundFX.jsx";
 import { BackgroundGradientAnimation } from "./components/Layout/Background/BackgroundGradient.tsx";
 import Footer from "./components/Layout/Footer.jsx";
-import Header from "./components/Layout/Header.jsx";
 import RetroTV from "./components/Layout/RetroTV.tsx";
 import LoadingScreen from "./components/LoadingScreen/LoadingScreen.jsx";
 import ProcessingScreen from "./components/ProcessingScreen/ProcessingScreen.jsx";
@@ -58,6 +57,22 @@ export default function App() {
 		}
 	}, [status]);
 
+	// Theme state and management
+	const [theme, setTheme] = useState(() => localStorage.getItem("theme") || "dark");
+
+	useEffect(() => {
+		if (theme === "light") {
+			document.body.classList.add("light-theme");
+		} else {
+			document.body.classList.remove("light-theme");
+		}
+		localStorage.setItem("theme", theme);
+	}, [theme]);
+
+	const toggleTheme = () => {
+		setTheme((prev) => (prev === "dark" ? "light" : "dark"));
+	};
+
 	const handleStartClick = () => {
 		const selectedList = [];
 		if (tree) {
@@ -74,21 +89,16 @@ export default function App() {
 		}
 	};
 
-	// Determine status indicators for the header
-	let statusClass = "loading pulse-radar-dot";
+	// Determine status indicators for the header/TV
 	let statusLabel = "Aguardando Arquivo";
 
 	if (globalLoading) {
-		statusClass = "processing";
 		statusLabel = "Lendo ZIP...";
 	} else if (status === "configuring") {
-		statusClass = "loading";
 		statusLabel = "Pronto";
 	} else if (status === "processing") {
-		statusClass = "processing";
 		statusLabel = "Processando";
 	} else if (status === "completed") {
-		statusClass = "finished";
 		statusLabel = "Finalizado";
 	}
 
@@ -155,8 +165,6 @@ export default function App() {
 
 			<BackgroundFX />
 
-			<Header statusClass={statusClass} statusLabel={statusLabel} />
-
 			<section className="app-content-wrapper">
 				<div className="retro-tv-layout-grid-single">
 					<RetroTV
@@ -170,6 +178,9 @@ export default function App() {
 						selectedPathsSize={selectedPaths?.size || 0}
 						handleStartClick={handleStartClick}
 						ignoredFiles={ignoredFiles}
+						statusLabel={statusLabel}
+						theme={theme}
+						toggleTheme={toggleTheme}
 					>
 						{renderScreen()}
 					</RetroTV>

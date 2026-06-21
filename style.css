@@ -632,13 +632,28 @@ body {
 	background: var(--scrollbar-thumb-hover);
 }
 
+#app {
+	height: 100vh;
+	overflow: hidden;
+}
+
 /* Layout Containers */
 .app-main-layout {
 	position: relative;
-	min-height: 100vh;
+	height: 100vh;
 	overflow: hidden;
 	display: flex;
 	flex-direction: column;
+}
+
+@media (min-width: 1400px) {
+	.app-main-layout {
+		width: 1400px;
+		margin: 0 auto;
+		border-left: var(--border-width-default) solid var(--border-color);
+		border-right: var(--border-width-default) solid var(--border-color);
+		box-shadow: 0 0 80px rgba(0, 0, 0, 0.5);
+	}
 }
 
 .app-content-wrapper {
@@ -649,9 +664,14 @@ body {
 	max-width: calc(var(--max-w-xl) * 2);
 	padding-left: var(--space-6);
 	padding-right: var(--space-6);
-	padding-bottom: var(--space-6);
+	padding-bottom: var(--space-4);
 	padding-top: var(--space-3);
 	flex-grow: 1;
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+	min-height: 0;
+	overflow: hidden;
 }
 
 .retro-tv-layout-grid-single {
@@ -661,7 +681,9 @@ body {
 	width: 100%;
 	max-width: 960px;
 	margin: 0 auto;
-	padding: var(--space-4) 0;
+	padding: var(--space-2) 0;
+	flex: 1;
+	min-height: 0;
 }
 
 .app-container {

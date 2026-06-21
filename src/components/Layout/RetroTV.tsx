@@ -34,6 +34,14 @@ interface RetroTVProps {
 	handleStartClick: () => void;
 	/** Optional list of ignored files detected during initialization */
 	ignoredFiles?: Array<{ fileName: string; size: number }>;
+
+	// Theme and Status Label properties
+	/** Current descriptive status label */
+	statusLabel: string;
+	/** Current active theme */
+	theme: string;
+	/** Callback to toggle the theme */
+	toggleTheme: () => void;
 }
 
 /**
@@ -55,9 +63,37 @@ export default function RetroTV({
 	selectedPathsSize,
 	handleStartClick,
 	ignoredFiles = [],
+
+	statusLabel,
+	theme,
+	toggleTheme,
 }: RetroTVProps) {
 	const isDisabled = status !== "configuring";
 	const dialRef = useRef<HTMLDivElement>(null);
+
+	// Convert status label to match reference wording
+	let displayLabel = "AGUARDANDO ARQUIVO";
+	switch (statusLabel) {
+		case "Aguardando Arquivo":
+			displayLabel = "AGUARDANDO ARQUIVO";
+			break;
+		case "Pronto":
+			displayLabel = "PRONTO PARA PROCESSAR";
+			break;
+		case "Processando":
+		case "Lendo ZIP...":
+			displayLabel = "PROCESSAMENTO EM CURSO";
+			break;
+		case "Finalizado":
+			displayLabel = "PROCESSAMENTO CONCLUÍDO";
+			break;
+		case "Interrompido":
+		case "Cancelado":
+			displayLabel = "PROCESSAMENTO CANCELADO";
+			break;
+		default:
+			break;
+	}
 
 	// Calculate rotation angle for UHF knob (from -135deg to +135deg over 1 to maxAllowedWorkers)
 	const workersVal = maxWorkers || 1;
@@ -112,18 +148,14 @@ export default function RetroTV({
 		}
 	};
 
-	// Determine power LED class and status label
+	// Determine power LED class based on status
 	let ledColor = "off";
-	let powerStatusText = "STANDBY";
 	if (status === "configuring") {
 		ledColor = "ready";
-		powerStatusText = "READY";
 	} else if (status === "processing") {
 		ledColor = "active";
-		powerStatusText = "ACTIVE";
 	} else if (status === "completed") {
 		ledColor = "finished";
-		powerStatusText = "FINISHED";
 	}
 
 	return (
@@ -143,13 +175,39 @@ export default function RetroTV({
 								<div className="crt-flicker" />
 								<div className="crt-radial-vignette" />
 							</div>
-							<div className="crt-screen-content">{children}</div>
+							<div className="crt-screen-content">
+								{children}
+
+								{/* Placard for Ignored Files inside screen */}
+								{ignoredFiles && ignoredFiles.length > 0 && status === "configuring" && (
+									<div className="crt-ignored-placard">
+										<div className="placard-title">
+											<span className="material-icons info-icon">warning</span>
+											ARQUIVOS IGNORADOS:
+										</div>
+										<ul className="placard-list">
+											{ignoredFiles.map((f) => (
+												<li key={f.fileName}>
+													{f.fileName} ({(f.size / 1024).toFixed(1)} KB)
+												</li>
+											))}
+										</ul>
+									</div>
+								)}
+							</div>
 						</div>
 						<div className="crt-brand">{brandText}</div>
 					</div>
 
 					{/* Right: Integrated Controls Panel */}
 					<div className={`crt-bezel-controls ${isDisabled ? "controls-disabled" : ""}`}>
+						{/* Logo Title placed above Speaker Grille */}
+						<div className="logo-text-wrapper">
+							<span className="logo-title">
+								eproc<span className="logo-glow-number text-glow">2</span>txt
+							</span>
+						</div>
+
 						{/* Speaker Grille */}
 						<div className="crt-speaker-grille">
 							<div className="speaker-slot" />
@@ -185,13 +243,31 @@ export default function RetroTV({
 							</span>
 						</div>
 
+						{/* Theme Toggle Button placed between controls */}
+						<div className="crt-control-group">
+							<span className="crt-control-label">TEMA</span>
+							<button
+								type="button"
+								className="crt-theme-btn"
+								title="Alternar Tema"
+								onClick={toggleTheme}
+								aria-label="Alternar Tema"
+							>
+								{theme === "dark" ? (
+									<span className="material-icons">light_mode</span>
+								) : (
+									<span className="material-icons">dark_mode</span>
+								)}
+							</button>
+						</div>
+
 						{/* Fader/Slider (OCR Level Selector) */}
 						<div className="crt-control-group">
 							<span className="crt-control-label">OCR LEVEL</span>
 							<div className="crt-fader-track">
 								<button
 									type="button"
-									className={`fader-preset-btn best ${tessModel === "best" ? "active" : ""}`}
+									className="fader-preset-btn best"
 									onClick={() => !isDisabled && setTessModel("best")}
 									disabled={isDisabled}
 									aria-label="OCR Preciso"
@@ -200,7 +276,7 @@ export default function RetroTV({
 								/>
 								<button
 									type="button"
-									className={`fader-preset-btn standard ${tessModel === "standard" ? "active" : ""}`}
+									className="fader-preset-btn standard"
 									onClick={() => !isDisabled && setTessModel("standard")}
 									disabled={isDisabled}
 									aria-label="OCR Normal"
@@ -209,7 +285,7 @@ export default function RetroTV({
 								/>
 								<button
 									type="button"
-									className={`fader-preset-btn fast ${tessModel === "fast" ? "active" : ""}`}
+									className="fader-preset-btn fast"
 									onClick={() => !isDisabled && setTessModel("fast")}
 									disabled={isDisabled}
 									aria-label="OCR Rápido"
@@ -223,9 +299,9 @@ export default function RetroTV({
 							</span>
 						</div>
 
-						{/* Power Section */}
+						{/* Power Section (Status label without "POWER:" label) */}
 						<div className="crt-power-section">
-							<span className="crt-power-text">POWER: {powerStatusText}</span>
+							<span className="status-badge-label">{displayLabel}</span>
 							<div className="crt-power-row">
 								<div className={`crt-power-led led-${ledColor}`} />
 								<button
@@ -240,23 +316,6 @@ export default function RetroTV({
 						</div>
 					</div>
 				</div>
-
-				{/* Placard for Ignored Files */}
-				{ignoredFiles && ignoredFiles.length > 0 && status === "configuring" && (
-					<div className="crt-ignored-placard">
-						<div className="placard-title">
-							<span className="material-icons info-icon">warning</span>
-							ARQUIVOS IGNORADOS:
-						</div>
-						<ul className="placard-list">
-							{ignoredFiles.map((f) => (
-								<li key={f.fileName}>
-									{f.fileName} ({(f.size / 1024).toFixed(1)} KB)
-								</li>
-							))}
-						</ul>
-					</div>
-				)}
 			</div>
 		</div>
 	);
