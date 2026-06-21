@@ -10,6 +10,44 @@
 		rgba(255, 255, 255, 0.08) 0%,
 		rgba(255, 255, 255, 0) 50%
 	);
+
+	/* Control Panel colors */
+	--crt-control-panel-bg: #252833;
+	--crt-control-panel-border: #1c1e26;
+
+	/* Speaker slots colors */
+	--crt-speaker-slot-bg: #121317;
+
+	/* Dial colors */
+	--crt-dial-bg: #18191f;
+	--crt-dial-notch: #ff4a5a;
+	--crt-dial-shadow: 2px 3px 6px rgba(0, 0, 0, 0.6), inset 1px 1px 2px rgba(255, 255, 255, 0.1);
+
+	/* Fader colors */
+	--crt-fader-track-bg: #121317;
+	--crt-fader-track-shadow: inset 1px 1px 2px rgba(0, 0, 0, 0.8);
+	--crt-fader-knob-bg: #4a5061;
+	--crt-fader-knob-border: #121317;
+
+	/* LED colors */
+	--crt-led-bg-off: #1b1c22;
+	--crt-led-ready: #ff3b30;
+	--crt-led-active: #0071e3;
+	--crt-led-finished: #34c759;
+
+	/* Power button colors */
+	--crt-power-btn-bg: #992226;
+	--crt-power-btn-border: #1c1e26;
+	--crt-power-btn-grad-start: #c92f34;
+	--crt-power-btn-grad-end: #7d1519;
+	--crt-power-btn-active-grad-start: #b02428;
+	--crt-power-btn-active-grad-end: #680e12;
+
+	/* Top handle colors */
+	--crt-top-handle-bg: #18191f;
+
+	/* Text/value colors */
+	--crt-control-val-color: #ffffff;
 }
 
 body.light-theme {
@@ -17,6 +55,29 @@ body.light-theme {
 	--crt-bezel-bg: #e2e2da;
 	--crt-border-color: #a4a49c;
 	--crt-shadow-color: rgba(0, 0, 0, 0.2);
+
+	/* Light theme control panel colors */
+	--crt-control-panel-bg: #eaeae2;
+	--crt-control-panel-border: #d2d2ca;
+
+	/* Light theme speaker slots */
+	--crt-speaker-slot-bg: #9a9a90;
+
+	/* Light theme dial colors */
+	--crt-dial-bg: #dcdcd4;
+	--crt-dial-shadow: 1px 2px 4px rgba(0, 0, 0, 0.2), inset 1px 1px 1px rgba(255, 255, 255, 0.6);
+
+	/* Light theme fader colors */
+	--crt-fader-track-bg: #c8c8c0;
+	--crt-fader-track-shadow: inset 1px 1px 2px rgba(0, 0, 0, 0.2);
+	--crt-fader-knob-bg: #94948a;
+	--crt-fader-knob-border: #e2e2da;
+
+	/* Light theme top handle colors */
+	--crt-top-handle-bg: #dcdcd4;
+
+	/* Light theme text/value colors */
+	--crt-control-val-color: #121317;
 }
 
 .crt-monitor-frame {
@@ -54,7 +115,7 @@ body.light-theme {
 	transform: translateX(-50%);
 	width: 140px;
 	height: 8px;
-	background: #18191f;
+	background: var(--crt-top-handle-bg);
 	border: 2px solid var(--crt-border-color);
 	border-top: none;
 	border-radius: 0 0 8px 8px;
@@ -77,12 +138,6 @@ body.light-theme {
 		transparent 12px
 	);
 	opacity: 0.6;
-}
-
-/* Remove old neck and base styles */
-.crt-neck,
-.crt-base {
-	display: none;
 }
 
 /* Layout: Screen on left, Controls on right */
@@ -108,8 +163,8 @@ body.light-theme {
 /* Bezel Controls Column */
 .crt-bezel-controls {
 	flex: 3;
-	background: #252833;
-	border: 4px solid #1c1e26;
+	background: var(--crt-control-panel-bg);
+	border: 4px solid var(--crt-control-panel-border);
 	border-radius: 12px;
 	padding: var(--space-3) var(--space-2);
 	display: flex;
@@ -118,11 +173,6 @@ body.light-theme {
 	box-shadow: inset 1px 1px 3px rgba(0, 0, 0, 0.5);
 	transition: opacity 0.3s ease;
 	min-width: 160px;
-}
-
-body.light-theme .crt-bezel-controls {
-	background: #eaeae2;
-	border-color: #d2d2ca;
 }
 
 .controls-disabled {
@@ -140,13 +190,9 @@ body.light-theme .crt-bezel-controls {
 
 .speaker-slot {
 	height: 2px;
-	background: #121317;
+	background: var(--crt-speaker-slot-bg);
 	border-radius: 1px;
 	opacity: 0.8;
-}
-
-body.light-theme .speaker-slot {
-	background: #9a9a90;
 }
 
 /* Control Group UI */
@@ -171,11 +217,7 @@ body.light-theme .speaker-slot {
 	font-family: var(--font-mono);
 	font-size: var(--font-size-xs);
 	font-weight: var(--font-weight-bold);
-	color: #ffffff;
-}
-
-body.light-theme .crt-control-value {
-	color: #121317;
+	color: var(--crt-control-val-color);
 }
 
 .value-yellow {
@@ -187,21 +229,12 @@ body.light-theme .crt-control-value {
 	width: 48px;
 	height: 48px;
 	border-radius: 50%;
-	background: #18191f;
+	background: var(--crt-dial-bg);
 	border: 3px solid var(--crt-border-color);
-	box-shadow:
-		2px 3px 6px rgba(0, 0, 0, 0.6),
-		inset 1px 1px 2px rgba(255, 255, 255, 0.1);
+	box-shadow: var(--crt-dial-shadow);
 	position: relative;
 	cursor: pointer;
 	transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-}
-
-body.light-theme .crt-uhf-dial {
-	background: #dcdcd4;
-	box-shadow:
-		1px 2px 4px rgba(0, 0, 0, 0.2),
-		inset 1px 1px 1px rgba(255, 255, 255, 0.6);
 }
 
 .dial-notch {
@@ -211,7 +244,7 @@ body.light-theme .crt-uhf-dial {
 	transform: translateX(-50%);
 	width: 4px;
 	height: 12px;
-	background: #ff4a5a;
+	background: var(--crt-dial-notch);
 	border-radius: 2px;
 }
 
@@ -231,20 +264,15 @@ body.light-theme .crt-uhf-dial {
 .crt-fader-track {
 	width: 16px;
 	height: 60px;
-	background: #121317;
+	background: var(--crt-fader-track-bg);
 	border-radius: 8px;
 	border: 2px solid var(--crt-border-color);
 	position: relative;
-	box-shadow: inset 1px 1px 2px rgba(0, 0, 0, 0.8);
+	box-shadow: var(--crt-fader-track-shadow);
 	display: flex;
 	flex-direction: column;
 	justify-content: space-between;
 	padding: 4px 0;
-}
-
-body.light-theme .crt-fader-track {
-	background: #c8c8c0;
-	box-shadow: inset 1px 1px 2px rgba(0, 0, 0, 0.2);
 }
 
 .fader-preset-btn {
@@ -254,6 +282,18 @@ body.light-theme .crt-fader-track {
 	border: none;
 	cursor: pointer;
 	z-index: 5;
+	position: relative;
+}
+
+.fader-preset-btn::after {
+	content: "";
+	position: absolute;
+	left: 50%;
+	top: 50%;
+	transform: translate(-50%, -50%);
+	width: 32px;
+	height: 20px;
+	z-index: 6;
 }
 
 .crt-fader-knob {
@@ -262,8 +302,8 @@ body.light-theme .crt-fader-track {
 	transform: translateX(-50%);
 	width: 24px;
 	height: 12px;
-	background: #4a5061;
-	border: 2px solid #121317;
+	background: var(--crt-fader-knob-bg);
+	border: 2px solid var(--crt-fader-knob-border);
 	border-radius: 3px;
 	box-shadow:
 		1px 2px 3px rgba(0, 0, 0, 0.6),
@@ -271,19 +311,14 @@ body.light-theme .crt-fader-track {
 	transition: bottom 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
 
-body.light-theme .crt-fader-knob {
-	background: #94948a;
-	border-color: #e2e2da;
-}
-
 .crt-fader-knob.position-best {
-	bottom: 38px;
+	bottom: 44px;
 }
 .crt-fader-knob.position-standard {
-	bottom: 18px;
+	bottom: 24px;
 }
 .crt-fader-knob.position-fast {
-	bottom: -2px;
+	bottom: 4px;
 }
 
 /* Power Section */
@@ -292,13 +327,9 @@ body.light-theme .crt-fader-knob {
 	flex-direction: column;
 	align-items: center;
 	gap: var(--space-2);
-	border-top: 2px solid #1c1e26;
+	border-top: 2px solid var(--crt-control-panel-border);
 	padding-top: var(--space-3);
 	width: 100%;
-}
-
-body.light-theme .crt-power-section {
-	border-top-color: #d2d2ca;
 }
 
 .crt-power-text {
@@ -319,33 +350,33 @@ body.light-theme .crt-power-section {
 	width: 10px;
 	height: 10px;
 	border-radius: 50%;
-	background: #1b1c22;
+	background: var(--crt-led-bg-off);
 	border: 1px solid rgba(0, 0, 0, 0.4);
 	transition: all 0.3s ease;
 }
 
 .crt-power-led.led-ready {
-	background: #ff3b30;
-	box-shadow: 0 0 8px #ff3b30;
+	background: var(--crt-led-ready);
+	box-shadow: 0 0 8px var(--crt-led-ready);
 }
 
 .crt-power-led.led-active {
-	background: #0071e3;
-	box-shadow: 0 0 10px #0071e3;
+	background: var(--crt-led-active);
+	box-shadow: 0 0 10px var(--crt-led-active);
 	animation: crt-led-blink 0.5s ease-in-out infinite;
 }
 
 .crt-power-led.led-finished {
-	background: #34c759;
-	box-shadow: 0 0 8px #34c759;
+	background: var(--crt-led-finished);
+	box-shadow: 0 0 8px var(--crt-led-finished);
 }
 
 /* Vintage Rectangular Red Power Button */
 .crt-power-btn {
 	width: 24px;
 	height: 24px;
-	background: #992226;
-	border: 2px solid #1c1e26;
+	background: var(--crt-power-btn-bg);
+	border: 2px solid var(--crt-power-btn-border);
 	border-radius: 4px;
 	box-shadow:
 		0 2px 4px rgba(0, 0, 0, 0.4),
@@ -367,7 +398,11 @@ body.light-theme .crt-power-section {
 	position: absolute;
 	inset: 1px;
 	border-radius: 2px;
-	background: linear-gradient(135deg, #c92f34 0%, #7d1519 100%);
+	background: linear-gradient(
+		135deg,
+		var(--crt-power-btn-grad-start) 0%,
+		var(--crt-power-btn-grad-end) 100%
+	);
 }
 
 .crt-power-btn:not(:disabled):active {
@@ -375,6 +410,15 @@ body.light-theme .crt-power-section {
 	box-shadow:
 		0 1px 1px rgba(0, 0, 0, 0.6),
 		inset 0 1px 2px rgba(0, 0, 0, 0.4);
+}
+
+.crt-power-btn:not(:disabled):active::after {
+	background: linear-gradient(
+		135deg,
+		var(--crt-power-btn-active-grad-start) 0%,
+		var(--crt-power-btn-active-grad-end) 100%
+	);
+	box-shadow: inset 1px 1px 3px rgba(0, 0, 0, 0.6);
 }
 
 /* Brand styling on Bezel */
@@ -575,5 +619,13 @@ body.light-theme .crt-flicker {
 	}
 	50% {
 		opacity: 1;
+	}
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.crt-static,
+	.crt-flicker,
+	.crt-power-led.led-active {
+		animation: none;
 	}
 }
