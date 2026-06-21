@@ -6,8 +6,6 @@ import "./RetroTV.css";
  * Properties for the RetroTV component.
  */
 interface RetroTVProps {
-	/** Brand name text displayed at the bottom of the bezel */
-	brandText?: string;
 	/** Indicates if the channel is currently switching (shows full static noise) */
 	isSwitchingChannel?: boolean;
 	/** Main content to render inside the CRT screen */
@@ -49,7 +47,6 @@ interface RetroTVProps {
  * Controls the worker count (UHF dial) and OCR quality level (Fader preset button).
  */
 export default function RetroTV({
-	brandText = "EPROC-TXT CRT-80",
 	isSwitchingChannel = false,
 	children,
 	className = "",
@@ -100,10 +97,68 @@ export default function RetroTV({
 	const maxAllowedVal = maxAllowedWorkers || 1;
 	const rotateValue = maxAllowedVal > 1 ? ((workersVal - 1) / (maxAllowedVal - 1)) * 270 - 135 : 0;
 
-	// Cycle workers on dial click
-	const handleDialClick = () => {
+	// Drag-to-rotate state refs (no re-render needed for drag tracking)
+	const dragStateRef = useRef<{
+		active: boolean;
+		startAngle: number;
+		startWorkers: number;
+		lastAngle: number;
+		totalDelta: number;
+	} | null>(null);
+
+	// Compute angle of pointer relative to dial center
+	const getAngleToDial = (clientX: number, clientY: number): number => {
+		const dial = dialRef.current;
+		if (!dial) return 0;
+		const rect = dial.getBoundingClientRect();
+		const cx = rect.left + rect.width / 2;
+		const cy = rect.top + rect.height / 2;
+		return Math.atan2(clientY - cy, clientX - cx) * (180 / Math.PI);
+	};
+
+	const handleDialPointerDown = (e: React.PointerEvent<HTMLDivElement>) => {
 		if (isDisabled) return;
-		setWorkers((prev) => (prev >= maxAllowedWorkers ? 1 : prev + 1));
+		e.preventDefault();
+		(e.target as HTMLElement).setPointerCapture(e.pointerId);
+		const angle = getAngleToDial(e.clientX, e.clientY);
+		dragStateRef.current = {
+			active: true,
+			startAngle: angle,
+			startWorkers: maxWorkers,
+			lastAngle: angle,
+			totalDelta: 0,
+		};
+	};
+
+	const handleDialPointerMove = (e: React.PointerEvent<HTMLDivElement>) => {
+		const ds = dragStateRef.current;
+		if (!ds?.active || isDisabled) return;
+		const angle = getAngleToDial(e.clientX, e.clientY);
+
+		// Compute shortest angular delta (handles 180/-180 wraparound)
+		let delta = angle - ds.lastAngle;
+		if (delta > 180) delta -= 360;
+		if (delta < -180) delta += 360;
+
+		ds.totalDelta += delta;
+		ds.lastAngle = angle;
+
+		// 270 degrees of arc spans all workers. Each worker step = 270 / (max-1) degrees
+		const degreesPerWorker = maxAllowedVal > 1 ? 270 / (maxAllowedVal - 1) : 270;
+		const rawSteps = ds.totalDelta / degreesPerWorker;
+		const newWorkers = Math.round(ds.startWorkers + rawSteps);
+		setWorkers(Math.max(1, Math.min(maxAllowedWorkers, newWorkers)));
+	};
+
+	const handleDialPointerUp = (e: React.PointerEvent<HTMLDivElement>) => {
+		if (dragStateRef.current) {
+			// If barely moved (< 5°), treat as click → advance by 1
+			if (Math.abs(dragStateRef.current.totalDelta) < 5 && !isDisabled) {
+				setWorkers((prev) => (prev >= maxAllowedWorkers ? 1 : prev + 1));
+			}
+			dragStateRef.current = null;
+		}
+		(e.target as HTMLElement).releasePointerCapture(e.pointerId);
 	};
 
 	// Use passive: false event listener for dial wheel to prevent console warnings/errors
@@ -148,14 +203,14 @@ export default function RetroTV({
 		}
 	};
 
-	// Determine power LED class based on status
-	let ledColor = "off";
+	// Determine power LED class based on status/pipeline state
+	let ledColor = "orange-pulse"; // Aguardando arquivo
 	if (status === "configuring") {
-		ledColor = "ready";
+		ledColor = "orange-solid"; // Pronto para processar
 	} else if (status === "processing") {
-		ledColor = "active";
+		ledColor = "green-pulse"; // Processamento em curso
 	} else if (status === "completed") {
-		ledColor = "finished";
+		ledColor = "green-solid"; // Processamento concluído
 	}
 
 	return (
@@ -196,7 +251,6 @@ export default function RetroTV({
 								)}
 							</div>
 						</div>
-						<div className="crt-brand">{brandText}</div>
 					</div>
 
 					{/* Right: Integrated Controls Panel */}
@@ -223,10 +277,13 @@ export default function RetroTV({
 							<div
 								ref={dialRef}
 								className="crt-uhf-dial"
-								onClick={handleDialClick}
+								onPointerDown={handleDialPointerDown}
+								onPointerMove={handleDialPointerMove}
+								onPointerUp={handleDialPointerUp}
+								onPointerCancel={handleDialPointerUp}
 								onKeyDown={handleDialKeyDown}
 								style={{ transform: `rotate(${rotateValue}deg)` }}
-								title="Clique para alternar / Role para ajustar"
+								title="Arraste para girar / Role para ajustar"
 								role="slider"
 								aria-valuenow={maxWorkers}
 								aria-valuemin={1}

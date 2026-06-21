@@ -1,12 +1,12 @@
 .processing-header-stats {
 	position: relative;
 	overflow: hidden;
-	padding: var(--space-6);
+	padding: var(--space-4) var(--space-5);
 }
 
 .processing-stats-grid {
 	display: grid;
-	gap: var(--gap-6);
+	gap: var(--gap-3);
 	text-align: left;
 	grid-template-columns: 1fr;
 	/* biome-ignore lint/suspicious/noDuplicateProperties: fallback override */
@@ -21,15 +21,15 @@
 
 .processing-stat-label {
 	font-family: var(--font-mono);
-	font-size: var(--font-size-2xs);
+	font-size: var(--font-size-xs);
 	text-transform: uppercase;
-	letter-spacing: 0.25em;
+	letter-spacing: 0.2em;
 	color: var(--color-text-secondary);
 }
 
 .processing-stat-value {
 	margin-top: var(--space-1);
-	font-size: var(--font-size-2xl);
+	font-size: var(--font-size-3xl);
 	font-weight: var(--font-weight-semibold);
 }
 
@@ -85,22 +85,28 @@
 }
 
 .processing-layout-grid {
-	margin-top: var(--space-6);
+	margin-top: var(--space-4);
 	display: grid;
 	grid-template-columns: 1fr;
 }
 
 .processing-layout-grid .isometric-viewport {
-	height: 400px;
+	height: 350px;
 	/* biome-ignore lint/suspicious/noDuplicateProperties: fallback override */
-	height: --responsive-lg(400px, 480px);
+	height: --responsive-lg(350px, 430px);
 	max-height: var(--max-h-panel);
 	margin-bottom: 0;
 }
 
-@media (min-width: 1024px) {
+@media (min-width: 900px) {
 	.processing-layout-grid .isometric-viewport {
-		height: 480px;
+		height: 430px;
+	}
+}
+
+@media (min-width: 1200px) {
+	.processing-layout-grid .isometric-viewport {
+		height: 510px;
 	}
 }
 
@@ -109,13 +115,19 @@
 	left: 0;
 	top: 0;
 	bottom: 0;
-	width: 320px;
+	width: 280px;
 	background: transparent;
 	border-right: 1px solid var(--border-color);
 	display: flex;
 	flex-direction: column;
 	z-index: 10;
 	pointer-events: auto;
+}
+
+@media (min-width: 1200px) {
+	.processing-docs-overlay {
+		width: 340px;
+	}
 }
 
 .docs-list-header-simple {
@@ -497,8 +509,8 @@
 
 .radar-sonar-circle {
 	position: relative;
-	width: 260px;
-	height: 260px;
+	width: 220px;
+	height: 220px;
 	border-radius: 50%;
 	border: 1px solid var(--border-color);
 	background: radial-gradient(circle, var(--color-primary-alpha-5) 0%, transparent 70%);
@@ -506,6 +518,13 @@
 	align-items: center;
 	justify-content: center;
 	pointer-events: none;
+}
+
+@media (min-width: 1200px) {
+	.radar-sonar-circle {
+		width: 290px;
+		height: 290px;
+	}
 }
 
 .radar-ring {
