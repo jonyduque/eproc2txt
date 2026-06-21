@@ -23,6 +23,16 @@ const formatDuration = (ms) => {
 	return `${String(m).padStart(2, "0")}:${String(ss).padStart(2, "0")}.${String(cs).padStart(2, "0")}`;
 };
 
+const defaultMaxWorkers = Math.max(navigator.hardwareConcurrency || 3, 3);
+
+const createDefaultWorkerStatuses = (count) => {
+	const arr = [];
+	for (let i = 1; i <= count; i++) {
+		arr.push({ index: i, status: "offline", job: "Aguardando Início" });
+	}
+	return arr;
+};
+
 const initialState = {
 	status: "idle", // "idle" | "configuring" | "processing" | "completed"
 	globalLoading: false,
@@ -37,16 +47,10 @@ const initialState = {
 	progressPercentage: 0,
 	progressText: "Aguardando início...",
 	consolidatedXml: "",
-	workerStatuses: [
-		{ index: 1, status: "offline", job: "Aguardando Início" },
-		{ index: 2, status: "offline", job: "Aguardando Início" },
-		{ index: 3, status: "offline", job: "Aguardando Início" },
-		{ index: 4, status: "offline", job: "Aguardando Início" },
-		{ index: 5, status: "offline", job: "Aguardando Início" },
-	],
+	workerStatuses: createDefaultWorkerStatuses(defaultMaxWorkers),
 	docStatuses: {},
 	mockState: null,
-	maxWorkers: Math.max(navigator.hardwareConcurrency || 3, 3),
+	maxWorkers: defaultMaxWorkers,
 	tessModel: "standard",
 	elapsedMs: 0,
 };
@@ -87,6 +91,7 @@ function pipelineReducer(state, action) {
 				maxWorkers: action.payload.maxWorkers,
 				tessModel: action.payload.tessModel,
 				consolidatedXml: "",
+				workerStatuses: createDefaultWorkerStatuses(action.payload.maxWorkers),
 			};
 		case "UPDATE_PROGRESS":
 			return {
@@ -139,6 +144,7 @@ function pipelineReducer(state, action) {
 				...initialState,
 				maxWorkers: state.maxWorkers,
 				tessModel: state.tessModel,
+				workerStatuses: createDefaultWorkerStatuses(state.maxWorkers),
 			};
 		case "SET_MOCK_STATE":
 			return {

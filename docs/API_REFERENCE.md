@@ -27,10 +27,10 @@ const pipeline = usePipeline();
 - **`progressPercentage`** (`number`): Porcentagem de conclusão global (0 a 100).
 - **`progressText`** (`string`): Texto descritivo do status do progresso atual.
 - **`consolidatedXml`** (`string`): O XML final consolidado gerado.
-- **`workerStatuses`** (`Array`): Status individual de cada um dos 5 slots de workers. Exemplo: `[{ index: 1, status: "active", job: "OCR..." }]`.
+- **`workerStatuses`** (`Array`): Status individual de cada um dos slots de workers. Exemplo: `[{ index: 1, status: "active", job: "OCR..." }]`.
 - **`docStatuses`** (`Object`): Dicionário contendo o estado detalhado de processamento de cada arquivo.
 - **`mockState`** (`string|null`): Indica se a interface está rodando em modo simulação (`"loaded"`, `"processing"`, `"completed"` ou `null`).
-- **`maxWorkers`** (`number`): Número máximo de workers de OCR simultâneos (1 a 5).
+- **`maxWorkers`** (`number`): Número máximo de workers de OCR simultâneos (1 a `navigator.hardwareConcurrency`).
 - **`tessModel`** (`string`): Modelo do Tesseract em execução (`"fast"`, `"standard"`, `"best"`).
 - **`elapsedTime`** (`string`): Tempo de processamento decorrido formatado (`mm:ss.cc`).
 - **`elapsedMs`** (`number`): Tempo decorrido em milissegundos.
@@ -41,7 +41,7 @@ const pipeline = usePipeline();
 - **`resetPipeline()`**: Reinicia o pipeline completo limpando todos os estados e arquivos carregados.
 - **`pausePipeline()`**: Pausa temporariamente o processamento dos arquivos.
 - **`resumePipeline()`**: Retoma o processamento pausado.
-- **`setWorkers(count)`**: Altera a quantidade de workers concorrentes (1 a 5).
+- **`setWorkers(count)`**: Altera a quantidade de workers concorrentes.
 - **`setTessModel(model)`**: Define o modelo de dados do Tesseract.
 - **`setSelectedPaths(paths)`**: Define o conjunto de caminhos de arquivos selecionados na árvore.
 - **`setMockState(state)`**: Ativa ou desativa simulações na UI.

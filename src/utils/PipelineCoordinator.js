@@ -162,13 +162,6 @@ export default class PipelineCoordinator {
 				},
 			);
 		}
-
-		// Update unused slots status
-		for (let i = count; i < 5; i++) {
-			Promise.try(() => this.onWorkerStatusUpdate(i + 1, "offline", "Desativado")).catch((err) => {
-				console.error("Erro no callback onWorkerStatusUpdate:", err);
-			});
-		}
 	}
 
 	dispatchOcrJobs() {

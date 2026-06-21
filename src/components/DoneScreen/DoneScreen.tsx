@@ -15,6 +15,7 @@ class DisposableUrl {
 }
 
 interface DoneScreenProps {
+	zipName?: string;
 	totalDocsCount: number;
 	pdfPages: number;
 	ocrPages: number;
@@ -26,6 +27,7 @@ interface DoneScreenProps {
 }
 
 export default function DoneScreen({
+	zipName,
 	totalDocsCount,
 	pdfPages,
 	ocrPages,
@@ -57,7 +59,8 @@ export default function DoneScreen({
 		using disposable = new DisposableUrl(URL.createObjectURL(blob));
 		const a = document.createElement("a");
 		a.href = disposable.url;
-		a.download = "consolidado.txt";
+		const downloadFileName = zipName ? `${zipName.replace(/\.zip$/i, "")}.txt` : "consolidado.txt";
+		a.download = downloadFileName;
 		document.body.appendChild(a);
 		a.click();
 		document.body.removeChild(a);

@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import ConfigPanel from "./components/ConfigScreen/ConfigPanel/ConfigPanel.tsx";
 import ConfigScreen from "./components/ConfigScreen/ConfigScreen.jsx";
-import DoneScreen from "./components/DoneScreen/DoneScreen.jsx";
+import DoneScreen from "./components/DoneScreen/DoneScreen.tsx";
 import BackgroundFX from "./components/Layout/Background/BackgroundFX.jsx";
 import { BackgroundGradientAnimation } from "./components/Layout/Background/BackgroundGradient.tsx";
 import Footer from "./components/Layout/Footer.jsx";
@@ -98,6 +98,7 @@ export default function App() {
 			const totalDocsCount = Object.keys(docStatuses).length || 1;
 			return (
 				<DoneScreen
+					zipName={zipName}
 					totalDocsCount={totalDocsCount}
 					pdfPages={pdfPages}
 					ocrPages={ocrPages}

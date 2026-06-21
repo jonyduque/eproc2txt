@@ -60,7 +60,41 @@ All colors are specified using the modern `oklch` color space to ensure uniform 
 
 ---
 
-## 5. Layout Principles
+## 5. Layout Components
+
+### RetroTV (`RetroTV.tsx`)
+The entire application is wrapped inside a CRT monitor frame simulation:
+*   **Chassis & Bezel:** Physical monitor frame with control bar, brand label ("EPROC-TXT CRT-80"), dials, and power LED.
+*   **Screen Effects:** Multiple overlay layers:
+    *   **Scanlines:** Horizontal lines simulating CRT phosphor rows.
+    *   **Flicker:** Subtle opacity animation mimicking CRT refresh flicker.
+    *   **Static:** Noise texture that intensifies during channel switching (`isSwitchingChannel`).
+    *   **Radial Vignette:** Darkened edges simulating CRT curvature.
+*   **Neck & Base:** Physical monitor stand elements for visual depth.
+
+### Background Gradient (`BackgroundGradient.tsx`)
+*   **SVG Filter:** Uses `<feGaussianBlur>` + `<feColorMatrix>` + `<feBlend>` for gooey blob effect.
+*   **Gradient Bubbles:** 5 colored bubbles (`bubble-first` through `bubble-fifth`) with CSS animations at different speeds and positions.
+*   **Interactive Bubble:** A `bubble-interactive` div follows mouse position via `mousemove` event listener (when `interactive={true}`).
+*   **Safari Fallback:** Detects Safari and applies alternative blur class (`safari-blur` vs `default-blur`).
+
+### Background FX (`BackgroundFX.jsx`)
+*   **Grid Overlay:** CSS grid pattern (`grid-bg`) for retro-tech aesthetic.
+*   **Top Glow Line:** Horizontal gradient line at the top of the viewport.
+*   **Bottom Glow Circle:** Large blurred radial gradient circle at the bottom.
+
+### Isometric Viewport 3D (`IsometricViewport3D.tsx`)
+A 3D CSS scene showing the processing pipeline:
+*   **Scene Container:** Uses `rotateX(52deg) rotateZ(-35deg)` for isometric projection.
+*   **Document Pile:** Stacked document sheets with dynamic height based on queue count.
+*   **Processor Box:** 5 cores (W1-W4 at corners, W5 at center) with laser animations for active workers.
+*   **Output File:** Text file representation with XML/TXT badge that changes on completion.
+*   **Particle Lanes:** Dynamically generated `@keyframes` animations for page particles flowing from pile → processor → output, and text particles flowing from processor → output. Each active worker gets its own lane animation.
+*   **Stage Classes:** `viewport-idle`, `viewport-configuring`, `viewport-processing`, `viewport-completed` for different visual states.
+
+---
+
+## 6. Layout Principles
 *   **Fluid Scrolling:** The layout has a natural min-height constraint (`min-height: 100vh`) with a standard scroll behavior. It avoids rigid full-viewport constraints that clip long document trees or logs on smaller screens.
 *   **Side-by-side Grids:** Features a clean asymmetric `2-column` grid layout on desktop viewports (`1fr 360px` or `1fr 1fr`) that collapses gracefully on mobile viewports.
 *   **Vertical Spacing:** Generous and consistent layout rhythm to allow breathing room between panels, keeping margins to multiples of `0.75rem` / `1rem`.

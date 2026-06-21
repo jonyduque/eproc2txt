@@ -10,10 +10,11 @@ O sistema lê arquivos mistos (PDF e HTML), identifica sua hierarquia cronológi
 
 - **Framework:** React 18 (Vite-powered, client-only SPA)
 - **Descompressão:** [FFlate](https://github.com/101arrowz/fflate) (descompressor leve e ultraveloz em blocos)
-- **Visualização & Extração de PDF:** PDFium.js (WASM) para renderização e extração nativa de texto
-- **Motor de OCR:** Tesseract.js executado concorrentemente em Web Workers
+- **Visualização & Extração de PDF:** [@hyzyla/pdfium](https://github.com/hyzyla/pdfium) (WASM) para renderização e extração nativa de texto
+- **Motor de OCR:** [Tesseract.js](https://github.com/naptha/tesseract.js) executado concorrentemente em Web Workers
 - **Multithreading:** Pipeline Worker (`pipeline.worker.js`) coordenando um pool dinâmico de até 5 `ocr.worker.js`
 - **Linting & Formatação:** [Biome](https://biomejs.dev/)
+- **Linguagem:** JavaScript (JSX) e TypeScript (TSX) mistos
 
 ---
 
@@ -21,11 +22,38 @@ O sistema lê arquivos mistos (PDF e HTML), identifica sua hierarquia cronológi
 
 Para informações detalhadas sobre design, arquitetura e desenvolvimento, consulte os documentos abaixo:
 
-1. **[Arquitetura do Sistema (docs/ARCHITECTURE.md)](file:///c:/Users/jonyd/Projetos/eproc2txt/docs/ARCHITECTURE.md)**: Detalhes sobre o fluxo multithreaded de Workers, contra-pressão de memória e o ciclo de vida dos arquivos.
-2. **[Referência de API (docs/API_REFERENCE.md)](file:///c:/Users/jonyd/Projetos/eproc2txt/docs/API_REFERENCE.md)**: Interfaces de comunicação, assinaturas do hook principal `usePipeline` e formato do protocolo dos Workers.
-3. **[Guia do Desenvolvedor (docs/DEVELOPER_GUIDE.md)](file:///c:/Users/jonyd/Projetos/eproc2txt/docs/DEVELOPER_GUIDE.md)**: Configurações de ambiente, padrões visuais (Custom CSS, OKLCH, Glassmorphism) e regras do Biome.
-4. **[Guia do Usuário (docs/USER_GUIDE.md)](file:///c:/Users/jonyd/Projetos/eproc2txt/docs/USER_GUIDE.md)**: Regras de nomenclatura de arquivos, configuração do pipeline e formato do XML consolidado gerado.
-5. **[Guia de Design (DESIGN.md)](file:///c:/Users/jonyd/Projetos/eproc2txt/DESIGN.md)**: Definições visuais, paleta de cores baseada em `oklch`, tipografia e estilos de componentes.
+1. **[Arquitetura do Sistema](docs/ARCHITECTURE.md)**: Detalhes sobre o fluxo multithreaded de Workers, contra-pressão de memória e o ciclo de vida dos arquivos.
+2. **[Referência de API](docs/API_REFERENCE.md)**: Interfaces de comunicação, assinaturas do hook principal `usePipeline` e formato do protocolo dos Workers.
+3. **[Guia do Desenvolvedor](docs/DEVELOPER_GUIDE.md)**: Configurações de ambiente, padrões visuais (Custom CSS, OKLCH, Glassmorphism) e regras do Biome.
+4. **[Guia do Usuário](docs/USER_GUIDE.md)**: Regras de nomenclatura de arquivos, configuração do pipeline e formato do XML consolidado gerado.
+5. **[Guia de Design](DESIGN.md)**: Definições visuais, paleta de cores baseada em `oklch`, tipografia e estilos de componentes.
+6. **[Requisitos do Produto](PRD.md)**: Requisitos funcionais, regras de negócio e especificação do formato de saída.
+
+---
+
+## 📁 Estrutura do Projeto
+
+```
+eproc2txt/
+├── src/
+│   ├── components/          # Componentes React (telas e layout)
+│   │   ├── ConfigScreen/    # Tela de seleção de documentos
+│   │   ├── DoneScreen/      # Tela de conclusão e download
+│   │   ├── Layout/          # RetroTV, BackgroundFX, BackgroundGradient, IsometricViewport3D
+│   │   ├── LoadingScreen/   # Tela de upload com dropzone
+│   │   └── ProcessingScreen/# Tela de acompanhamento em tempo real
+│   ├── hooks/               # usePipeline (máquina de estados)
+│   ├── utils/               # PipelineCoordinator, parser, xml-builder, wake-lock-audio, format
+│   ├── workers/             # pipeline.worker.js, ocr.worker.js
+│   ├── App.jsx              # Componente raiz com roteamento de telas
+│   └── main.jsx             # Entry point
+├── docs/                    # Documentação detalhada
+├── public/                  # Assets estáticos
+├── style.css                # Estilos globais e design tokens
+├── biome.json               # Configuração do Biome
+├── vite.config.js           # Configuração do Vite
+└── package.json             # Dependências e scripts
+```
 
 ---
 
@@ -33,7 +61,7 @@ Para informações detalhadas sobre design, arquitetura e desenvolvimento, consu
 
 ### Pré-requisitos
 
-Certifique-se de ter o [Node.js](https://nodejs.org/) instalado em sua máquina.
+Certifique-se de ter o [Node.js](https://nodejs.org/) instalado em sua máquina (versão 18+ recomendada).
 
 ### Instalação
 
