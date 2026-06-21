@@ -20,21 +20,32 @@ export default function Header({ statusLabel }) {
 	let displayLabel = "AGUARDANDO ARQUIVO";
 	let dotClass = "status-dot-idle";
 
-	if (statusLabel === "Aguardando Arquivo") {
-		displayLabel = "AGUARDANDO ARQUIVO";
-		dotClass = "status-dot-idle pulse-dot";
-	} else if (statusLabel === "Pronto") {
-		displayLabel = "PRONTO PARA PROCESSAR";
-		dotClass = "status-dot-ready pulse-dot";
-	} else if (statusLabel === "Processando" || statusLabel === "Lendo ZIP...") {
-		displayLabel = "PROCESSAMENTO EM CURSO";
-		dotClass = "status-dot-processing animate-blink";
-	} else if (statusLabel === "Finalizado") {
-		displayLabel = "PROCESSAMENTO CONCLUÍDO";
-		dotClass = "status-dot-completed";
-	} else if (statusLabel === "Interrompido" || statusLabel === "Cancelado") {
-		displayLabel = "PROCESSAMENTO CANCELADO";
-		dotClass = "status-dot-canceled";
+	switch (statusLabel) {
+		case "Aguardando Arquivo":
+			displayLabel = "AGUARDANDO ARQUIVO";
+			dotClass = "status-dot-idle pulse-dot";
+			break;
+		case "Pronto":
+			displayLabel = "PRONTO PARA PROCESSAR";
+			dotClass = "status-dot-ready pulse-dot";
+			break;
+		case "Processando":
+		case "Lendo ZIP...":
+			displayLabel = "PROCESSAMENTO EM CURSO";
+			dotClass = "status-dot-processing animate-blink";
+			break;
+		case "Finalizado":
+			displayLabel = "PROCESSAMENTO CONCLUÍDO";
+			dotClass = "status-dot-completed";
+			break;
+		case "Interrompido":
+		case "Cancelado":
+			displayLabel = "PROCESSAMENTO CANCELADO";
+			dotClass = "status-dot-canceled";
+			break;
+
+		default:
+			break;
 	}
 
 	return (
@@ -45,7 +56,6 @@ export default function Header({ statusLabel }) {
 					<span className="logo-title">
 						eproc<span className="logo-glow-number text-glow">2</span>txt
 					</span>
-					<span className="logo-subtitle">ocr · processamento paralelo · ia</span>
 				</div>
 			</div>
 

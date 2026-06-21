@@ -4,6 +4,7 @@ import Wheel from "./Wheel";
 import "./ConfigPanel.css";
 
 interface ConfigPanelProps {
+	disabled?: boolean;
 	workers: number;
 	setWorkers:
 		| React.Dispatch<React.SetStateAction<number>>
@@ -17,6 +18,7 @@ interface ConfigPanelProps {
 }
 
 export default function ConfigPanel({
+	disabled = false,
 	workers,
 	setWorkers,
 	maxAllowedWorkers,
@@ -27,7 +29,7 @@ export default function ConfigPanel({
 	ignoredFiles,
 }: ConfigPanelProps) {
 	return (
-		<div className="config-panel">
+		<div className={`config-panel ${disabled ? "is-disabled" : ""}`}>
 			{/* Workers range card */}
 			<div className="panel config-card">
 				<span className="config-card-label">processadores paralelos</span>

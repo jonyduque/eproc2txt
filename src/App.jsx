@@ -1,9 +1,12 @@
+import { useEffect, useRef, useState } from "react";
+import ConfigPanel from "./components/ConfigScreen/ConfigPanel/ConfigPanel.tsx";
 import ConfigScreen from "./components/ConfigScreen/ConfigScreen.jsx";
 import DoneScreen from "./components/DoneScreen/DoneScreen.jsx";
 import BackgroundFX from "./components/Layout/Background/BackgroundFX.jsx";
 import { BackgroundGradientAnimation } from "./components/Layout/Background/BackgroundGradient.tsx";
 import Footer from "./components/Layout/Footer.jsx";
 import Header from "./components/Layout/Header.jsx";
+import RetroTV from "./components/Layout/RetroTV.tsx";
 import LoadingScreen from "./components/LoadingScreen/LoadingScreen.jsx";
 import ProcessingScreen from "./components/ProcessingScreen/ProcessingScreen.jsx";
 import usePipeline from "./hooks/usePipeline.js";
@@ -41,6 +44,36 @@ export default function App() {
 		setGlobalLoading,
 		handleZipParsed,
 	} = usePipeline();
+
+	const [isSwitchingChannel, setIsSwitchingChannel] = useState(false);
+	const prevStatusRef = useRef(status);
+
+	useEffect(() => {
+		if (prevStatusRef.current !== status) {
+			setIsSwitchingChannel(true);
+			const timer = setTimeout(() => {
+				setIsSwitchingChannel(false);
+			}, 400);
+			prevStatusRef.current = status;
+			return () => clearTimeout(timer);
+		}
+	}, [status]);
+
+	const handleStartClick = () => {
+		const selectedList = [];
+		if (tree) {
+			for (const event of tree) {
+				for (const doc of event.documents) {
+					if (selectedPaths.has(doc.originalPath)) {
+						selectedList.push(doc);
+					}
+				}
+			}
+		}
+		if (selectedList.length > 0) {
+			startPipeline(selectedList);
+		}
+	};
 
 	// Determine status indicators for the header
 	let statusClass = "loading pulse-radar-dot";
@@ -102,14 +135,8 @@ export default function App() {
 				<ConfigScreen
 					zipName={zipName}
 					tree={tree}
-					ignoredFiles={ignoredFiles}
 					selectedPaths={selectedPaths}
 					setSelectedPaths={setSelectedPaths}
-					workers={maxWorkers}
-					setWorkers={setWorkers}
-					tessModel={tessModel}
-					setTessModel={setTessModel}
-					onStart={startPipeline}
 					onReset={resetPipeline}
 				/>
 			);
@@ -130,7 +157,31 @@ export default function App() {
 
 			<Header statusClass={statusClass} statusLabel={statusLabel} />
 
-			<section className="app-content-wrapper">{renderScreen()}</section>
+			<section className="app-content-wrapper">
+				<div className="retro-tv-layout-grid">
+					<div className="retro-tv-left-column">
+						<RetroTV
+							isSwitchingChannel={isSwitchingChannel}
+							isLoading={globalLoading || status === "processing"}
+						>
+							{renderScreen()}
+						</RetroTV>
+					</div>
+					<div className="retro-tv-right-column">
+						<ConfigPanel
+							disabled={status !== "configuring"}
+							workers={maxWorkers}
+							setWorkers={setWorkers}
+							maxAllowedWorkers={Math.max(navigator.hardwareConcurrency || 3, 3)}
+							tessModel={tessModel}
+							setTessModel={setTessModel}
+							selectedPathsSize={selectedPaths?.size || 0}
+							handleStartClick={handleStartClick}
+							ignoredFiles={ignoredFiles}
+						/>
+					</div>
+				</div>
+			</section>
 
 			<Footer mockState={mockState} setMockState={setMockState} />
 		</main>

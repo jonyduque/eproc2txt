@@ -1,6 +1,5 @@
 import { memo, useEffect, useState } from "react";
 import FileIcon from "../FileIcon";
-import CRTMonitor from "../Layout/CRTMonitor";
 import IsometricViewport3D from "../Layout/IsometricViewport3D";
 import "./ProcessingScreen.css";
 import { formatDuration } from "../../utils/format";
@@ -212,47 +211,45 @@ export default function ProcessingScreen({
 
 			{/* Shared isometric scene panel with overlays */}
 			<div className="processing-layout-grid">
-				<CRTMonitor brandText="EPROC-TXT CRT-80" isLoading={!isPaused}>
-					<IsometricViewport3D
-						status="processing"
-						maxWorkers={maxWorkers}
-						workerStatuses={workerStatuses}
-						docStatuses={docStatuses}
-						globalLoading={false}
-					>
-						{/* Transparent document list overlay */}
-						<div className="processing-docs-overlay">
-							<div className="docs-list-header-simple">
-								<span className="docs-list-header-title">documentos</span>
-							</div>
-							<ul className="docs-list-items">
-								{Object.values(docStatuses).map((d) => (
-									<DocRow key={d.fileName} doc={d} />
-								))}
-							</ul>
+				<IsometricViewport3D
+					status="processing"
+					maxWorkers={maxWorkers}
+					workerStatuses={workerStatuses}
+					docStatuses={docStatuses}
+					globalLoading={false}
+				>
+					{/* Transparent document list overlay */}
+					<div className="processing-docs-overlay">
+						<div className="docs-list-header-simple">
+							<span className="docs-list-header-title">documentos</span>
 						</div>
+						<ul className="docs-list-items">
+							{Object.values(docStatuses).map((d) => (
+								<DocRow key={d.fileName} doc={d} />
+							))}
+						</ul>
+					</div>
 
-						{/* Upper right control actions overlay */}
-						<div className="processing-actions-overlay">
-							<button
-								type="button"
-								className={`btn-pause-process ${isPaused ? "paused" : ""}`}
-								onClick={isPaused ? onResume : onPause}
-							>
-								<span className="material-icons" style={{ fontSize: "14px" }}>
-									{isPaused ? "play_arrow" : "pause"}
-								</span>
-								{isPaused ? "Retomar" : "Pausar"}
-							</button>
-							<button type="button" className="btn-stop-process" onClick={onCancel}>
-								<span className="material-icons" style={{ fontSize: "14px" }}>
-									stop
-								</span>
-								Parar
-							</button>
-						</div>
-					</IsometricViewport3D>
-				</CRTMonitor>
+					{/* Upper right control actions overlay */}
+					<div className="processing-actions-overlay">
+						<button
+							type="button"
+							className={`btn-pause-process ${isPaused ? "paused" : ""}`}
+							onClick={isPaused ? onResume : onPause}
+						>
+							<span className="material-icons" style={{ fontSize: "14px" }}>
+								{isPaused ? "play_arrow" : "pause"}
+							</span>
+							{isPaused ? "Retomar" : "Pausar"}
+						</button>
+						<button type="button" className="btn-stop-process" onClick={onCancel}>
+							<span className="material-icons" style={{ fontSize: "14px" }}>
+								stop
+							</span>
+							Parar
+						</button>
+					</div>
+				</IsometricViewport3D>
 			</div>
 		</div>
 	);

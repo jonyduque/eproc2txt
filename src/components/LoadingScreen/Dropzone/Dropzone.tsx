@@ -1,6 +1,5 @@
 import { useRef, useState } from "react";
 import { parseZipStructure } from "../../../utils/parser.js";
-import CRTMonitor from "../../Layout/CRTMonitor";
 import IsometricViewport3D from "../../Layout/IsometricViewport3D";
 
 // @ts-expect-error
@@ -65,57 +64,51 @@ export default function Dropzone({ onZipParsed, onLoadingChange }: DropzoneProps
 
 	return (
 		<div className="dropzone-outer-container">
-			<CRTMonitor
-				brandText="EPROC-TXT CRT-80"
-				isLoading={loading}
-				onPowerClick={() => fileInputRef.current?.click()}
+			<label
+				onDragOver={(e) => {
+					e.preventDefault();
+					setHover(true);
+				}}
+				onDragLeave={() => setHover(false)}
+				onDrop={(e) => {
+					e.preventDefault();
+					setHover(false);
+					const f = e.dataTransfer.files?.[0];
+					if (f) handleFile(f);
+				}}
+				className={`dropzone-screen-area ${hover ? "hovered" : ""} ${loading ? "loading" : ""}`}
 			>
-				<label
-					onDragOver={(e) => {
-						e.preventDefault();
-						setHover(true);
+				<input
+					type="file"
+					ref={fileInputRef}
+					accept=".zip"
+					className="visually-hidden"
+					onChange={(e) => {
+						if (e.target.files && e.target.files.length > 0) {
+							handleFile(e.target.files[0]);
+						}
 					}}
-					onDragLeave={() => setHover(false)}
-					onDrop={(e) => {
-						e.preventDefault();
-						setHover(false);
-						const f = e.dataTransfer.files?.[0];
-						if (f) handleFile(f);
-					}}
-					className={`dropzone-screen-area ${hover ? "hovered" : ""} ${loading ? "loading" : ""}`}
-				>
-					<input
-						type="file"
-						ref={fileInputRef}
-						accept=".zip"
-						className="visually-hidden"
-						onChange={(e) => {
-							if (e.target.files && e.target.files.length > 0) {
-								handleFile(e.target.files[0]);
-							}
-						}}
-						disabled={loading}
-					/>
+					disabled={loading}
+				/>
 
-					{loading && <div className="scan-line" />}
+				{loading && <div className="scan-line" />}
 
-					<IsometricViewport3D
-						status="idle"
-						maxWorkers={0}
-						workerStatuses={[]}
-						docStatuses={{}}
-						globalLoading={false}
-						isDragHovered={hover}
-						showUploadIcon={true}
-					/>
+				<IsometricViewport3D
+					status="idle"
+					maxWorkers={0}
+					workerStatuses={[]}
+					docStatuses={{}}
+					globalLoading={false}
+					isDragHovered={hover}
+					showUploadIcon={true}
+				/>
 
-					<div className="dropzone-text-group">
-						<p className="dropzone-prompt">
-							{loading ? "Lendo arquivo…" : "Arraste o .zip aqui ou clique para selecionar"}
-						</p>
-					</div>
-				</label>
-			</CRTMonitor>
+				<div className="dropzone-text-group">
+					<p className="dropzone-prompt">
+						{loading ? "Lendo arquivo…" : "Arraste o .zip aqui ou clique para selecionar"}
+					</p>
+				</div>
+			</label>
 			{error && <p className="dropzone-error animate-fade-in">{error}</p>}
 		</div>
 	);

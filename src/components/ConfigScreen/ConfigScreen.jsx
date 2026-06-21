@@ -1,37 +1,8 @@
-import ConfigPanel from "./ConfigPanel/ConfigPanel";
 import FileSummaryBar from "./FileSummaryBar/FileSummaryBar";
 import Tree from "./Tree/Tree";
 import "./ConfigScreen.css";
 
-export default function ConfigScreen({
-	zipName,
-	tree,
-	ignoredFiles,
-	selectedPaths,
-	setSelectedPaths,
-	workers,
-	setWorkers,
-	tessModel,
-	setTessModel,
-	onStart,
-	onReset,
-}) {
-	const maxAllowedWorkers = Math.max(navigator.hardwareConcurrency || 3, 3);
-
-	const handleStartClick = () => {
-		const selectedList = [];
-		tree.forEach((event) => {
-			event.documents.forEach((doc) => {
-				if (selectedPaths.has(doc.originalPath)) {
-					selectedList.push(doc);
-				}
-			});
-		});
-		if (selectedList.length > 0) {
-			onStart(selectedList);
-		}
-	};
-
+export default function ConfigScreen({ zipName, tree, selectedPaths, setSelectedPaths, onReset }) {
 	// Calculate document statistics for LOADED VIEW
 	let selectedDocsCount = 0;
 	let treeDocsCount = 0;
@@ -69,16 +40,6 @@ export default function ConfigScreen({
 					setSelectedPaths={setSelectedPaths}
 					isProcessing={false}
 					isCompleted={false}
-				/>
-				<ConfigPanel
-					workers={workers}
-					setWorkers={setWorkers}
-					maxAllowedWorkers={maxAllowedWorkers}
-					tessModel={tessModel}
-					setTessModel={setTessModel}
-					selectedPathsSize={selectedPaths.size}
-					handleStartClick={handleStartClick}
-					ignoredFiles={ignoredFiles}
 				/>
 			</div>
 		</div>
