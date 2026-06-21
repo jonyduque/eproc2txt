@@ -148,7 +148,7 @@ body.light-theme {
 }
 
 .crt-screen-bezel {
-	flex: 7;
+	flex: 8.5;
 	background: var(--crt-bezel-bg);
 	border: 8px solid var(--crt-bezel-bg);
 	border-radius: 16px;
@@ -162,7 +162,7 @@ body.light-theme {
 
 /* Bezel Controls Column */
 .crt-bezel-controls {
-	flex: 3;
+	flex: 1.5;
 	background: var(--crt-control-panel-bg);
 	border: 4px solid var(--crt-control-panel-border);
 	border-radius: 12px;
@@ -172,7 +172,7 @@ body.light-theme {
 	justify-content: space-between;
 	box-shadow: inset 1px 1px 3px rgba(0, 0, 0, 0.5);
 	transition: opacity 0.3s ease;
-	min-width: 160px;
+	min-width: 120px;
 }
 
 .controls-disabled {
