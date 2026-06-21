@@ -1,4 +1,5 @@
 import type React from "react";
+import { useEffect, useRef } from "react";
 import "./RetroTV.css";
 
 /**
@@ -7,16 +8,12 @@ import "./RetroTV.css";
 interface RetroTVProps {
 	/** Brand name text displayed at the bottom of the bezel */
 	brandText?: string;
-	/** Indicates if background processes are loading */
-	isLoading?: boolean;
 	/** Indicates if the channel is currently switching (shows full static noise) */
 	isSwitchingChannel?: boolean;
 	/** Main content to render inside the CRT screen */
 	children: React.ReactNode;
 	/** Custom class name applied to the outermost container */
 	className?: string;
-	/** Optional callback when the power button is clicked (maintained for compatibility) */
-	onPowerClick?: () => void;
 
 	// Config panel properties
 	/** Current operational status of the application ('configuring', 'processing', 'completed', etc.) */
@@ -60,6 +57,7 @@ export default function RetroTV({
 	ignoredFiles = [],
 }: RetroTVProps) {
 	const isDisabled = status !== "configuring";
+	const dialRef = useRef<HTMLDivElement>(null);
 
 	// Calculate rotation angle for UHF knob (from -135deg to +135deg over 1 to maxAllowedWorkers)
 	const rotateValue =
@@ -71,16 +69,29 @@ export default function RetroTV({
 		setWorkers((prev) => (prev >= maxAllowedWorkers ? 1 : prev + 1));
 	};
 
-	// Handle wheel scroll on dial
-	const handleDialWheel = (e: React.WheelEvent) => {
-		if (isDisabled) return;
-		e.preventDefault();
-		if (e.deltaY < 0) {
-			setWorkers((prev) => Math.min(maxAllowedWorkers, prev + 1));
-		} else {
-			setWorkers((prev) => Math.max(1, prev - 1));
+	// Use passive: false event listener for dial wheel to prevent console warnings/errors
+	useEffect(() => {
+		const handleWheel = (e: WheelEvent) => {
+			if (isDisabled) return;
+			e.preventDefault();
+			if (e.deltaY < 0) {
+				setWorkers((prev) => Math.min(maxAllowedWorkers, prev + 1));
+			} else {
+				setWorkers((prev) => Math.max(1, prev - 1));
+			}
+		};
+
+		const dial = dialRef.current;
+		if (dial) {
+			dial.addEventListener("wheel", handleWheel, { passive: false });
 		}
-	};
+
+		return () => {
+			if (dial) {
+				dial.removeEventListener("wheel", handleWheel);
+			}
+		};
+	}, [isDisabled, maxAllowedWorkers, setWorkers]);
 
 	// Handle key presses on dial for keyboard accessibility
 	const handleDialKeyDown = (e: React.KeyboardEvent) => {
@@ -91,6 +102,12 @@ export default function RetroTV({
 		} else if (e.key === "ArrowDown" || e.key === "ArrowLeft") {
 			e.preventDefault();
 			setWorkers((prev) => Math.max(1, prev - 1));
+		} else if (e.key === "Home") {
+			e.preventDefault();
+			setWorkers(1);
+		} else if (e.key === "End") {
+			e.preventDefault();
+			setWorkers(maxAllowedWorkers);
 		}
 	};
 
@@ -145,9 +162,9 @@ export default function RetroTV({
 						<div className="crt-control-group">
 							<span className="crt-control-label">WORKERS (UHF)</span>
 							<div
+								ref={dialRef}
 								className="crt-uhf-dial"
 								onClick={handleDialClick}
-								onWheel={handleDialWheel}
 								onKeyDown={handleDialKeyDown}
 								style={{ transform: `rotate(${rotateValue}deg)` }}
 								title="Clique para alternar / Role para ajustar"
@@ -155,6 +172,7 @@ export default function RetroTV({
 								aria-valuenow={maxWorkers}
 								aria-valuemin={1}
 								aria-valuemax={maxAllowedWorkers}
+								aria-disabled={isDisabled}
 								aria-label="Worker selection"
 								tabIndex={isDisabled ? -1 : 0}
 							>
@@ -174,27 +192,30 @@ export default function RetroTV({
 									type="button"
 									className={`fader-preset-btn best ${tessModel === "best" ? "active" : ""}`}
 									onClick={() => !isDisabled && setTessModel("best")}
+									disabled={isDisabled}
+									aria-label="OCR Preciso"
+									aria-pressed={tessModel === "best"}
 									title="Preciso"
 								/>
 								<button
 									type="button"
 									className={`fader-preset-btn standard ${tessModel === "standard" ? "active" : ""}`}
 									onClick={() => !isDisabled && setTessModel("standard")}
+									disabled={isDisabled}
+									aria-label="OCR Normal"
+									aria-pressed={tessModel === "standard"}
 									title="Normal"
 								/>
 								<button
 									type="button"
 									className={`fader-preset-btn fast ${tessModel === "fast" ? "active" : ""}`}
 									onClick={() => !isDisabled && setTessModel("fast")}
+									disabled={isDisabled}
+									aria-label="OCR Rápido"
+									aria-pressed={tessModel === "fast"}
 									title="Rápido"
 								/>
-								<div
-									className="crt-fader-knob"
-									style={{
-										bottom:
-											tessModel === "best" ? "38px" : tessModel === "standard" ? "18px" : "-2px",
-									}}
-								/>
+								<div className={`crt-fader-knob position-${tessModel}`} />
 							</div>
 							<span className="crt-control-value value-yellow">
 								{tessModel === "fast" ? "Rápido" : tessModel === "best" ? "Preciso" : "Normal"}
@@ -211,6 +232,7 @@ export default function RetroTV({
 									className="crt-power-btn"
 									disabled={isDisabled || selectedPathsSize === 0}
 									onClick={handleStartClick}
+									aria-label="Iniciar Processamento"
 									title="Iniciar Processamento"
 								/>
 							</div>
