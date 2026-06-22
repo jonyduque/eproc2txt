@@ -102,15 +102,22 @@ body.light-theme {
 .dropzone-screen-area {
 	display: flex;
 	flex-direction: column;
-	justify-content: center;
-	align-items: center;
 	cursor: pointer;
 	position: relative;
 	overflow: hidden;
 	background: var(--bg-card);
 	height: 100%;
+	width: 100%;
 	flex: 1;
 	transition: background-color 0.3s;
+}
+
+/* Viewport isométrico dentro do dropzone preenche o espaço */
+.dropzone-screen-area > .isometric-viewport {
+	flex: 1;
+	height: 100%;
+	margin-bottom: 0;
+	border-radius: 0;
 }
 
 .dropzone-screen-area.hovered {

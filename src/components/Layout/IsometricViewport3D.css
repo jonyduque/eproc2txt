@@ -55,6 +55,7 @@
 }
 
 .isometric-viewport {
+	width: 100%;
 	height: var(--viewport-height);
 	border-radius: var(--radius);
 	position: relative;
