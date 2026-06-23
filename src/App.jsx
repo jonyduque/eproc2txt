@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import ConfigScreen from "./components/ConfigScreen/ConfigScreen.jsx";
 import DoneScreen from "./components/DoneScreen/DoneScreen.tsx";
 import BackgroundFX from "./components/Layout/Background/BackgroundFX.jsx";
@@ -69,11 +69,11 @@ export default function App() {
 		localStorage.setItem("theme", theme);
 	}, [theme]);
 
-	const toggleTheme = () => {
+	const toggleTheme = useCallback(() => {
 		setTheme((prev) => (prev === "dark" ? "light" : "dark"));
-	};
+	}, []);
 
-	const handleStartClick = () => {
+	const handleStartClick = useCallback(() => {
 		const selectedList = [];
 		if (tree) {
 			for (const event of tree) {
@@ -87,20 +87,17 @@ export default function App() {
 		if (selectedList.length > 0) {
 			startPipeline(selectedList);
 		}
-	};
+	}, [tree, selectedPaths, startPipeline]);
 
-	// Determine status indicators for the header/TV
-	let statusLabel = "Aguardando Arquivo";
+	const maxAllowedWorkers = useMemo(() => Math.max(navigator.hardwareConcurrency || 3, 3), []);
 
-	if (globalLoading) {
-		statusLabel = "Lendo ZIP...";
-	} else if (status === "configuring") {
-		statusLabel = "Pronto";
-	} else if (status === "processing") {
-		statusLabel = "Processando";
-	} else if (status === "completed") {
-		statusLabel = "Finalizado";
-	}
+	const statusLabel = useMemo(() => {
+		if (globalLoading) return "PROCESSAMENTO EM CURSO";
+		if (status === "configuring") return "PRONTO PARA PROCESSAR";
+		if (status === "processing") return "PROCESSAMENTO EM CURSO";
+		if (status === "completed") return "PROCESSAMENTO CONCLUÍDO";
+		return "AGUARDANDO ARQUIVO";
+	}, [status, globalLoading]);
 
 	const renderScreen = () => {
 		if (status === "completed") {
@@ -172,7 +169,7 @@ export default function App() {
 						status={status}
 						maxWorkers={maxWorkers}
 						setWorkers={setWorkers}
-						maxAllowedWorkers={Math.max(navigator.hardwareConcurrency || 3, 3)}
+						maxAllowedWorkers={maxAllowedWorkers}
 						tessModel={tessModel}
 						setTessModel={setTessModel}
 						selectedPathsSize={selectedPaths?.size || 0}

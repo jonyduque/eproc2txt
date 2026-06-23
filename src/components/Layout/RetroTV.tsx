@@ -8,6 +8,12 @@ import CRTPowerSection from "./Controls/CRTPowerSection";
 import CRTSpeakerGrille from "./Controls/CRTSpeakerGrille";
 import CRTUHFDial from "./Controls/CRTUHFDial";
 
+const LED_COLORS: Record<string, string> = {
+	configuring: "orange-solid",
+	processing: "green-pulse",
+	completed: "green-solid",
+};
+
 interface RetroTVProps {
 	isSwitchingChannel?: boolean;
 	children: React.ReactNode;
@@ -63,20 +69,7 @@ export default function RetroTV({
 		onPointerUp: handleFaderPointerUp,
 	} = useFaderControl({ isDisabled, setTessModel });
 
-	const labelMap: Record<string, string> = {
-		"Aguardando Arquivo": "AGUARDANDO ARQUIVO",
-		Pronto: "PRONTO PARA PROCESSAR",
-		Processando: "PROCESSAMENTO EM CURSO",
-		"Lendo ZIP...": "PROCESSAMENTO EM CURSO",
-		Finalizado: "PROCESSAMENTO CONCLUÍDO",
-		Interrompido: "PROCESSAMENTO CANCELADO",
-		Cancelado: "PROCESSAMENTO CANCELADO",
-	};
-	const displayLabel = labelMap[statusLabel] ?? "AGUARDANDO ARQUIVO";
-	let ledColor = "orange-pulse";
-	if (status === "configuring") ledColor = "orange-solid";
-	else if (status === "processing") ledColor = "green-pulse";
-	else if (status === "completed") ledColor = "green-solid";
+	const ledColor = LED_COLORS[status] ?? "orange-pulse";
 
 	return (
 		<div className={`crt-monitor-frame ${className}`}>
@@ -147,7 +140,7 @@ export default function RetroTV({
 						</div>
 
 						<CRTPowerSection
-							displayLabel={displayLabel}
+							displayLabel={statusLabel}
 							ledColor={ledColor}
 							isDisabled={isDisabled}
 							selectedPathsSize={selectedPathsSize}
