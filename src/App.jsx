@@ -181,13 +181,12 @@ export default function App() {
 						statusLabel={statusLabel}
 						theme={theme}
 						toggleTheme={toggleTheme}
+						footer={<Footer mockState={mockState} setMockState={setMockState} />}
 					>
 						{renderScreen()}
 					</RetroTV>
 				</div>
 			</section>
-
-			<Footer mockState={mockState} setMockState={setMockState} />
 		</main>
 	);
 }

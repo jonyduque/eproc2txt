@@ -1,15 +1,14 @@
 /* RetroTV.css */
+@import url("https://fonts.googleapis.com/css2?family=VT323&display=swap");
 
 :root {
 	--crt-cabinet-bg: linear-gradient(135deg, #373b47 0%, #21242d 100%);
 	--crt-bezel-bg: #1c1e26;
 	--crt-border-color: #4b5061;
 	--crt-shadow-color: rgba(0, 0, 0, 0.7);
-	--crt-glass-reflection: linear-gradient(
-		135deg,
-		rgba(255, 255, 255, 0.08) 0%,
-		rgba(255, 255, 255, 0) 50%
-	);
+	--crt-glass-reflection: linear-gradient(135deg,
+			rgba(255, 255, 255, 0.08) 0%,
+			rgba(255, 255, 255, 0) 50%);
 
 	/* Control Panel colors */
 	--crt-control-panel-bg: #252833;
@@ -62,19 +61,21 @@
 }
 
 .crt-monitor-frame {
-	margin: var(--space-4) auto;
+	margin: 0;
 	max-width: 100%;
 	width: 100%;
+	height: 100%;
 	display: flex;
 	flex-direction: column;
-	align-items: center;
+	align-items: stretch;
 	position: relative;
 }
 
 /* Cabinet/Chassis */
 .crt-chassis {
 	width: 100%;
-	height: 560px;
+	flex: 1;
+	min-height: 0;
 	background: var(--crt-cabinet-bg);
 	border: 6px solid var(--crt-border-color);
 	border-radius: 20px;
@@ -87,18 +88,6 @@
 	display: flex;
 	flex-direction: column;
 	position: relative;
-}
-
-@media (min-width: 900px) {
-	.crt-chassis {
-		height: 620px;
-	}
-}
-
-@media (min-width: 1200px) {
-	.crt-chassis {
-		height: 700px;
-	}
 }
 
 /* Molded handle at the top */
@@ -124,13 +113,11 @@
 	left: 10%;
 	right: 10%;
 	height: 3px;
-	background: repeating-linear-gradient(
-		90deg,
-		rgba(0, 0, 0, 0.4) 0px,
-		rgba(0, 0, 0, 0.4) 6px,
-		transparent 6px,
-		transparent 12px
-	);
+	background: repeating-linear-gradient(90deg,
+			rgba(0, 0, 0, 0.4) 0px,
+			rgba(0, 0, 0, 0.4) 6px,
+			transparent 6px,
+			transparent 12px);
 	opacity: 0.6;
 }
 
@@ -161,23 +148,132 @@
 
 /* Bezel Controls Column */
 .crt-bezel-controls {
-	flex: 0.8;
+	flex: 0 0 140px;
 	background: var(--crt-control-panel-bg);
 	border: 4px solid var(--crt-control-panel-border);
 	border-radius: 12px;
-	padding: var(--space-3) 6px;
+	padding: var(--space-3) var(--space-3);
 	display: flex;
 	flex-direction: column;
-	justify-content: space-between;
+	justify-content: flex-start;
+	gap: var(--space-2);
 	box-shadow: inset 1px 1px 3px rgba(0, 0, 0, 0.5);
-	transition: opacity 0.3s ease;
-	min-width: 90px;
 	height: 100%;
 }
 
-.controls-disabled {
-	opacity: 0.5;
+/* Lid wrapper — fills available space between logo and power section */
+.crt-lid-wrapper {
+	position: relative;
+	flex: 1;
+	min-height: 0;
+	perspective: 280px;
+	perspective-origin: 100% 50%;
+	display: flex;
+	flex-direction: column;
+}
+
+/* Controls underneath the lid */
+.crt-lid-content {
+	flex: 1;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+}
+
+.crt-lid-content.locked {
 	pointer-events: none;
+	user-select: none;
+}
+
+/* Physical lid panel — hinge on right edge, opens leftward */
+.crt-controls-lid {
+	position: absolute;
+	inset: 0;
+	transform-origin: right center;
+	transform: rotateY(0deg);
+	transition: transform 0.48s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+	z-index: 5;
+	pointer-events: auto;
+	backface-visibility: hidden;
+	background: linear-gradient(180deg, #30344a 0%, #252935 40%, #1d2028 70%, #252833 100%);
+	border: 2px solid var(--crt-border-color);
+	border-radius: 8px 0 0 8px;
+	border-right: 2px solid rgba(255, 255, 255, 0.12);
+	box-shadow:
+		-4px 0 12px rgba(0, 0, 0, 0.6),
+		inset 1px 0 3px rgba(255, 255, 255, 0.1),
+		inset -2px 0 4px rgba(0, 0, 0, 0.5);
+}
+
+.crt-controls-lid.open {
+	transform: rotateY(-100deg);
+	pointer-events: none;
+}
+
+/* Lid face layout */
+.crt-lid-face {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+	height: 100%;
+	gap: var(--space-4);
+	padding: var(--space-3) var(--space-2);
+}
+
+/* Ribbed texture stripes on lid */
+.crt-lid-ribs {
+	width: 80%;
+	height: 16px;
+	border-radius: 2px;
+	background: repeating-linear-gradient(180deg,
+			rgba(255, 255, 255, 0.05) 0px,
+			rgba(255, 255, 255, 0.05) 2px,
+			rgba(0, 0, 0, 0.2) 2px,
+			rgba(0, 0, 0, 0.2) 4px);
+}
+
+/* Embossed label on lid */
+.crt-lid-label {
+	font-family: var(--font-mono);
+	font-size: 7px;
+	letter-spacing: 0.22em;
+	color: rgba(200, 210, 235, 0.3);
+	text-transform: uppercase;
+	text-align: center;
+}
+
+body.light-theme .crt-controls-lid {
+	background: linear-gradient(180deg, #cdd0dc 0%, #c2c5d0 40%, #b8bbc8 70%, #c0c3ce 100%);
+	border-color: #a4a7b8;
+	border-top-color: rgba(255, 255, 255, 0.6);
+	box-shadow:
+		0 6px 14px rgba(0, 0, 0, 0.2),
+		inset 0 1px 3px rgba(255, 255, 255, 0.5),
+		inset 0 -2px 4px rgba(0, 0, 0, 0.15);
+}
+
+body.light-theme .crt-lid-label {
+	color: rgba(80, 90, 115, 0.45);
+}
+
+body.light-theme .crt-lid-ribs {
+	background: repeating-linear-gradient(180deg,
+			rgba(255, 255, 255, 0.35) 0px,
+			rgba(255, 255, 255, 0.35) 2px,
+			rgba(0, 0, 0, 0.06) 2px,
+			rgba(0, 0, 0, 0.06) 4px);
+}
+
+/* Theme group below power section */
+.crt-theme-group {
+	margin-bottom: 0;
+	border-top: 1px solid rgba(255, 255, 255, 0.07);
+	padding-top: var(--space-2);
+}
+
+body.light-theme .crt-theme-group {
+	border-top-color: rgba(0, 0, 0, 0.1);
 }
 
 /* Speaker Grille */
@@ -201,23 +297,35 @@
 	flex-direction: column;
 	align-items: center;
 	gap: var(--space-2);
-	margin-bottom: var(--space-3);
+	margin-bottom: var(--space-4);
 }
 
 .crt-control-label {
 	font-family: var(--font-mono);
-	font-size: 8px;
+	font-size: 9px;
 	font-weight: var(--font-weight-bold);
 	color: var(--crt-control-label-color);
-	letter-spacing: 0.05em;
+	letter-spacing: 0.08em;
 	text-align: center;
 }
 
 .crt-control-value {
-	font-family: var(--font-mono);
-	font-size: var(--font-size-xs);
-	font-weight: var(--font-weight-bold);
-	color: var(--crt-control-val-color);
+	font-family: "VT323", "Courier New", monospace;
+	font-size: 16px;
+	font-weight: normal;
+	color: rgb(210, 255, 248);
+	text-shadow:
+		0 0 5px rgba(0, 230, 190, 0.9),
+		0 0 10px rgba(0, 200, 160, 0.5);
+	background: #000;
+	border: 1px solid rgba(0, 180, 140, 0.3);
+	border-radius: 2px;
+	padding: 1px 6px;
+	letter-spacing: 0.08em;
+	font-variant-numeric: tabular-nums;
+	box-shadow:
+		inset 0 0 8px rgba(0, 180, 140, 0.08),
+		0 1px 3px rgba(0, 0, 0, 0.6);
 }
 
 .value-yellow {
@@ -226,8 +334,8 @@
 
 /* UHF Dial Knob - redesigned realistic rotary dial */
 .crt-uhf-dial {
-	width: 56px;
-	height: 56px;
+	width: 72px;
+	height: 72px;
 	border-radius: 50%;
 	background: var(--crt-dial-bg);
 	border: 3px solid var(--crt-dial-ring);
@@ -249,46 +357,44 @@
 	position: absolute;
 	inset: -3px;
 	border-radius: 50%;
-	background: conic-gradient(
-		from 0deg,
-		#3a3d4a 0deg,
-		#555869 10deg,
-		#3a3d4a 20deg,
-		#555869 30deg,
-		#3a3d4a 40deg,
-		#555869 50deg,
-		#3a3d4a 60deg,
-		#555869 70deg,
-		#3a3d4a 80deg,
-		#555869 90deg,
-		#3a3d4a 100deg,
-		#555869 110deg,
-		#3a3d4a 120deg,
-		#555869 130deg,
-		#3a3d4a 140deg,
-		#555869 150deg,
-		#3a3d4a 160deg,
-		#555869 170deg,
-		#3a3d4a 180deg,
-		#555869 190deg,
-		#3a3d4a 200deg,
-		#555869 210deg,
-		#3a3d4a 220deg,
-		#555869 230deg,
-		#3a3d4a 240deg,
-		#555869 250deg,
-		#3a3d4a 260deg,
-		#555869 270deg,
-		#3a3d4a 280deg,
-		#555869 290deg,
-		#3a3d4a 300deg,
-		#555869 310deg,
-		#3a3d4a 320deg,
-		#555869 330deg,
-		#3a3d4a 340deg,
-		#555869 350deg,
-		#3a3d4a 360deg
-	);
+	background: conic-gradient(from 0deg,
+			#3a3d4a 0deg,
+			#555869 10deg,
+			#3a3d4a 20deg,
+			#555869 30deg,
+			#3a3d4a 40deg,
+			#555869 50deg,
+			#3a3d4a 60deg,
+			#555869 70deg,
+			#3a3d4a 80deg,
+			#555869 90deg,
+			#3a3d4a 100deg,
+			#555869 110deg,
+			#3a3d4a 120deg,
+			#555869 130deg,
+			#3a3d4a 140deg,
+			#555869 150deg,
+			#3a3d4a 160deg,
+			#555869 170deg,
+			#3a3d4a 180deg,
+			#555869 190deg,
+			#3a3d4a 200deg,
+			#555869 210deg,
+			#3a3d4a 220deg,
+			#555869 230deg,
+			#3a3d4a 240deg,
+			#555869 250deg,
+			#3a3d4a 260deg,
+			#555869 270deg,
+			#3a3d4a 280deg,
+			#555869 290deg,
+			#3a3d4a 300deg,
+			#555869 310deg,
+			#3a3d4a 320deg,
+			#555869 330deg,
+			#3a3d4a 340deg,
+			#555869 350deg,
+			#3a3d4a 360deg);
 	z-index: 0;
 	pointer-events: none;
 	opacity: 0.5;
@@ -309,14 +415,14 @@
 
 .dial-notch {
 	position: absolute;
-	top: 5px;
+	top: 6px;
 	left: 50%;
 	transform: translateX(-50%);
-	width: 5px;
-	height: 14px;
+	width: 6px;
+	height: 18px;
 	background: linear-gradient(180deg, #ff6b78 0%, #cc2233 100%);
-	border-radius: 2px 2px 1px 1px;
-	box-shadow: 0 0 4px rgba(255, 75, 90, 0.6);
+	border-radius: 3px 3px 2px 2px;
+	box-shadow: 0 0 6px rgba(255, 75, 90, 0.7);
 	z-index: 10;
 }
 
@@ -325,8 +431,8 @@
 	top: 50%;
 	left: 50%;
 	transform: translate(-50%, -50%);
-	width: 22px;
-	height: 22px;
+	width: 28px;
+	height: 28px;
 	border-radius: 50%;
 	background: radial-gradient(circle at 40% 35%, #2a2d38 0%, #111318 80%);
 	border: 1.5px solid rgba(255, 255, 255, 0.08);
@@ -336,65 +442,98 @@
 	z-index: 10;
 }
 
-/* Fader/Slider for OCR */
+/* Fader/Slider for OCR — drag-and-drop */
+.crt-fader-container {
+	display: flex;
+	flex-direction: row;
+	align-items: stretch;
+	gap: 8px;
+}
+
 .crt-fader-track {
-	width: 16px;
-	height: 60px;
+	width: 18px;
+	height: 90px;
 	background: var(--crt-fader-track-bg);
-	border-radius: 8px;
+	border-radius: 9px;
 	border: 2px solid var(--crt-border-color);
 	position: relative;
 	box-shadow: var(--crt-fader-track-shadow);
-	display: flex;
-	flex-direction: column;
-	justify-content: space-between;
-	padding: 4px 0;
+	cursor: ns-resize;
+	touch-action: none;
+	flex-shrink: 0;
 }
 
-.fader-preset-btn {
-	width: 100%;
-	height: 12px;
-	background: transparent;
-	border: none;
-	cursor: pointer;
-	z-index: 5;
-	position: relative;
-}
-
-.fader-preset-btn::after {
-	content: "";
-	position: absolute;
-	left: 50%;
-	top: 50%;
-	transform: translate(-50%, -50%);
-	width: 32px;
-	height: 20px;
-	z-index: 6;
+body.light-theme .crt-fader-track {
+	background: #c8c8c0;
+	box-shadow: inset 1px 1px 2px rgba(0, 0, 0, 0.2);
 }
 
 .crt-fader-knob {
 	position: absolute;
 	left: 50%;
 	transform: translateX(-50%);
-	width: 24px;
-	height: 12px;
+	width: 28px;
+	height: 14px;
 	background: var(--crt-fader-knob-bg);
 	border: 2px solid var(--crt-fader-knob-border);
-	border-radius: 3px;
+	border-radius: 4px;
 	box-shadow:
-		1px 2px 3px rgba(0, 0, 0, 0.6),
-		inset 1px 1px 0 rgba(255, 255, 255, 0.15);
-	transition: bottom 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+		1px 2px 4px rgba(0, 0, 0, 0.7),
+		inset 1px 1px 0 rgba(255, 255, 255, 0.18);
+	transition: bottom 0.18s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+	cursor: ns-resize;
+	pointer-events: none;
+}
+
+body.light-theme .crt-fader-knob {
+	background: #94948a;
+	border-color: #e2e2da;
 }
 
 .crt-fader-knob.position-best {
-	bottom: 44px;
+	bottom: 72px;
 }
+
 .crt-fader-knob.position-standard {
-	bottom: 24px;
+	bottom: 38px;
 }
+
 .crt-fader-knob.position-fast {
 	bottom: 4px;
+}
+
+/* Fader level labels */
+.crt-fader-labels {
+	display: flex;
+	flex-direction: column;
+	justify-content: space-between;
+	padding: 1px 0;
+}
+
+.crt-fader-label-item {
+	font-family: var(--font-mono);
+	font-size: 7.5px;
+	color: var(--crt-control-label-color);
+	opacity: 0.55;
+	line-height: 1;
+	white-space: nowrap;
+	transition:
+		color 0.15s ease,
+		opacity 0.15s ease;
+	user-select: none;
+}
+
+.crt-fader-label-item.active {
+	color: var(--color-accent);
+	opacity: 1;
+}
+
+body.light-theme .crt-fader-label-item {
+	color: var(--color-text-muted);
+}
+
+body.light-theme .crt-fader-label-item.active {
+	color: var(--color-accent);
 }
 
 /* Power Section */
@@ -429,7 +568,7 @@
 	background: radial-gradient(circle at 35% 30%, #2a2b30 0%, #111216 60%, #0a0a0c 100%);
 	border: 1px solid rgba(0, 0, 0, 0.7);
 	box-shadow:
-/* anel externo fosco */
+		/* anel externo fosco */
 		0 0 0 1.5px rgba(0, 0, 0, 0.5),
 		/* sombra de profundidade */
 		inset 0 2px 3px rgba(0, 0, 0, 0.8),
@@ -451,25 +590,21 @@
 	width: 45%;
 	height: 35%;
 	border-radius: 50%;
-	background: radial-gradient(
-		ellipse at 40% 30%,
-		rgba(255, 255, 255, 0.25) 0%,
-		rgba(255, 255, 255, 0.04) 60%,
-		transparent 100%
-	);
+	background: radial-gradient(ellipse at 40% 30%,
+			rgba(255, 255, 255, 0.25) 0%,
+			rgba(255, 255, 255, 0.04) 60%,
+			transparent 100%);
 	pointer-events: none;
 	z-index: 2;
 }
 
 /* Estado: laranja pulsante (aguardando arquivo) */
 .crt-power-led.led-orange-pulse {
-	background: radial-gradient(
-		circle at 35% 30%,
-		#ffcc60 0%,
-		#ff9500 45%,
-		#cc6800 80%,
-		#8a4000 100%
-	);
+	background: radial-gradient(circle at 35% 30%,
+			#ffcc60 0%,
+			#ff9500 45%,
+			#cc6800 80%,
+			#8a4000 100%);
 	box-shadow:
 		0 0 0 1.5px rgba(180, 80, 0, 0.6),
 		0 0 6px 2px rgba(255, 149, 0, 0.5),
@@ -481,13 +616,11 @@
 
 /* Estado: laranja fixo (pronto para processar) */
 .crt-power-led.led-orange-solid {
-	background: radial-gradient(
-		circle at 35% 30%,
-		#ffd070 0%,
-		#ff9500 45%,
-		#cc6800 80%,
-		#8a4000 100%
-	);
+	background: radial-gradient(circle at 35% 30%,
+			#ffd070 0%,
+			#ff9500 45%,
+			#cc6800 80%,
+			#8a4000 100%);
 	box-shadow:
 		0 0 0 1.5px rgba(180, 80, 0, 0.6),
 		0 0 7px 2px rgba(255, 149, 0, 0.55),
@@ -498,13 +631,11 @@
 
 /* Estado: verde pulsante (processamento em curso) */
 .crt-power-led.led-green-pulse {
-	background: radial-gradient(
-		circle at 35% 30%,
-		#a8ffb0 0%,
-		#34c759 45%,
-		#1a8a3a 80%,
-		#0a4a1e 100%
-	);
+	background: radial-gradient(circle at 35% 30%,
+			#a8ffb0 0%,
+			#34c759 45%,
+			#1a8a3a 80%,
+			#0a4a1e 100%);
 	box-shadow:
 		0 0 0 1.5px rgba(10, 100, 40, 0.6),
 		0 0 6px 2px rgba(52, 199, 89, 0.5),
@@ -516,13 +647,11 @@
 
 /* Estado: verde fixo (processamento concluído) */
 .crt-power-led.led-green-solid {
-	background: radial-gradient(
-		circle at 35% 30%,
-		#b0ffb8 0%,
-		#34c759 45%,
-		#1a8a3a 80%,
-		#0a4a1e 100%
-	);
+	background: radial-gradient(circle at 35% 30%,
+			#b0ffb8 0%,
+			#34c759 45%,
+			#1a8a3a 80%,
+			#0a4a1e 100%);
 	box-shadow:
 		0 0 0 1.5px rgba(10, 100, 40, 0.6),
 		0 0 7px 2px rgba(52, 199, 89, 0.55),
@@ -558,11 +687,9 @@
 	position: absolute;
 	inset: 1px;
 	border-radius: 2px;
-	background: linear-gradient(
-		135deg,
-		var(--crt-power-btn-grad-start) 0%,
-		var(--crt-power-btn-grad-end) 100%
-	);
+	background: linear-gradient(135deg,
+			var(--crt-power-btn-grad-start) 0%,
+			var(--crt-power-btn-grad-end) 100%);
 }
 
 .crt-power-btn:not(:disabled):active {
@@ -573,11 +700,9 @@
 }
 
 .crt-power-btn:not(:disabled):active::after {
-	background: linear-gradient(
-		135deg,
-		var(--crt-power-btn-active-grad-start) 0%,
-		var(--crt-power-btn-active-grad-end) 100%
-	);
+	background: linear-gradient(135deg,
+			var(--crt-power-btn-active-grad-start) 0%,
+			var(--crt-power-btn-active-grad-end) 100%);
 	box-shadow: inset 1px 1px 3px rgba(0, 0, 0, 0.6);
 }
 
@@ -596,7 +721,7 @@
 /* Glass Screen Container styling tweaks */
 .crt-screen-container {
 	background: #000000;
-	border-radius: 10px;
+	border-radius: 3%;
 	overflow: hidden;
 	border: 3px solid #0d0e12;
 	position: relative;
@@ -606,6 +731,62 @@
 	flex-direction: column;
 	min-height: 0;
 	height: 100%;
+}
+
+/* Footer strip inside the TV chassis */
+.crt-chassis-footer {
+	flex-shrink: 0;
+	margin-top: var(--space-2);
+	border-top: 1px solid rgba(255, 255, 255, 0.07);
+	padding-top: var(--space-1);
+}
+
+.crt-chassis-footer .app-footer {
+	color: var(--crt-control-label-color);
+	font-size: 8px;
+	letter-spacing: 0.12em;
+	opacity: 0.7;
+}
+
+.crt-chassis-footer .btn-dev {
+	font-size: 9px;
+	padding: var(--space-0-5) var(--space-2);
+	background: rgba(255, 255, 255, 0.05);
+	border-color: rgba(255, 255, 255, 0.12);
+	color: var(--crt-control-label-color);
+}
+
+.crt-chassis-footer .btn-dev:hover {
+	background: rgba(255, 255, 255, 0.1);
+	color: #ffffff;
+}
+
+.crt-chassis-footer .btn-dev.active {
+	background: rgba(0, 242, 254, 0.12);
+	color: var(--color-primary);
+	border-color: var(--color-primary);
+	box-shadow: 0 0 8px var(--color-primary-glow);
+}
+
+body.light-theme .crt-chassis-footer {
+	border-top-color: rgba(0, 0, 0, 0.1);
+}
+
+body.light-theme .crt-chassis-footer .app-footer {
+	color: var(--color-text-muted);
+}
+
+body.light-theme .crt-chassis-footer .btn-dev {
+	background: rgba(0, 0, 0, 0.04);
+	border-color: rgba(0, 0, 0, 0.1);
+	color: var(--color-text-secondary);
+}
+
+body.light-theme .crt-chassis-footer .btn-dev.active {
+	background: var(--color-primary-alpha-10);
+	color: var(--color-primary);
+	border-color: var(--color-primary);
+	box-shadow: none;
 }
 
 /* Ignored Placard Styling (standardized warning alert inside TV) */
@@ -700,23 +881,19 @@ body.light-theme .crt-static.switching {
 .crt-scanlines {
 	position: absolute;
 	inset: 0;
-	background: repeating-linear-gradient(
-		0deg,
-		rgba(0, 0, 0, 0.14),
-		rgba(0, 0, 0, 0.14) 3px,
-		transparent 3px,
-		transparent 6px
-	);
+	background: repeating-linear-gradient(0deg,
+			rgba(0, 0, 0, 0.14),
+			rgba(0, 0, 0, 0.14) 3px,
+			transparent 3px,
+			transparent 6px);
 }
 
 body.light-theme .crt-scanlines {
-	background: repeating-linear-gradient(
-		0deg,
-		rgba(0, 0, 0, 0.03),
-		rgba(0, 0, 0, 0.03) 3px,
-		transparent 3px,
-		transparent 6px
-	);
+	background: repeating-linear-gradient(0deg,
+			rgba(0, 0, 0, 0.03),
+			rgba(0, 0, 0, 0.03) 3px,
+			transparent 3px,
+			transparent 6px);
 }
 
 /* Phosphor Screen Flicker */
@@ -779,16 +956,30 @@ body.light-theme .crt-flicker {
 	letter-spacing: -0.025em;
 }
 
-/* Power Section Nested Status Badge Label */
+/* Power Section Nested Status Badge Label — LCD display style */
 .crt-power-section .status-badge-label {
 	display: block;
-	font-size: 7.5px;
+	font-family: "VT323", "Courier New", monospace;
+	font-size: 12px;
+	font-weight: normal;
 	letter-spacing: 0.05em;
 	text-align: center;
-	line-height: 1.3;
+	line-height: 1.4;
 	margin-bottom: var(--space-2);
-	color: var(--crt-control-val-color);
+	color: rgb(200, 255, 245);
+	text-shadow:
+		0 0 5px rgba(0, 230, 190, 0.8),
+		0 0 10px rgba(0, 200, 160, 0.4);
 	text-transform: uppercase;
+	background: #000;
+	border: 1px solid rgba(0, 180, 140, 0.22);
+	border-radius: 2px;
+	padding: 3px 5px;
+	width: 100%;
+	box-sizing: border-box;
+	box-shadow:
+		inset 0 0 10px rgba(0, 180, 140, 0.06),
+		0 1px 3px rgba(0, 0, 0, 0.5);
 }
 
 /* ── Animations ── */
@@ -797,6 +988,7 @@ body.light-theme .crt-flicker {
 		transform: translateY(5px);
 		opacity: 0;
 	}
+
 	100% {
 		transform: translateY(0);
 		opacity: 1;
@@ -807,15 +999,19 @@ body.light-theme .crt-flicker {
 	0% {
 		transform: translate(0, 0) scale(1);
 	}
+
 	25% {
 		transform: translate(-5px, 5px) scale(1.02);
 	}
+
 	50% {
 		transform: translate(5px, -5px) scale(0.98);
 	}
+
 	75% {
 		transform: translate(-3px, -2px) scale(1.01);
 	}
+
 	100% {
 		transform: translate(3px, 3px) scale(1);
 	}
@@ -825,15 +1021,18 @@ body.light-theme .crt-flicker {
 	0% {
 		opacity: 0.94;
 	}
+
 	50% {
 		opacity: 1;
 	}
+
 	100% {
 		opacity: 0.96;
 	}
 }
 
 @keyframes crt-led-blink-orange {
+
 	0%,
 	100% {
 		box-shadow:
@@ -844,6 +1043,7 @@ body.light-theme .crt-flicker {
 			inset 0 -1px 2px rgba(255, 200, 80, 0.1);
 		filter: brightness(0.55);
 	}
+
 	50% {
 		box-shadow:
 			0 0 0 1.5px rgba(180, 80, 0, 0.7),
@@ -856,6 +1056,7 @@ body.light-theme .crt-flicker {
 }
 
 @keyframes crt-led-blink-green {
+
 	0%,
 	100% {
 		box-shadow:
@@ -866,6 +1067,7 @@ body.light-theme .crt-flicker {
 			inset 0 -1px 2px rgba(120, 255, 140, 0.15);
 		filter: brightness(0.6);
 	}
+
 	50% {
 		box-shadow:
 			0 0 0 1.5px rgba(10, 100, 40, 0.7),
@@ -878,6 +1080,7 @@ body.light-theme .crt-flicker {
 }
 
 @media (prefers-reduced-motion: reduce) {
+
 	.crt-static,
 	.crt-flicker,
 	.crt-power-led.led-orange-pulse,

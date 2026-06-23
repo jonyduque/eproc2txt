@@ -32,6 +32,8 @@ interface RetroTVProps {
 	handleStartClick: () => void;
 	/** Optional list of ignored files detected during initialization */
 	ignoredFiles?: Array<{ fileName: string; size: number }>;
+	/** Optional footer content rendered at the bottom of the TV chassis */
+	footer?: React.ReactNode;
 
 	// Theme and Status Label properties
 	/** Current descriptive status label */
@@ -60,6 +62,7 @@ export default function RetroTV({
 	selectedPathsSize,
 	handleStartClick,
 	ignoredFiles = [],
+	footer,
 
 	statusLabel,
 	theme,
@@ -67,6 +70,36 @@ export default function RetroTV({
 }: RetroTVProps) {
 	const isDisabled = status !== "configuring";
 	const dialRef = useRef<HTMLDivElement>(null);
+	const faderRef = useRef<HTMLDivElement>(null);
+	const faderActiveRef = useRef<boolean>(false);
+
+	const updateFaderFromY = (clientY: number) => {
+		const track = faderRef.current;
+		if (!track) return;
+		const rect = track.getBoundingClientRect();
+		const relY = Math.max(0, Math.min(1, (clientY - rect.top) / rect.height));
+		if (relY < 0.33) setTessModel("best");
+		else if (relY < 0.67) setTessModel("standard");
+		else setTessModel("fast");
+	};
+
+	const handleFaderPointerDown = (e: React.PointerEvent<HTMLDivElement>) => {
+		if (isDisabled) return;
+		e.preventDefault();
+		e.currentTarget.setPointerCapture(e.pointerId);
+		faderActiveRef.current = true;
+		updateFaderFromY(e.clientY);
+	};
+
+	const handleFaderPointerMove = (e: React.PointerEvent<HTMLDivElement>) => {
+		if (!faderActiveRef.current || isDisabled) return;
+		updateFaderFromY(e.clientY);
+	};
+
+	const handleFaderPointerUp = (e: React.PointerEvent<HTMLDivElement>) => {
+		faderActiveRef.current = false;
+		e.currentTarget.releasePointerCapture(e.pointerId);
+	};
 
 	// Convert status label to match reference wording
 	let displayLabel = "AGUARDANDO ARQUIVO";
@@ -254,54 +287,126 @@ export default function RetroTV({
 					</div>
 
 					{/* Right: Integrated Controls Panel */}
-					<div className={`crt-bezel-controls ${isDisabled ? "controls-disabled" : ""}`}>
-						{/* Logo Title placed above Speaker Grille */}
+					<div className="crt-bezel-controls">
+						{/* Logo Title - always visible */}
 						<div className="logo-text-wrapper">
 							<span className="logo-title">
 								eproc<span className="logo-glow-number text-glow">2</span>txt
 							</span>
 						</div>
 
-						{/* Speaker Grille */}
-						<div className="crt-speaker-grille">
-							<div className="speaker-slot" />
-							<div className="speaker-slot" />
-							<div className="speaker-slot" />
-							<div className="speaker-slot" />
-							<div className="speaker-slot" />
-						</div>
+						{/* Lid wrapper: speaker + workers + OCR covered when disabled */}
+						<div className="crt-lid-wrapper">
+							<div className={`crt-lid-content${isDisabled ? " locked" : ""}`}>
+								{/* Speaker Grille */}
+								<div className="crt-speaker-grille">
+									<div className="speaker-slot" />
+									<div className="speaker-slot" />
+									<div className="speaker-slot" />
+									<div className="speaker-slot" />
+									<div className="speaker-slot" />
+								</div>
 
-						{/* UHF Dial (Parallel Processors Selector) */}
-						<div className="crt-control-group">
-							<span className="crt-control-label">WORKERS (UHF)</span>
-							<div
-								ref={dialRef}
-								className="crt-uhf-dial"
-								onPointerDown={handleDialPointerDown}
-								onPointerMove={handleDialPointerMove}
-								onPointerUp={handleDialPointerUp}
-								onPointerCancel={handleDialPointerUp}
-								onKeyDown={handleDialKeyDown}
-								style={{ transform: `rotate(${rotateValue}deg)` }}
-								title="Arraste para girar / Role para ajustar"
-								role="slider"
-								aria-valuenow={maxWorkers}
-								aria-valuemin={1}
-								aria-valuemax={maxAllowedWorkers}
-								aria-disabled={isDisabled}
-								aria-label="Worker selection"
-								tabIndex={isDisabled ? -1 : 0}
-							>
-								<div className="dial-notch" />
-								<div className="dial-groove" />
+								{/* UHF Dial (Parallel Processors Selector) */}
+								<div className="crt-control-group">
+									<span className="crt-control-label">WORKERS (UHF)</span>
+									<div
+										ref={dialRef}
+										className="crt-uhf-dial"
+										onPointerDown={handleDialPointerDown}
+										onPointerMove={handleDialPointerMove}
+										onPointerUp={handleDialPointerUp}
+										onPointerCancel={handleDialPointerUp}
+										onKeyDown={handleDialKeyDown}
+										style={{ transform: `rotate(${rotateValue}deg)` }}
+										title="Arraste para girar / Role para ajustar"
+										role="slider"
+										aria-valuenow={maxWorkers}
+										aria-valuemin={1}
+										aria-valuemax={maxAllowedWorkers}
+										aria-disabled={isDisabled}
+										aria-label="Worker selection"
+										tabIndex={isDisabled ? -1 : 0}
+									>
+										<div className="dial-notch" />
+										<div className="dial-groove" />
+									</div>
+									<span className="crt-control-value">
+										{maxWorkers} / {maxAllowedWorkers}
+									</span>
+								</div>
+
+								{/* Fader/Slider (OCR Level Selector) — drag to set */}
+								<div className="crt-control-group">
+									<span className="crt-control-label">OCR LEVEL</span>
+									<div className="crt-fader-container">
+										<div
+											ref={faderRef}
+											className="crt-fader-track"
+											onPointerDown={handleFaderPointerDown}
+											onPointerMove={handleFaderPointerMove}
+											onPointerUp={handleFaderPointerUp}
+											onPointerCancel={handleFaderPointerUp}
+											role="slider"
+											aria-label="OCR Level"
+											aria-valuenow={tessModel === "best" ? 2 : tessModel === "standard" ? 1 : 0}
+											aria-valuemin={0}
+											aria-valuemax={2}
+											aria-disabled={isDisabled}
+											tabIndex={isDisabled ? -1 : 0}
+											title="Arraste para ajustar o nível OCR"
+										>
+											<div className={`crt-fader-knob position-${tessModel || "standard"}`} />
+										</div>
+										<div className="crt-fader-labels">
+											<span
+												className={`crt-fader-label-item ${tessModel === "best" ? "active" : ""}`}
+											>
+												Preciso
+											</span>
+											<span
+												className={`crt-fader-label-item ${tessModel === "standard" ? "active" : ""}`}
+											>
+												Normal
+											</span>
+											<span
+												className={`crt-fader-label-item ${tessModel === "fast" ? "active" : ""}`}
+											>
+												Rápido
+											</span>
+										</div>
+									</div>
+								</div>
 							</div>
-							<span className="crt-control-value">
-								{maxWorkers} / {maxAllowedWorkers}
-							</span>
+
+							{/* 3D Lid - covers controls when not configuring */}
+							<div className={`crt-controls-lid${isDisabled ? "" : " open"}`}>
+								<div className="crt-lid-face">
+									<div className="crt-lid-ribs" />
+									<span className="crt-lid-label">CONTROLES</span>
+									<div className="crt-lid-ribs" />
+								</div>
+							</div>
 						</div>
 
-						{/* Theme Toggle Button placed between controls */}
-						<div className="crt-control-group">
+						{/* Power Section - always visible */}
+						<div className="crt-power-section">
+							<span className="status-badge-label">{displayLabel}</span>
+							<div className="crt-power-row">
+								<div className={`crt-power-led led-${ledColor}`} />
+								<button
+									type="button"
+									className="crt-power-btn"
+									disabled={isDisabled || selectedPathsSize === 0}
+									onClick={handleStartClick}
+									aria-label="Iniciar Processamento"
+									title="Iniciar Processamento"
+								/>
+							</div>
+						</div>
+
+						{/* Theme Toggle - below power section, always visible */}
+						<div className="crt-control-group crt-theme-group">
 							<span className="crt-control-label">TEMA</span>
 							<button
 								type="button"
@@ -317,62 +422,10 @@ export default function RetroTV({
 								)}
 							</button>
 						</div>
-
-						{/* Fader/Slider (OCR Level Selector) */}
-						<div className="crt-control-group">
-							<span className="crt-control-label">OCR LEVEL</span>
-							<div className="crt-fader-track">
-								<button
-									type="button"
-									className="fader-preset-btn best"
-									onClick={() => !isDisabled && setTessModel("best")}
-									disabled={isDisabled}
-									aria-label="OCR Preciso"
-									aria-pressed={tessModel === "best"}
-									title="Preciso"
-								/>
-								<button
-									type="button"
-									className="fader-preset-btn standard"
-									onClick={() => !isDisabled && setTessModel("standard")}
-									disabled={isDisabled}
-									aria-label="OCR Normal"
-									aria-pressed={tessModel === "standard"}
-									title="Normal"
-								/>
-								<button
-									type="button"
-									className="fader-preset-btn fast"
-									onClick={() => !isDisabled && setTessModel("fast")}
-									disabled={isDisabled}
-									aria-label="OCR Rápido"
-									aria-pressed={tessModel === "fast"}
-									title="Rápido"
-								/>
-								<div className={`crt-fader-knob position-${tessModel || "standard"}`} />
-							</div>
-							<span className="crt-control-value value-yellow">
-								{tessModel === "fast" ? "Rápido" : tessModel === "best" ? "Preciso" : "Normal"}
-							</span>
-						</div>
-
-						{/* Power Section (Status label without "POWER:" label) */}
-						<div className="crt-power-section">
-							<span className="status-badge-label">{displayLabel}</span>
-							<div className="crt-power-row">
-								<div className={`crt-power-led led-${ledColor}`} />
-								<button
-									type="button"
-									className="crt-power-btn"
-									disabled={isDisabled || selectedPathsSize === 0}
-									onClick={handleStartClick}
-									aria-label="Iniciar Processamento"
-									title="Iniciar Processamento"
-								/>
-							</div>
-						</div>
 					</div>
 				</div>
+
+				{footer && <div className="crt-chassis-footer">{footer}</div>}
 			</div>
 		</div>
 	);
