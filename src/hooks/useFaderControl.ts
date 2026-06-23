@@ -7,7 +7,7 @@ interface FaderControlOptions {
 }
 
 interface FaderControlReturn {
-	faderRef: React.RefObject<HTMLDivElement>;
+	faderRef: React.RefObject<HTMLDivElement | null>;
 	onPointerDown: (e: React.PointerEvent<HTMLDivElement>) => void;
 	onPointerMove: (e: React.PointerEvent<HTMLDivElement>) => void;
 	onPointerUp: (e: React.PointerEvent<HTMLDivElement>) => void;

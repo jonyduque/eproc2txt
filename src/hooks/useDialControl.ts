@@ -9,7 +9,7 @@ interface DialControlOptions {
 }
 
 interface DialControlReturn {
-	dialRef: React.RefObject<HTMLDivElement>;
+	dialRef: React.RefObject<HTMLDivElement | null>;
 	rotateValue: number;
 	onPointerDown: (e: React.PointerEvent<HTMLDivElement>) => void;
 	onPointerMove: (e: React.PointerEvent<HTMLDivElement>) => void;
