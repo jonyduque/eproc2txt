@@ -41,6 +41,12 @@ export default function App() {
 		setSelectedPaths,
 		setGlobalLoading,
 		handleZipParsed,
+		errors,
+		errorPages,
+		pipelineError,
+		hasRunLog,
+		downloadLog,
+		dismissPipelineError,
 	} = usePipeline();
 
 	const [isSwitchingChannel, setIsSwitchingChannel] = useState(false);
@@ -112,6 +118,9 @@ export default function App() {
 					tessModel={tessModel}
 					elapsedTime={elapsedTime}
 					consolidatedXml={consolidatedXml}
+					errors={errors}
+					errorPages={errorPages}
+					onDownloadLog={hasRunLog ? downloadLog : undefined}
 					onReset={resetPipeline}
 				/>
 			);
@@ -129,6 +138,7 @@ export default function App() {
 					docStatuses={docStatuses}
 					workerStatuses={workerStatuses}
 					maxWorkers={maxWorkers}
+					errorPages={errorPages}
 					onResume={resumePipeline}
 					onPause={pausePipeline}
 					onCancel={cancelPipeline}
@@ -145,6 +155,10 @@ export default function App() {
 					selectedPaths={selectedPaths}
 					setSelectedPaths={setSelectedPaths}
 					onReset={resetPipeline}
+					pipelineError={pipelineError}
+					errors={errors}
+					onDownloadLog={downloadLog}
+					onDismissError={dismissPipelineError}
 				/>
 			);
 		}

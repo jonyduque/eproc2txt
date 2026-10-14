@@ -9,6 +9,8 @@ export default function FileIcon({ status, ext }: FileIconProps) {
 		stateClass = "status-done";
 	} else if (status === "processing") {
 		stateClass = "status-processing";
+	} else if (status === "error") {
+		stateClass = "status-error";
 	}
 
 	return (

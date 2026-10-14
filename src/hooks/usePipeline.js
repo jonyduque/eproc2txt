@@ -7,6 +7,7 @@ import {
 	mockXmlData,
 } from "../utils/mockData.js";
 import PipelineCoordinator from "../utils/PipelineCoordinator.js";
+import RunLog, { downloadText } from "../utils/run-log.js";
 import {
 	releaseWakeLock,
 	requestWakeLock,
@@ -53,6 +54,12 @@ const initialState = {
 	maxWorkers: defaultMaxWorkers,
 	tessModel: "standard",
 	elapsedMs: 0,
+	// [{ kind, fileName, page?, message }] - problems of the current/last run, shown in the UI
+	errors: [],
+	errorPages: 0,
+	// Message of a run that aborted entirely (shown on the config screen)
+	pipelineError: null,
+	hasRunLog: false,
 };
 
 function pipelineReducer(state, action) {
@@ -92,6 +99,10 @@ function pipelineReducer(state, action) {
 				tessModel: action.payload.tessModel,
 				consolidatedXml: "",
 				workerStatuses: createDefaultWorkerStatuses(action.payload.maxWorkers),
+				errors: [],
+				errorPages: 0,
+				pipelineError: null,
+				hasRunLog: true,
 			};
 		case "UPDATE_PROGRESS":
 			return {
@@ -102,6 +113,8 @@ function pipelineReducer(state, action) {
 				progressPercentage: action.payload.progressPercentage,
 				progressText: action.payload.progressText,
 				elapsedMs: action.payload.elapsedMs ?? state.elapsedMs,
+				errors: action.payload.errors,
+				errorPages: action.payload.errorPages,
 			};
 		case "PAUSE_PIPELINE":
 			return {
@@ -122,11 +135,16 @@ function pipelineReducer(state, action) {
 				consolidatedXml: action.payload.consolidatedXml,
 				docStatuses: action.payload.docStatuses,
 				elapsedMs: action.payload.elapsedMs ?? state.elapsedMs,
+				errors: action.payload.errors,
+				errorPages: action.payload.errorPages,
 			};
 		case "PIPELINE_ERROR":
 			return {
 				...state,
 				status: "configuring",
+				isPaused: false,
+				pipelineError: action.payload.message,
+				errors: action.payload.errors,
 			};
 		case "CANCEL_PIPELINE":
 			return {
@@ -138,7 +156,11 @@ function pipelineReducer(state, action) {
 				progressPercentage: 0,
 				progressText: "Processamento cancelado pelo usuário.",
 				docStatuses: {},
+				errors: [],
+				errorPages: 0,
 			};
+		case "DISMISS_PIPELINE_ERROR":
+			return { ...state, pipelineError: null };
 		case "RESET_PIPELINE":
 			return {
 				...initialState,
@@ -215,29 +237,9 @@ export default function usePipeline() {
 	const pendingProgressTextRef = useRef("");
 	const pendingProgressPercentageRef = useRef(0);
 	const throttleTimeoutRef = useRef(null);
-
-	const flushStateUpdates = useCallback(() => {
-		if (throttleTimeoutRef.current) {
-			clearTimeout(throttleTimeoutRef.current);
-			throttleTimeoutRef.current = null;
-		}
-
-		const elapsed = isPausedRef.current
-			? accumulatedTimeRef.current
-			: accumulatedTimeRef.current + (Date.now() - startTimeRef.current);
-
-		dispatch({
-			type: "UPDATE_PROGRESS",
-			payload: {
-				docStatuses: { ...pendingDocStatusesRef.current },
-				pdfPages: pendingPdfPagesRef.current,
-				ocrPages: pendingOcrPagesRef.current,
-				progressPercentage: pendingProgressPercentageRef.current,
-				progressText: pendingProgressTextRef.current,
-				elapsedMs: elapsed,
-			},
-		});
-	}, []);
+	const pendingErrorsRef = useRef([]);
+	const pendingErrorPagesRef = useRef(0);
+	const runLogRef = useRef(null);
 
 	const scheduleStateUpdate = useCallback(() => {
 		if (throttleTimeoutRef.current) return;
@@ -257,6 +259,8 @@ export default function usePipeline() {
 					progressPercentage: pendingProgressPercentageRef.current,
 					progressText: pendingProgressTextRef.current,
 					elapsedMs: elapsed,
+					errors: [...pendingErrorsRef.current],
+					errorPages: pendingErrorPagesRef.current,
 				},
 			});
 		}, 100);
@@ -290,6 +294,12 @@ export default function usePipeline() {
 		},
 		[scheduleStateUpdate],
 	);
+
+	// Collects a problem for the UI and the downloadable log
+	const recordError = useCallback((error) => {
+		pendingErrorsRef.current.push(error);
+		runLogRef.current?.addError(error);
+	}, []);
 
 	// Initialize the PipelineCoordinator
 	const coordinatorRef = useRef(null);
@@ -348,7 +358,7 @@ export default function usePipeline() {
 				pendingCompletedPagesRef.current++;
 				updateOverallProgress(fileName, page, pageCount);
 			},
-			onOcrError: (_jobId, _message, fileName, page, pageCount) => {
+			onPageError: (fileName, page, pageCount, stage, message) => {
 				const doc = pendingDocStatusesRef.current[fileName];
 				if (doc) {
 					const comp = doc.completedPages + 1;
@@ -356,13 +366,30 @@ export default function usePipeline() {
 					pendingDocStatusesRef.current[fileName] = {
 						...doc,
 						completedPages: comp,
+						errorCount: (doc.errorCount || 0) + 1,
 						status: isFinished ? "done" : "processing",
 						finishedAt: isFinished ? Date.now() : null,
 					};
 				}
-				pendingOcrPagesRef.current++;
+				recordError({ kind: stage === "ocr" ? "OCR" : "PDF", fileName, page, message });
+				pendingErrorPagesRef.current++;
 				pendingCompletedPagesRef.current++;
 				updateOverallProgress(fileName, page, pageCount);
+			},
+			onDocError: (fileName, message) => {
+				const doc = pendingDocStatusesRef.current[fileName];
+				pendingDocStatusesRef.current[fileName] = {
+					...doc,
+					status: "error",
+					errorCount: (doc?.errorCount || 0) + 1,
+					errorMessage: message,
+					finishedAt: Date.now(),
+				};
+				recordError({ kind: "Documento", fileName, message });
+				scheduleStateUpdate();
+			},
+			onLog: (level, source, message) => {
+				runLogRef.current?.add(level, source, message);
 			},
 			onFinished: (processedDocs, currentTree) => {
 				if (activeSessionRef.current) {
@@ -383,8 +410,25 @@ export default function usePipeline() {
 							const docState = processedDocs.get(origDoc.fileName);
 							if (docState) {
 								const orderedPages = [];
+								if (docState.docError && docState.pageCount === 0) {
+									// Document failed before its pages were known: keep a marker in the output
+									orderedPages.push({
+										pagId: 1,
+										content: `[Erro: documento não processado: ${docState.docError}]`,
+									});
+								}
 								for (let p = 1; p <= docState.pageCount; p++) {
-									const content = docState.pages.get(p) || "";
+									let content = docState.pages.get(p);
+									if (content === undefined) {
+										// Never reported: the reading stopped midway (e.g. corrupt PDF)
+										content = "[Erro: página não processada]";
+										recordError({
+											kind: "Página ausente",
+											fileName: origDoc.fileName,
+											page: p,
+											message: docState.docError || "página não foi lida",
+										});
+									}
 									orderedPages.push({
 										pagId: p,
 										content: content,
@@ -413,11 +457,12 @@ export default function usePipeline() {
 
 				const xmlResult = buildConsolidatedXml(finalTree);
 
-				// Set all docs to done in pending status
+				// Set all docs to done in pending status (documents that failed entirely stay "error")
 				Object.keys(pendingDocStatusesRef.current).forEach((key) => {
+					const current = pendingDocStatusesRef.current[key];
 					pendingDocStatusesRef.current[key] = {
-						...pendingDocStatusesRef.current[key],
-						status: "done",
+						...current,
+						status: current.status === "error" ? "error" : "done",
 						finishedAt: pendingDocStatusesRef.current[key].finishedAt || Date.now(),
 					};
 				});
@@ -432,6 +477,8 @@ export default function usePipeline() {
 						consolidatedXml: xmlResult,
 						docStatuses: { ...pendingDocStatusesRef.current },
 						elapsedMs: finalMs,
+						errors: [...pendingErrorsRef.current],
+						errorPages: pendingErrorPagesRef.current,
 					},
 				});
 
@@ -440,15 +487,22 @@ export default function usePipeline() {
 					throttleTimeoutRef.current = null;
 				}
 			},
-			onError: (_message) => {
+			onError: (message) => {
 				if (activeSessionRef.current) {
 					activeSessionRef.current.active = false;
 					activeSessionRef.current[Symbol.dispose]();
 					activeSessionRef.current = null;
 				}
 				stopTimer();
-				dispatch({ type: "PIPELINE_ERROR" });
-				flushStateUpdates();
+				recordError({ kind: "Falha geral", message });
+				if (throttleTimeoutRef.current) {
+					clearTimeout(throttleTimeoutRef.current);
+					throttleTimeoutRef.current = null;
+				}
+				dispatch({
+					type: "PIPELINE_ERROR",
+					payload: { message, errors: [...pendingErrorsRef.current] },
+				});
 			},
 			onWorkerStatusUpdate: (index, status, jobText) => {
 				dispatch({
@@ -493,6 +547,14 @@ export default function usePipeline() {
 			pendingTotalPagesRef.current = 0;
 			pendingProgressPercentageRef.current = 0;
 			pendingProgressTextRef.current = `Iniciando processamento de ${selectedFiles.length} documentos...`;
+			pendingErrorsRef.current = [];
+			pendingErrorPagesRef.current = 0;
+			runLogRef.current = new RunLog({
+				arquivo: state.zipName || "(mock)",
+				"documentos selecionados": selectedFiles.length,
+				"workers OCR": state.maxWorkers,
+				"modelo OCR": state.tessModel,
+			});
 
 			dispatch({
 				type: "START_PIPELINE",
@@ -512,7 +574,24 @@ export default function usePipeline() {
 			const activeZipData = state.mockState ? "mock-zip-data" : state.zipData;
 			const activeTree = state.mockState ? mockTreeData : state.tree;
 
+			// Anything uncaught in the page during the run goes to the log too
+			const onWindowError = (event) => {
+				runLogRef.current?.add(
+					"error",
+					"janela",
+					`${event.message} (${event.filename}:${event.lineno})`,
+				);
+			};
+			const onRejection = (event) => {
+				const reason = event.reason;
+				runLogRef.current?.add("error", "janela", `Promise rejeitada: ${reason?.stack || reason}`);
+			};
+			window.addEventListener("error", onWindowError);
+			window.addEventListener("unhandledrejection", onRejection);
+
 			const session = new PipelineSession(coordinatorRef.current, () => {
+				window.removeEventListener("error", onWindowError);
+				window.removeEventListener("unhandledrejection", onRejection);
 				coordinatorRef.current.cancel();
 				stopTimer();
 				stopSilentAudio();
@@ -536,6 +615,7 @@ export default function usePipeline() {
 			state.tree,
 			state.mockState,
 			state.zipData,
+			state.zipName,
 			stopTimer,
 		],
 	);
@@ -619,6 +699,23 @@ export default function usePipeline() {
 
 	const setGlobalLoading = useCallback((loading) => {
 		dispatch({ type: "SET_LOADING", payload: loading });
+	}, []);
+
+	const downloadLog = useCallback(() => {
+		const log = runLogRef.current;
+		if (!log) return;
+		const text = log.toText({
+			"páginas com texto nativo": pendingPdfPagesRef.current,
+			"páginas por OCR": pendingOcrPagesRef.current,
+			"páginas com erro": pendingErrorPagesRef.current,
+			"páginas estimadas": pendingTotalPagesRef.current,
+		});
+		const base = (state.zipName || "eproc2txt").replace(/\.zip$/i, "");
+		downloadText(`${base}-log.txt`, text);
+	}, [state.zipName]);
+
+	const dismissPipelineError = useCallback(() => {
+		dispatch({ type: "DISMISS_PIPELINE_ERROR" });
 	}, []);
 
 	const handleZipParsed = useCallback((zipData, zipName, tree, ignoredFiles) => {
@@ -714,6 +811,10 @@ export default function usePipeline() {
 		mockState: state.mockState,
 		maxWorkers: state.maxWorkers,
 		tessModel: state.tessModel,
+		errors: state.errors,
+		errorPages: state.errorPages,
+		pipelineError: state.pipelineError,
+		hasRunLog: state.hasRunLog,
 		elapsedMs: mockVal
 			? mockVal === "processing"
 				? 4500
@@ -739,5 +840,7 @@ export default function usePipeline() {
 		setSelectedPaths,
 		setGlobalLoading,
 		handleZipParsed,
+		downloadLog,
+		dismissPipelineError,
 	};
 }

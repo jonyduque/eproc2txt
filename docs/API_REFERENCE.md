@@ -108,8 +108,14 @@ A comunicação entre a thread principal e as threads dos workers ocorre por men
 - **`{ type: "doc_info", fileName: string, pageCount: number }`**: Fornece o número total de páginas descobertas no documento.
 - **`{ type: "page_native", fileName: string, page: number, pageCount: number, content: string }`**: Entrega o texto nativo extraído da página.
 - **`{ type: "page_ocr_request", fileName: string, page: number, pageCount: number, width: number, height: number, imageBuffer: ArrayBuffer }`**: Solicita processamento OCR da página enviando o pixel buffer da imagem renderizada de forma transferível.
+- **`{ type: "page_error", fileName: string, page: number, pageCount: number, stage: "pdf", message: string }`**: Uma página não pôde ser lida/renderizada; as demais páginas do documento continuam. No resultado a página vira `[Erro ao ler na página N: ...]`.
+- **`{ type: "doc_error", fileName: string, message: string }`**: O documento inteiro falhou (ausente no ZIP, PDF corrompido...). Os outros documentos continuam; no resultado ele aparece como `[Erro: documento não processado: ...]`.
 - **`{ type: "pipeline_finished" }`**: Indica que a varredura do arquivo ZIP foi concluída pelo worker.
-- **`{ type: "error", message: string }`**: Erro crítico ocorrido no pipeline.
+- **`{ type: "error", message: string }`**: Erro crítico ocorrido no pipeline. O processamento é abortado e a tela de configuração mostra a mensagem e o botão de log.
+
+Erros não tratados dentro dos workers (`onerror`) também são capturados pelo `PipelineCoordinator`: no worker do pipeline abortam a execução; num worker de OCR a página em andamento falha, o worker sai do pool e, se não restar nenhum, as páginas na fila falham em vez de travar o processamento.
+
+Todos os eventos alimentam o log de diagnóstico (`src/utils/run-log.js`), que o usuário baixa na tela de conclusão ou de erro. O log traz ambiente, configuração, versão do build, erros e linha do tempo, mas nunca o texto dos documentos.
 
 ### 3.3 Canal: Main Thread ➔ OCR Worker
 - **`{ type: "ocr_job", jobId: number, width: number, height: number, imageBuffer: ArrayBuffer, tessDataPath: string }`**: Envia uma tarefa de OCR contendo o pixel buffer de forma transferível.

@@ -1,18 +1,7 @@
 import { useState } from "react";
+import { downloadText } from "../../utils/run-log.js";
+import RunIssues, { type RunIssue } from "../RunIssues/RunIssues";
 import "./DoneScreen.css";
-
-// @ts-expect-error
-Symbol.dispose ??= Symbol("Symbol.dispose");
-
-class DisposableUrl {
-	url: string;
-	constructor(url: string) {
-		this.url = url;
-	}
-	[Symbol.dispose]() {
-		URL.revokeObjectURL(this.url);
-	}
-}
 
 interface DoneScreenProps {
 	zipName?: string;
@@ -23,6 +12,9 @@ interface DoneScreenProps {
 	tessModel: string;
 	elapsedTime: string;
 	consolidatedXml: string;
+	errors?: RunIssue[];
+	errorPages?: number;
+	onDownloadLog?: () => void;
 	onReset: () => void;
 }
 
@@ -35,10 +27,13 @@ export default function DoneScreen({
 	tessModel,
 	elapsedTime,
 	consolidatedXml,
+	errors = [],
+	errorPages = 0,
+	onDownloadLog,
 	onReset,
 }: DoneScreenProps) {
 	const [copied, setCopied] = useState(false);
-	const completedPages = pdfPages + ocrPages;
+	const completedPages = pdfPages + ocrPages + errorPages;
 
 	const handleCopyXml = async () => {
 		if (!consolidatedXml) return;
@@ -53,20 +48,12 @@ export default function DoneScreen({
 
 	const handleDownloadXml = () => {
 		if (!consolidatedXml) return;
-		const blob = new Blob([consolidatedXml], {
-			type: "text/plain;charset=utf-8",
-		});
-		const disposable = new DisposableUrl(URL.createObjectURL(blob));
-		const a = document.createElement("a");
-		a.href = disposable.url;
 		const downloadFileName = zipName ? `${zipName.replace(/\.zip$/i, "")}.txt` : "consolidado.txt";
-		a.download = downloadFileName;
-		document.body.appendChild(a);
-		a.click();
-		document.body.removeChild(a);
-		// Revogar no mesmo tick pode abortar o download no Firefox/Safari
-		setTimeout(() => disposable[Symbol.dispose](), 1000);
+		downloadText(downloadFileName, consolidatedXml);
 	};
+
+	const errorDocs = new Set(errors.map((e) => e.fileName).filter(Boolean)).size;
+
 	return (
 		<div className="done-view-container animate-fade-up">
 			<div className="done-header-banner">
@@ -80,7 +67,11 @@ export default function DoneScreen({
 						<div className="file-type-badge">TXT</div>
 					</div>
 				</div>
-				<p className="done-status-tagline">{"// processamento concluído"}</p>
+				<p className="done-status-tagline">
+					{errors.length > 0
+						? "// processamento concluído com problemas"
+						: "// processamento concluído"}
+				</p>
 				<h2 className="done-title">{totalDocsCount} documentos convertidos</h2>
 				<p className="done-summary-details">
 					{completedPages} págs · {maxWorkers} workers · ocr{" "}
@@ -103,6 +94,15 @@ export default function DoneScreen({
 					<p className="ticker done-stats-value">{completedPages}</p>
 				</div>
 			</div>
+
+			{errors.length > 0 && (
+				<RunIssues
+					title={`${errors.length} ${errors.length === 1 ? "problema" : "problemas"} em ${errorDocs} ${errorDocs === 1 ? "documento" : "documentos"}`}
+					hint="O resultado foi gerado mesmo assim. Cada página afetada aparece no arquivo como [Erro ...] no lugar do texto. O log ajuda a investigar a causa."
+					issues={errors}
+					onDownloadLog={onDownloadLog}
+				/>
+			)}
 
 			{/* Export actions */}
 			<div className="done-actions-row">
@@ -127,6 +127,14 @@ export default function DoneScreen({
 					processar novo arquivo
 				</button>
 			</div>
+
+			{errors.length === 0 && onDownloadLog && (
+				<div className="done-log-row">
+					<button type="button" className="done-log-link" onClick={onDownloadLog}>
+						baixar log do processamento
+					</button>
+				</div>
+			)}
 		</div>
 	);
 }

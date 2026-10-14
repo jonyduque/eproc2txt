@@ -243,6 +243,133 @@ function decodeHtmlBytes(bytes) {
 	}
 }
 
+function describeError(err) {
+	if (err instanceof Error) return `${err.name}: ${err.message}`;
+	return String(err);
+}
+
+/**
+ * Extracts one selected file from the ZIP and emits its pages (native text or OCR requests).
+ * Throws when the whole document is unusable; per-page failures are reported as page_error.
+ */
+async function processFile(zipData, file) {
+	const targetPath = file.originalPath;
+	const rawUnzipped = unzipSync(zipData, {
+		filter: (f) => f.name === targetPath,
+	});
+	rawUnzipped[Symbol.dispose] = () => {
+		delete rawUnzipped[targetPath];
+	};
+	using unzipped = rawUnzipped;
+
+	const fileBytes = unzipped[targetPath];
+	if (!fileBytes) {
+		throw new Error("arquivo não encontrado no ZIP");
+	}
+
+	if (file.extension === "html") {
+		const cleaned = cleanHtmlContent(decodeHtmlBytes(fileBytes));
+
+		// Registra o documento no coordenador antes da página; sem isso o page_native é descartado
+		self.postMessage({ type: "doc_info", fileName: file.fileName, pageCount: 1 });
+		self.postMessage({
+			type: "page_native",
+			fileName: file.fileName,
+			page: 1,
+			pageCount: 1,
+			content: cleaned,
+		});
+		self.postMessage({
+			type: "log",
+			level: "info",
+			message: `[HTML] ${file.fileName}: texto extraído (${cleaned.length} caracteres).`,
+		});
+		return;
+	}
+
+	if (file.extension !== "pdf") {
+		throw new Error(`extensão não suportada: ${file.extension}`);
+	}
+
+	const rawDoc = await pdfiumLib.loadDocument(fileBytes);
+	rawDoc[Symbol.dispose] = () => {
+		rawDoc.destroy();
+	};
+	using doc = rawDoc;
+	const pageCount = doc.getPageCount();
+
+	// Informa os metadados do documento antes de ler as páginas
+	self.postMessage({ type: "doc_info", fileName: file.fileName, pageCount });
+
+	for (let p = 0; p < pageCount; p++) {
+		// Verifica contra-pressão
+		await checkPause();
+
+		// A failing page is reported and skipped; the rest of the document goes on
+		try {
+			await processPdfPage(doc, file.fileName, p, pageCount);
+		} catch (err) {
+			self.postMessage({
+				type: "page_error",
+				fileName: file.fileName,
+				page: p + 1,
+				pageCount,
+				stage: "pdf",
+				message: describeError(err),
+			});
+		}
+	}
+}
+
+async function processPdfPage(doc, fileName, p, pageCount) {
+	const rawPage = doc.getPage(p);
+	rawPage[Symbol.dispose] = () => {
+		if (typeof rawPage.destroy === "function") {
+			rawPage.destroy();
+		}
+	};
+	using page = rawPage;
+
+	let text = page.getText();
+	if (text) {
+		text = text
+			.replace(/(?:\r?\n\s*)+/g, "\n")
+			.replace(/[ \t]+/g, " ")
+			.trim();
+	}
+
+	if (text && text.length > 5) {
+		self.postMessage({ type: "page_native", fileName, page: p + 1, pageCount, content: text });
+		return;
+	}
+
+	self.postMessage({
+		type: "log",
+		level: "info",
+		message: `[PDF-OCR] Página ${p + 1}/${pageCount} de ${fileName} identificada como escaneada. Renderizando...`,
+	});
+
+	const render = await page.render({
+		scale: 2.0,
+		colorSpace: "BGRA",
+	});
+	binarizeBgraToRgba(render.data);
+
+	const buffer = render.data.buffer;
+	self.postMessage(
+		{
+			type: "page_ocr_request",
+			fileName,
+			page: p + 1,
+			pageCount,
+			width: render.width,
+			height: render.height,
+			imageBuffer: buffer,
+		},
+		[buffer],
+	); // Transfere posse do buffer da imagem
+}
+
 /**
  * Main pipeline processor (Sem OCR direto)
  */
@@ -272,129 +399,15 @@ async function processPipeline(zipData, selectedFiles) {
 			total: totalFiles,
 		});
 
-		// Extrai os bytes correspondentes do ZIP
-		const targetPath = file.originalPath;
-		const rawUnzipped = unzipSync(zipData, {
-			filter: (f) => f.name === targetPath,
-		});
-		rawUnzipped[Symbol.dispose] = () => {
-			delete rawUnzipped[targetPath];
-		};
-		using unzipped = rawUnzipped;
-
-		const fileBytes = unzipped[targetPath];
-		if (!fileBytes) {
+		// One broken document must not abort the others: failures become doc_error
+		try {
+			await processFile(zipData, file);
+		} catch (err) {
 			self.postMessage({
-				type: "log",
-				level: "error",
-				message: `Falha ao extrair arquivo do ZIP: ${file.fileName}`,
-			});
-			continue;
-		}
-
-		if (file.extension === "html") {
-			const htmlText = decodeHtmlBytes(fileBytes);
-			const cleaned = cleanHtmlContent(htmlText);
-
-			// Registra o documento no coordenador antes da página; sem isso o page_native é descartado
-			self.postMessage({
-				type: "doc_info",
+				type: "doc_error",
 				fileName: file.fileName,
-				pageCount: 1,
+				message: describeError(err),
 			});
-
-			self.postMessage({
-				type: "page_native",
-				fileName: file.fileName,
-				page: 1,
-				pageCount: 1,
-				content: cleaned,
-			});
-
-			self.postMessage({
-				type: "log",
-				level: "success",
-				message: `[HTML] ${file.fileName}: Texto limpo extraído.`,
-			});
-		} else if (file.extension === "pdf") {
-			try {
-				const rawDoc = await pdfiumLib.loadDocument(fileBytes);
-				rawDoc[Symbol.dispose] = () => {
-					rawDoc.destroy();
-				};
-				using doc = rawDoc;
-				const pageCount = doc.getPageCount();
-
-				// Informa os metadados do documento antes de ler as páginas
-				self.postMessage({
-					type: "doc_info",
-					fileName: file.fileName,
-					pageCount: pageCount,
-				});
-
-				for (let p = 0; p < pageCount; p++) {
-					// Verifica contra-pressão
-					await checkPause();
-
-					const rawPage = doc.getPage(p);
-					rawPage[Symbol.dispose] = () => {
-						if (typeof rawPage.destroy === "function") {
-							rawPage.destroy();
-						}
-					};
-					using page = rawPage;
-
-					let text = page.getText();
-					if (text) {
-						text = text
-							.replace(/(?:\r?\n\s*)+/g, "\n")
-							.replace(/[ \t]+/g, " ")
-							.trim();
-					}
-
-					if (text && text.length > 5) {
-						self.postMessage({
-							type: "page_native",
-							fileName: file.fileName,
-							page: p + 1,
-							pageCount: pageCount,
-							content: text,
-						});
-					} else {
-						self.postMessage({
-							type: "log",
-							level: "info",
-							message: `[PDF-OCR] Página ${p + 1}/${pageCount} de ${file.fileName} identificada como escaneada. Renderizando...`,
-						});
-
-						const render = await page.render({
-							scale: 2.0,
-							colorSpace: "BGRA",
-						});
-						binarizeBgraToRgba(render.data);
-
-						const buffer = render.data.buffer;
-						self.postMessage(
-							{
-								type: "page_ocr_request",
-								fileName: file.fileName,
-								page: p + 1,
-								pageCount: pageCount,
-								width: render.width,
-								height: render.height,
-								imageBuffer: buffer,
-							},
-							[buffer],
-						); // Transfere posse do buffer da imagem
-					}
-				}
-			} catch (err) {
-				self.postMessage({
-					type: "log",
-					level: "error",
-					message: `Erro ao processar PDF ${file.fileName}: ${err.message}`,
-				});
-			}
 		}
 	}
 
@@ -408,7 +421,7 @@ self.onmessage = (event) => {
 	const { type, zipData, selectedFiles } = event.data;
 	if (type === "start") {
 		Promise.try(() => processPipeline(zipData, selectedFiles)).catch((err) => {
-			self.postMessage({ type: "error", message: err.message });
+			self.postMessage({ type: "error", message: describeError(err) });
 		});
 	} else if (type === "pause") {
 		isPaused = true;

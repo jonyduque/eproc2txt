@@ -1,8 +1,19 @@
+import RunIssues from "../RunIssues/RunIssues";
 import FileSummaryBar from "./FileSummaryBar/FileSummaryBar";
 import Tree from "./Tree/Tree";
 import "./ConfigScreen.css";
 
-export default function ConfigScreen({ zipName, tree, selectedPaths, setSelectedPaths, onReset }) {
+export default function ConfigScreen({
+	zipName,
+	tree,
+	selectedPaths,
+	setSelectedPaths,
+	onReset,
+	pipelineError,
+	errors = [],
+	onDownloadLog,
+	onDismissError,
+}) {
 	// Calculate document statistics for LOADED VIEW
 	let selectedDocsCount = 0;
 	let treeDocsCount = 0;
@@ -31,6 +42,17 @@ export default function ConfigScreen({ zipName, tree, selectedPaths, setSelected
 				selectedSize={selectedSize}
 				onReset={onReset}
 			/>
+
+			{pipelineError && (
+				<RunIssues
+					tone="error"
+					title="O processamento foi interrompido"
+					hint={`${pipelineError} — os arquivos continuam selecionados; você pode tentar de novo (com menos workers ou outro modelo de OCR) ou baixar o log para diagnóstico.`}
+					issues={errors.filter((e) => e.kind !== "Falha geral")}
+					onDownloadLog={onDownloadLog}
+					onDismiss={onDismissError}
+				/>
+			)}
 
 			{/* Grid configuration and lists */}
 			<div className="loaded-layout-grid">

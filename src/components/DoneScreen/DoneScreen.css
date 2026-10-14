@@ -325,3 +325,23 @@
 	color: var(--foreground);
 	border-color: var(--color-text-muted);
 }
+
+.done-log-row {
+	margin-top: var(--space-4);
+	text-align: center;
+}
+
+.done-log-link {
+	background: none;
+	border: none;
+	padding: 0;
+	font-family: var(--font-mono);
+	font-size: var(--font-size-xs);
+	color: var(--color-text-secondary);
+	text-decoration: underline;
+	cursor: pointer;
+}
+
+.done-log-link:hover {
+	color: var(--color-primary);
+}

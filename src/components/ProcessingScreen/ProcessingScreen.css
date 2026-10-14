@@ -961,3 +961,21 @@
 	transform-style: preserve-3d;
 	transition: transform 0.1s ease-out;
 }
+
+.docs-list-item-status.error {
+	color: var(--color-error);
+}
+
+.docs-list-item-errors {
+	font-family: var(--font-mono);
+	font-size: var(--font-size-2xs);
+	color: var(--color-warning);
+}
+
+.processing-error-count {
+	color: var(--color-error);
+}
+
+.file-icon-material.status-error {
+	color: var(--color-error);
+}

@@ -12,6 +12,8 @@ interface DocStatusItem {
 	extension: string;
 	pageCount?: number;
 	completedPages: number;
+	errorCount?: number;
+	errorMessage?: string;
 }
 
 interface WorkerStatusItem {
@@ -48,6 +50,7 @@ interface ProcessingScreenProps {
 	docStatuses: Record<string, DocStatusItem>;
 	workerStatuses: WorkerStatusItem[];
 	maxWorkers: number;
+	errorPages?: number;
 	onResume: () => void;
 	onPause: () => void;
 	onCancel: () => void;
@@ -90,6 +93,8 @@ const DocRow = memo(function DocRow({ doc }: DocRowProps) {
 	const isProcessingDoc = doc.status === "processing";
 	const isDoneDoc = doc.status === "done";
 	const isQueuedDoc = doc.status === "queued";
+	const isErrorDoc = doc.status === "error";
+	const errorCount = doc.errorCount || 0;
 
 	// Calculate elapsed time per document
 	const elapsedDocMs = doc.startedAt ? (doc.finishedAt || Date.now()) - doc.startedAt : 0;
@@ -108,15 +113,34 @@ const DocRow = memo(function DocRow({ doc }: DocRowProps) {
 				<div className="docs-list-item-bottom">
 					<span
 						className={`docs-list-item-status ${
-							isQueuedDoc ? "queued" : isProcessingDoc ? "processing" : "done"
+							isErrorDoc
+								? "error"
+								: isQueuedDoc
+									? "queued"
+									: isProcessingDoc
+										? "processing"
+										: "done"
 						}`}
+						title={doc.errorMessage}
 					>
-						{isQueuedDoc ? "aguardando" : isProcessingDoc ? "processando" : "concluído"}
+						{isErrorDoc
+							? "falhou"
+							: isQueuedDoc
+								? "aguardando"
+								: isProcessingDoc
+									? "processando"
+									: "concluído"}
 					</span>
 
 					<span className="docs-list-item-details">
 						· ~{isDoneDoc ? doc.pageCount : doc.pageCount || "?"} págs
 					</span>
+
+					{errorCount > 0 && !isErrorDoc && (
+						<span className="docs-list-item-errors">
+							· {errorCount} {errorCount === 1 ? "pág com erro" : "págs com erro"}
+						</span>
+					)}
 				</div>
 			</div>
 
@@ -140,17 +164,20 @@ export default function ProcessingScreen({
 	docStatuses,
 	workerStatuses,
 	maxWorkers,
+	errorPages = 0,
 	onResume,
 	onPause,
 	onCancel,
 }: ProcessingScreenProps) {
 	// Calculate derived values internally
 	const totalPages = Object.values(docStatuses).reduce((s, d) => s + (d.pageCount || 0), 0) || 1;
-	const completedPages = pdfPages + ocrPages;
+	const completedPages = pdfPages + ocrPages + errorPages;
 	const elapsedSec = (elapsedMs || 0) / 1000 || 0.1;
 	const pagesPerSec = completedPages / elapsedSec;
 
-	const completedDocs = Object.values(docStatuses).filter((d) => d.status === "done").length;
+	const completedDocs = Object.values(docStatuses).filter(
+		(d) => d.status === "done" || d.status === "error",
+	).length;
 	const totalDocsCount = Object.keys(docStatuses).length || 1;
 
 	const activeWorkersCount = workerStatuses.filter((w) => w.status === "active").length;
@@ -205,6 +232,11 @@ export default function ProcessingScreen({
 						</span>
 						<span>{pagesPerSec.toFixed(1)} págs/s</span>
 						<span>{queuedDocsCount} na fila</span>
+						{errorPages > 0 && (
+							<span className="processing-error-count">
+								{errorPages} {errorPages === 1 ? "pág com erro" : "págs com erro"}
+							</span>
+						)}
 					</div>
 				</div>
 			</div>
