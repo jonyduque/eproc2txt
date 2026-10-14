@@ -7,7 +7,7 @@ interface CRTPowerSectionProps {
 }
 
 /**
- * CRTPowerSection - Status LCD, power LED, and start button.
+ * CRTPowerSection - Status LCD, power LED, and green play button.
  */
 export default function CRTPowerSection({
 	displayLabel,
@@ -28,7 +28,14 @@ export default function CRTPowerSection({
 					onClick={onStart}
 					aria-label="Iniciar Processamento"
 					title="Iniciar Processamento"
-				/>
+				>
+					<svg className="crt-play-icon" viewBox="0 0 24 24" aria-hidden="true">
+						<path
+							d="M6 3.5v17a1 1 0 0 0 1.5.86l14-8.5a1 1 0 0 0 0-1.72l-14-8.5A1 1 0 0 0 6 3.5Z"
+							fill="currentColor"
+						/>
+					</svg>
+				</button>
 			</div>
 		</div>
 	);
