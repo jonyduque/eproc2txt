@@ -17,7 +17,28 @@ async function getTesseractWorker(tessDataPath) {
 		tesseractWorker = null;
 	}
 
-	tesseractWorker = await createWorker("por", 1, { langPath: tessDataPath });
+	// tesseract.js caches traineddata in IndexedDB under `${cachePath}/por.traineddata`, without
+	// the langPath; a per-model cachePath keeps fast/standard/best from reusing each other's file
+	const modelName = tessDataPath.replace(/\/+$/, "").split("/").pop();
+
+	// createWorker only rejects when the core fails to load; a failed traineddata download or
+	// initialize is swallowed and the promise never settles. errorHandler receives those failures
+	// (as strings), so we race it to turn them into an error instead of a hung job.
+	let rejectInit = null;
+	const initFailed = new Promise((_resolve, reject) => {
+		rejectInit = reject;
+	});
+	const created = createWorker("por", 1, {
+		langPath: tessDataPath,
+		cachePath: `tessdata-${modelName}`,
+		errorHandler: (message) => rejectInit?.(message),
+	});
+	try {
+		tesseractWorker = await Promise.race([created, initFailed]);
+	} finally {
+		// After init, recognize() rejects on its own; errorHandler must not throw anywhere
+		rejectInit = null;
+	}
 	currentTessDataPath = tessDataPath;
 	return tesseractWorker;
 }
@@ -57,11 +78,13 @@ self.onmessage = async (event) => {
 				[imageBuffer],
 			); // Transfere o buffer de volta para liberar memória do worker
 		} catch (err) {
+			console.error(`[OCR] Falha no job ${jobId}:`, err);
 			self.postMessage(
 				{
 					type: "ocr_error",
 					jobId,
-					message: err.message,
+					// tesseract.js rejects with err.toString(), a plain string, not an Error
+					message: err instanceof Error ? err.message : String(err),
 					imageBuffer: imageBuffer,
 				},
 				[imageBuffer],

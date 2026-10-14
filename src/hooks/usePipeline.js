@@ -506,7 +506,8 @@ export default function usePipeline() {
 
 			startTimer();
 			startSilentAudio();
-			requestWakeLock();
+			// Denied wake lock is not fatal; WakeLockSession already logs the warning
+			requestWakeLock().catch(() => {});
 
 			const activeZipData = state.mockState ? "mock-zip-data" : state.zipData;
 			const activeTree = state.mockState ? mockTreeData : state.tree;
