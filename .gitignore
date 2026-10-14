@@ -28,3 +28,6 @@ scratch/
 
 # Git Worktrees
 .worktrees/
+
+# Deploy tarball (scripts/deploy.mjs)
+dist.tgz

@@ -6,9 +6,11 @@
 	--crt-bezel-bg: #1c1e26;
 	--crt-border-color: #4b5061;
 	--crt-shadow-color: rgba(0, 0, 0, 0.7);
-	--crt-glass-reflection: linear-gradient(135deg,
-			rgba(255, 255, 255, 0.08) 0%,
-			rgba(255, 255, 255, 0) 50%);
+	--crt-glass-reflection: linear-gradient(
+		135deg,
+		rgba(255, 255, 255, 0.08) 0%,
+		rgba(255, 255, 255, 0) 50%
+	);
 
 	/* Control Panel colors */
 	--crt-control-panel-bg: #252833;
@@ -113,11 +115,13 @@
 	left: 10%;
 	right: 10%;
 	height: 3px;
-	background: repeating-linear-gradient(90deg,
-			rgba(0, 0, 0, 0.4) 0px,
-			rgba(0, 0, 0, 0.4) 6px,
-			transparent 6px,
-			transparent 12px);
+	background: repeating-linear-gradient(
+		90deg,
+		rgba(0, 0, 0, 0.4) 0px,
+		rgba(0, 0, 0, 0.4) 6px,
+		transparent 6px,
+		transparent 12px
+	);
 	opacity: 0.6;
 }
 
@@ -226,11 +230,13 @@
 	width: 80%;
 	height: 16px;
 	border-radius: 2px;
-	background: repeating-linear-gradient(180deg,
-			rgba(255, 255, 255, 0.05) 0px,
-			rgba(255, 255, 255, 0.05) 2px,
-			rgba(0, 0, 0, 0.2) 2px,
-			rgba(0, 0, 0, 0.2) 4px);
+	background: repeating-linear-gradient(
+		180deg,
+		rgba(255, 255, 255, 0.05) 0px,
+		rgba(255, 255, 255, 0.05) 2px,
+		rgba(0, 0, 0, 0.2) 2px,
+		rgba(0, 0, 0, 0.2) 4px
+	);
 }
 
 /* Embossed label on lid */
@@ -258,11 +264,13 @@ body.light-theme .crt-lid-label {
 }
 
 body.light-theme .crt-lid-ribs {
-	background: repeating-linear-gradient(180deg,
-			rgba(255, 255, 255, 0.35) 0px,
-			rgba(255, 255, 255, 0.35) 2px,
-			rgba(0, 0, 0, 0.06) 2px,
-			rgba(0, 0, 0, 0.06) 4px);
+	background: repeating-linear-gradient(
+		180deg,
+		rgba(255, 255, 255, 0.35) 0px,
+		rgba(255, 255, 255, 0.35) 2px,
+		rgba(0, 0, 0, 0.06) 2px,
+		rgba(0, 0, 0, 0.06) 4px
+	);
 }
 
 /* Theme group below power section */
@@ -357,44 +365,46 @@ body.light-theme .crt-theme-group {
 	position: absolute;
 	inset: -3px;
 	border-radius: 50%;
-	background: conic-gradient(from 0deg,
-			#3a3d4a 0deg,
-			#555869 10deg,
-			#3a3d4a 20deg,
-			#555869 30deg,
-			#3a3d4a 40deg,
-			#555869 50deg,
-			#3a3d4a 60deg,
-			#555869 70deg,
-			#3a3d4a 80deg,
-			#555869 90deg,
-			#3a3d4a 100deg,
-			#555869 110deg,
-			#3a3d4a 120deg,
-			#555869 130deg,
-			#3a3d4a 140deg,
-			#555869 150deg,
-			#3a3d4a 160deg,
-			#555869 170deg,
-			#3a3d4a 180deg,
-			#555869 190deg,
-			#3a3d4a 200deg,
-			#555869 210deg,
-			#3a3d4a 220deg,
-			#555869 230deg,
-			#3a3d4a 240deg,
-			#555869 250deg,
-			#3a3d4a 260deg,
-			#555869 270deg,
-			#3a3d4a 280deg,
-			#555869 290deg,
-			#3a3d4a 300deg,
-			#555869 310deg,
-			#3a3d4a 320deg,
-			#555869 330deg,
-			#3a3d4a 340deg,
-			#555869 350deg,
-			#3a3d4a 360deg);
+	background: conic-gradient(
+		from 0deg,
+		#3a3d4a 0deg,
+		#555869 10deg,
+		#3a3d4a 20deg,
+		#555869 30deg,
+		#3a3d4a 40deg,
+		#555869 50deg,
+		#3a3d4a 60deg,
+		#555869 70deg,
+		#3a3d4a 80deg,
+		#555869 90deg,
+		#3a3d4a 100deg,
+		#555869 110deg,
+		#3a3d4a 120deg,
+		#555869 130deg,
+		#3a3d4a 140deg,
+		#555869 150deg,
+		#3a3d4a 160deg,
+		#555869 170deg,
+		#3a3d4a 180deg,
+		#555869 190deg,
+		#3a3d4a 200deg,
+		#555869 210deg,
+		#3a3d4a 220deg,
+		#555869 230deg,
+		#3a3d4a 240deg,
+		#555869 250deg,
+		#3a3d4a 260deg,
+		#555869 270deg,
+		#3a3d4a 280deg,
+		#555869 290deg,
+		#3a3d4a 300deg,
+		#555869 310deg,
+		#3a3d4a 320deg,
+		#555869 330deg,
+		#3a3d4a 340deg,
+		#555869 350deg,
+		#3a3d4a 360deg
+	);
 	z-index: 0;
 	pointer-events: none;
 	opacity: 0.5;
@@ -568,7 +578,7 @@ body.light-theme .crt-fader-label-item.active {
 	background: radial-gradient(circle at 35% 30%, #2a2b30 0%, #111216 60%, #0a0a0c 100%);
 	border: 1px solid rgba(0, 0, 0, 0.7);
 	box-shadow:
-		/* anel externo fosco */
+/* anel externo fosco */
 		0 0 0 1.5px rgba(0, 0, 0, 0.5),
 		/* sombra de profundidade */
 		inset 0 2px 3px rgba(0, 0, 0, 0.8),
@@ -590,21 +600,25 @@ body.light-theme .crt-fader-label-item.active {
 	width: 45%;
 	height: 35%;
 	border-radius: 50%;
-	background: radial-gradient(ellipse at 40% 30%,
-			rgba(255, 255, 255, 0.25) 0%,
-			rgba(255, 255, 255, 0.04) 60%,
-			transparent 100%);
+	background: radial-gradient(
+		ellipse at 40% 30%,
+		rgba(255, 255, 255, 0.25) 0%,
+		rgba(255, 255, 255, 0.04) 60%,
+		transparent 100%
+	);
 	pointer-events: none;
 	z-index: 2;
 }
 
 /* Estado: laranja pulsante (aguardando arquivo) */
 .crt-power-led.led-orange-pulse {
-	background: radial-gradient(circle at 35% 30%,
-			#ffcc60 0%,
-			#ff9500 45%,
-			#cc6800 80%,
-			#8a4000 100%);
+	background: radial-gradient(
+		circle at 35% 30%,
+		#ffcc60 0%,
+		#ff9500 45%,
+		#cc6800 80%,
+		#8a4000 100%
+	);
 	box-shadow:
 		0 0 0 1.5px rgba(180, 80, 0, 0.6),
 		0 0 6px 2px rgba(255, 149, 0, 0.5),
@@ -616,11 +630,13 @@ body.light-theme .crt-fader-label-item.active {
 
 /* Estado: laranja fixo (pronto para processar) */
 .crt-power-led.led-orange-solid {
-	background: radial-gradient(circle at 35% 30%,
-			#ffd070 0%,
-			#ff9500 45%,
-			#cc6800 80%,
-			#8a4000 100%);
+	background: radial-gradient(
+		circle at 35% 30%,
+		#ffd070 0%,
+		#ff9500 45%,
+		#cc6800 80%,
+		#8a4000 100%
+	);
 	box-shadow:
 		0 0 0 1.5px rgba(180, 80, 0, 0.6),
 		0 0 7px 2px rgba(255, 149, 0, 0.55),
@@ -631,11 +647,13 @@ body.light-theme .crt-fader-label-item.active {
 
 /* Estado: verde pulsante (processamento em curso) */
 .crt-power-led.led-green-pulse {
-	background: radial-gradient(circle at 35% 30%,
-			#a8ffb0 0%,
-			#34c759 45%,
-			#1a8a3a 80%,
-			#0a4a1e 100%);
+	background: radial-gradient(
+		circle at 35% 30%,
+		#a8ffb0 0%,
+		#34c759 45%,
+		#1a8a3a 80%,
+		#0a4a1e 100%
+	);
 	box-shadow:
 		0 0 0 1.5px rgba(10, 100, 40, 0.6),
 		0 0 6px 2px rgba(52, 199, 89, 0.5),
@@ -647,11 +665,13 @@ body.light-theme .crt-fader-label-item.active {
 
 /* Estado: verde fixo (processamento concluído) */
 .crt-power-led.led-green-solid {
-	background: radial-gradient(circle at 35% 30%,
-			#b0ffb8 0%,
-			#34c759 45%,
-			#1a8a3a 80%,
-			#0a4a1e 100%);
+	background: radial-gradient(
+		circle at 35% 30%,
+		#b0ffb8 0%,
+		#34c759 45%,
+		#1a8a3a 80%,
+		#0a4a1e 100%
+	);
 	box-shadow:
 		0 0 0 1.5px rgba(10, 100, 40, 0.6),
 		0 0 7px 2px rgba(52, 199, 89, 0.55),
@@ -687,9 +707,11 @@ body.light-theme .crt-fader-label-item.active {
 	position: absolute;
 	inset: 1px;
 	border-radius: 2px;
-	background: linear-gradient(135deg,
-			var(--crt-power-btn-grad-start) 0%,
-			var(--crt-power-btn-grad-end) 100%);
+	background: linear-gradient(
+		135deg,
+		var(--crt-power-btn-grad-start) 0%,
+		var(--crt-power-btn-grad-end) 100%
+	);
 }
 
 .crt-power-btn:not(:disabled):active {
@@ -700,9 +722,11 @@ body.light-theme .crt-fader-label-item.active {
 }
 
 .crt-power-btn:not(:disabled):active::after {
-	background: linear-gradient(135deg,
-			var(--crt-power-btn-active-grad-start) 0%,
-			var(--crt-power-btn-active-grad-end) 100%);
+	background: linear-gradient(
+		135deg,
+		var(--crt-power-btn-active-grad-start) 0%,
+		var(--crt-power-btn-active-grad-end) 100%
+	);
 	box-shadow: inset 1px 1px 3px rgba(0, 0, 0, 0.6);
 }
 
@@ -881,19 +905,23 @@ body.light-theme .crt-static.switching {
 .crt-scanlines {
 	position: absolute;
 	inset: 0;
-	background: repeating-linear-gradient(0deg,
-			rgba(0, 0, 0, 0.14),
-			rgba(0, 0, 0, 0.14) 3px,
-			transparent 3px,
-			transparent 6px);
+	background: repeating-linear-gradient(
+		0deg,
+		rgba(0, 0, 0, 0.14),
+		rgba(0, 0, 0, 0.14) 3px,
+		transparent 3px,
+		transparent 6px
+	);
 }
 
 body.light-theme .crt-scanlines {
-	background: repeating-linear-gradient(0deg,
-			rgba(0, 0, 0, 0.03),
-			rgba(0, 0, 0, 0.03) 3px,
-			transparent 3px,
-			transparent 6px);
+	background: repeating-linear-gradient(
+		0deg,
+		rgba(0, 0, 0, 0.03),
+		rgba(0, 0, 0, 0.03) 3px,
+		transparent 3px,
+		transparent 6px
+	);
 }
 
 /* Phosphor Screen Flicker */
@@ -1032,7 +1060,6 @@ body.light-theme .crt-flicker {
 }
 
 @keyframes crt-led-blink-orange {
-
 	0%,
 	100% {
 		box-shadow:
@@ -1056,7 +1083,6 @@ body.light-theme .crt-flicker {
 }
 
 @keyframes crt-led-blink-green {
-
 	0%,
 	100% {
 		box-shadow:
@@ -1080,7 +1106,6 @@ body.light-theme .crt-flicker {
 }
 
 @media (prefers-reduced-motion: reduce) {
-
 	.crt-static,
 	.crt-flicker,
 	.crt-power-led.led-orange-pulse,

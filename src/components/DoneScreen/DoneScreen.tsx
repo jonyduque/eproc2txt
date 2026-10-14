@@ -56,7 +56,7 @@ export default function DoneScreen({
 		const blob = new Blob([consolidatedXml], {
 			type: "text/plain;charset=utf-8",
 		});
-		using disposable = new DisposableUrl(URL.createObjectURL(blob));
+		const disposable = new DisposableUrl(URL.createObjectURL(blob));
 		const a = document.createElement("a");
 		a.href = disposable.url;
 		const downloadFileName = zipName ? `${zipName.replace(/\.zip$/i, "")}.txt` : "consolidado.txt";
@@ -64,6 +64,8 @@ export default function DoneScreen({
 		document.body.appendChild(a);
 		a.click();
 		document.body.removeChild(a);
+		// Revogar no mesmo tick pode abortar o download no Firefox/Safari
+		setTimeout(() => disposable[Symbol.dispose](), 1000);
 	};
 	return (
 		<div className="done-view-container animate-fade-up">

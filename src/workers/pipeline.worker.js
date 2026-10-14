@@ -296,6 +296,13 @@ async function processPipeline(zipData, selectedFiles) {
 			const htmlText = decodeHtmlBytes(fileBytes);
 			const cleaned = cleanHtmlContent(htmlText);
 
+			// Registra o documento no coordenador antes da página; sem isso o page_native é descartado
+			self.postMessage({
+				type: "doc_info",
+				fileName: file.fileName,
+				pageCount: 1,
+			});
+
 			self.postMessage({
 				type: "page_native",
 				fileName: file.fileName,

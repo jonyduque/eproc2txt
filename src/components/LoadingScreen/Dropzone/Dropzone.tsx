@@ -2,16 +2,6 @@ import { useRef, useState } from "react";
 import { parseZipStructure } from "../../../utils/parser.js";
 import IsometricViewport3D from "../../Layout/IsometricViewport3D";
 
-// @ts-expect-error
-Promise.try ??= (fn) =>
-	new Promise((resolve, reject) => {
-		try {
-			resolve(fn());
-		} catch (e) {
-			reject(e);
-		}
-	});
-
 interface DropzoneProps {
 	onZipParsed: (
 		zipData: Uint8Array,
@@ -30,7 +20,7 @@ export default function Dropzone({ onZipParsed, onLoadingChange }: DropzoneProps
 
 	const handleFile = async (file: File) => {
 		setError(null);
-		if (!file?.name.endsWith(".zip")) {
+		if (!file?.name.toLowerCase().endsWith(".zip")) {
 			setError("Por favor, envie um arquivo ZIP válido.");
 			return;
 		}
@@ -39,11 +29,7 @@ export default function Dropzone({ onZipParsed, onLoadingChange }: DropzoneProps
 		if (onLoadingChange) onLoadingChange(true);
 
 		try {
-			// @ts-expect-error
-			const zipData = await Promise.try(async () => {
-				const buffer = await file.arrayBuffer();
-				return new Uint8Array(buffer);
-			});
+			const zipData = new Uint8Array(await file.arrayBuffer());
 			const result = parseZipStructure(zipData);
 
 			if (result.tree.length === 0) {

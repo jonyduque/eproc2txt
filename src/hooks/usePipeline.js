@@ -489,10 +489,8 @@ export default function usePipeline() {
 			pendingPdfPagesRef.current = 0;
 			pendingOcrPagesRef.current = 0;
 			pendingCompletedPagesRef.current = 0;
-			pendingTotalPagesRef.current = selectedFiles.reduce(
-				(sum, file) => sum + (file.extension === "html" ? 1 : 0),
-				0,
-			);
+			// Todas as páginas (inclusive HTML) são somadas em onDocInfo
+			pendingTotalPagesRef.current = 0;
 			pendingProgressPercentageRef.current = 0;
 			pendingProgressTextRef.current = `Iniciando processamento de ${selectedFiles.length} documentos...`;
 
