@@ -1,5 +1,5 @@
 // Deploy to https://eproc2text.duque.cloud (VPS root@duque.cloud, bare-metal nginx).
-// Usage: npm run deploy [-- --skip-build]
+// Usage: npm run deploy  |  node scripts/deploy.mjs --skip-build
 // Builds dist/, uploads it with the vhost and the remote installer to /tmp/eproc2text/,
 // runs deploy/remote-install.sh over ssh, then checks this site and the neighbours still answer.
 import { execFileSync, execSync } from "node:child_process";
@@ -78,7 +78,13 @@ console.log(`https://${DOMAIN}/ -> ${site.status} (COEP: ${coep ?? "ausente"})`)
 if (site.status !== 200 || coep !== "require-corp") failed = true;
 
 for (const url of NEIGHBOURS) {
-	const now = (await status(url)).status;
+	// A keep-alive socket opened before the reload can be closed by nginx (UND_ERR_SOCKET); retry
+	let now;
+	for (let attempt = 1; attempt <= 3; attempt++) {
+		now = (await status(url)).status;
+		if (now === before[url]) break;
+		await new Promise((resolve) => setTimeout(resolve, 2000));
+	}
 	const changed = now !== before[url];
 	console.log(`${url} -> ${now}${changed ? ` (antes: ${before[url]})` : ""}`);
 	if (changed) failed = true;

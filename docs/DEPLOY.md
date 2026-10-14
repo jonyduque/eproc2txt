@@ -14,7 +14,7 @@ Tesseract rodam todos no navegador.
 
 ```bash
 npm run deploy                 # lint + build + envio + instalação + verificação
-npm run deploy -- --skip-build # reaproveita o dist/ atual
+node scripts/deploy.mjs --skip-build # reaproveita o dist/ atual (no PowerShell, `npm run deploy -- ...` perde o `--`)
 ```
 
 `scripts/deploy.mjs`:
