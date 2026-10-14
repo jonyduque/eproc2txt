@@ -2,7 +2,7 @@
 // Usage: npm run deploy [-- --skip-build]
 // Builds dist/, uploads it with the vhost and the remote installer to /tmp/eproc2text/,
 // runs deploy/remote-install.sh over ssh, then checks this site and the neighbours still answer.
-import { execFileSync } from "node:child_process";
+import { execFileSync, execSync } from "node:child_process";
 import { rmSync } from "node:fs";
 
 const REMOTE = "root@duque.cloud";
@@ -21,7 +21,9 @@ const isWindows = process.platform === "win32";
 
 function run(cmd, args) {
 	console.log(`> ${cmd} ${args.join(" ")}`);
-	execFileSync(cmd, args, { stdio: "inherit", shell: isWindows && cmd === "npm" });
+	// npm is a .cmd shim on Windows and needs a shell; pass one string so args are not re-joined
+	if (isWindows && cmd === "npm") execSync(`npm ${args.join(" ")}`, { stdio: "inherit" });
+	else execFileSync(cmd, args, { stdio: "inherit" });
 }
 
 async function status(url) {
@@ -63,8 +65,15 @@ try {
 }
 
 let failed = false;
-const site = await status(`https://${DOMAIN}/`);
-const coep = site.headers.get("cross-origin-embedder-policy");
+// nginx reload is graceful: old workers (serving the old certificate) may answer for a few seconds
+let site;
+let coep;
+for (let attempt = 1; attempt <= 10; attempt++) {
+	site = await status(`https://${DOMAIN}/`);
+	coep = site.headers.get("cross-origin-embedder-policy");
+	if (site.status === 200 && coep === "require-corp") break;
+	await new Promise((resolve) => setTimeout(resolve, 2000));
+}
 console.log(`https://${DOMAIN}/ -> ${site.status} (COEP: ${coep ?? "ausente"})`);
 if (site.status !== 200 || coep !== "require-corp") failed = true;
 

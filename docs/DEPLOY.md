@@ -46,7 +46,7 @@ Nenhuma configuração global do nginx é alterada.
 
 ## Headers
 
-COOP `same-origin` / COEP `require-corp` (iguais ao `netlify.toml`) vão em toda resposta. Os
+COOP `same-origin` / COEP `require-corp` vão em toda resposta. Os
 recursos de outra origem que o app carrega (Google Fonts, jsDelivr para o wasm do PDFium e o
 worker do Tesseract, `tessdata.projectnaptha.com`) mandam headers CORS/CORP, então carregam
 sob COEP. `/assets/` fica em cache por 1 ano (nomes com hash); `index.html` é `no-cache`.
