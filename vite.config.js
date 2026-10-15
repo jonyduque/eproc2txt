@@ -18,7 +18,14 @@ export default defineConfig({
 	define: {
 		__BUILD_ID__: JSON.stringify(buildId()),
 	},
+	// Same isolation headers as production (deploy/nginx) for `npm run dev` and `npm run preview`
 	server: {
+		headers: {
+			"Cross-Origin-Opener-Policy": "same-origin",
+			"Cross-Origin-Embedder-Policy": "require-corp",
+		},
+	},
+	preview: {
 		headers: {
 			"Cross-Origin-Opener-Policy": "same-origin",
 			"Cross-Origin-Embedder-Policy": "require-corp",

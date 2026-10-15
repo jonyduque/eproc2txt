@@ -35,14 +35,9 @@
 	--crt-fader-knob-border: #121317;
 
 	/* LED colors */
-	--crt-led-bg-off: #1b1c22;
-	--crt-led-ready: #ff3b30;
-	--crt-led-active: #0071e3;
-	--crt-led-finished: #34c759;
 
 	/* Power button colors */
 	--crt-play-btn-housing: #111318;
-	--crt-play-btn-glow: rgba(52, 199, 89, 0.5);
 
 	/* Top handle colors */
 	--crt-top-handle-bg: #18191f;
@@ -473,12 +468,7 @@ body.light-theme .crt-lid-ribs {
 /* Theme group below power section */
 .crt-theme-group {
 	margin-bottom: 0;
-	border-top: 1px solid rgba(255, 255, 255, 0.07);
 	padding-top: var(--space-2);
-}
-
-body.light-theme .crt-theme-group {
-	border-top-color: rgba(0, 0, 0, 0.1);
 }
 
 /* Speaker Grille */
@@ -770,121 +760,22 @@ body.light-theme .crt-fader-label-item.active {
 	padding: 0 3px;
 }
 
-.crt-power-led {
-	width: 12px;
-	height: 12px;
-	border-radius: 50%;
-	background: radial-gradient(circle at 35% 30%, #2a2b30 0%, #111216 60%, #0a0a0c 100%);
-	border: 1px solid rgba(0, 0, 0, 0.7);
-	box-shadow:
-/* anel externo fosco */
-		0 0 0 1.5px rgba(0, 0, 0, 0.5),
-		/* sombra de profundidade */
-		inset 0 2px 3px rgba(0, 0, 0, 0.8),
-		/* brilho sutil de inativo */
-		inset 0 -1px 2px rgba(255, 255, 255, 0.03);
-	position: relative;
-	transition:
-		background 0.3s ease,
-		box-shadow 0.3s ease;
-	overflow: hidden;
-}
-
-/* Reflexo de lente convexa no LED */
-.crt-power-led::before {
-	content: "";
-	position: absolute;
-	top: 15%;
-	left: 20%;
-	width: 45%;
-	height: 35%;
-	border-radius: 50%;
-	background: radial-gradient(
-		ellipse at 40% 30%,
-		rgba(255, 255, 255, 0.25) 0%,
-		rgba(255, 255, 255, 0.04) 60%,
-		transparent 100%
-	);
-	pointer-events: none;
-	z-index: 2;
-}
-
-/* Estado: laranja pulsante (aguardando arquivo) */
-.crt-power-led.led-orange-pulse {
-	background: radial-gradient(
-		circle at 35% 30%,
-		#ffcc60 0%,
-		#ff9500 45%,
-		#cc6800 80%,
-		#8a4000 100%
-	);
-	box-shadow:
-		0 0 0 1.5px rgba(180, 80, 0, 0.6),
-		0 0 6px 2px rgba(255, 149, 0, 0.5),
-		0 0 14px 4px rgba(255, 149, 0, 0.25),
-		inset 0 2px 3px rgba(0, 0, 0, 0.4),
-		inset 0 -1px 2px rgba(255, 200, 80, 0.3);
-	animation: crt-led-blink-orange 1.4s ease-in-out infinite;
-}
-
-/* Estado: laranja fixo (pronto para processar) */
-.crt-power-led.led-orange-solid {
-	background: radial-gradient(
-		circle at 35% 30%,
-		#ffd070 0%,
-		#ff9500 45%,
-		#cc6800 80%,
-		#8a4000 100%
-	);
-	box-shadow:
-		0 0 0 1.5px rgba(180, 80, 0, 0.6),
-		0 0 7px 2px rgba(255, 149, 0, 0.55),
-		0 0 16px 5px rgba(255, 149, 0, 0.2),
-		inset 0 2px 3px rgba(0, 0, 0, 0.35),
-		inset 0 -1px 2px rgba(255, 200, 80, 0.35);
-}
-
-/* Estado: verde pulsante (processamento em curso) */
-.crt-power-led.led-green-pulse {
-	background: radial-gradient(
-		circle at 35% 30%,
-		#a8ffb0 0%,
-		#34c759 45%,
-		#1a8a3a 80%,
-		#0a4a1e 100%
-	);
-	box-shadow:
-		0 0 0 1.5px rgba(10, 100, 40, 0.6),
-		0 0 6px 2px rgba(52, 199, 89, 0.5),
-		0 0 14px 4px rgba(52, 199, 89, 0.25),
-		inset 0 2px 3px rgba(0, 0, 0, 0.4),
-		inset 0 -1px 2px rgba(120, 255, 140, 0.35);
-	animation: crt-led-blink-green 0.6s ease-in-out infinite;
-}
-
-/* Estado: verde fixo (processamento concluído) */
-.crt-power-led.led-green-solid {
-	background: radial-gradient(
-		circle at 35% 30%,
-		#b0ffb8 0%,
-		#34c759 45%,
-		#1a8a3a 80%,
-		#0a4a1e 100%
-	);
-	box-shadow:
-		0 0 0 1.5px rgba(10, 100, 40, 0.6),
-		0 0 7px 2px rgba(52, 199, 89, 0.55),
-		0 0 16px 5px rgba(52, 199, 89, 0.2),
-		inset 0 2px 3px rgba(0, 0, 0, 0.35),
-		inset 0 -1px 2px rgba(120, 255, 140, 0.4);
-}
-
 /*
- * Start button: a wide key of translucent green plastic lit from behind.
+ * Start key: a column-wide key of translucent plastic lit from behind. It also replaces the old
+ * status LED, so its light follows the same states:
+ *   tone-orange-pulse  waiting for a file      tone-orange-solid  ready to process
+ *   tone-green-pulse   processing              tone-green-solid   done
  * Layers, top to bottom: surface gloss, frosted lines, the backlight (hot spot in the middle,
- * falling off to the edges). Unlit (disabled) it turns into smoky dark plastic.
+ * falling off to the edges). The colours come from the --key-* variables of each tone.
  */
 .crt-power-btn {
+	--key-light: rgba(255, 225, 160, 0.95);
+	--key-mid: rgba(255, 160, 40, 0.88);
+	--key-dark: rgba(200, 100, 0, 0.82);
+	--key-edge: rgba(110, 50, 0, 0.9);
+	--key-rim: rgba(255, 225, 180, 0.4);
+	--key-shade: rgba(70, 30, 0, 0.55);
+	--key-glow: rgba(255, 149, 0, 0.5);
 	flex: 1;
 	height: 38px;
 	padding: 0;
@@ -894,7 +785,7 @@ body.light-theme .crt-fader-label-item.active {
 	border-radius: 6px;
 	position: relative;
 	cursor: pointer;
-	color: #f4fff6;
+	color: #fffaf2;
 	background:
 		linear-gradient(
 			180deg,
@@ -911,18 +802,18 @@ body.light-theme .crt-fader-label-item.active {
 		),
 		radial-gradient(
 			ellipse 70% 90% at 50% 60%,
-			rgba(170, 255, 190, 0.95) 0%,
-			rgba(70, 215, 110, 0.85) 38%,
-			rgba(25, 140, 65, 0.8) 72%,
-			rgba(10, 70, 32, 0.9) 100%
+			var(--key-light) 0%,
+			var(--key-mid) 38%,
+			var(--key-dark) 72%,
+			var(--key-edge) 100%
 		);
 	box-shadow:
 		0 0 0 3px var(--crt-play-btn-housing),
 		0 3px 0 3px #0a0b0e,
 		0 6px 10px 2px rgba(0, 0, 0, 0.5),
-		0 0 16px 3px var(--crt-play-btn-glow),
-		inset 0 0 0 1px rgba(210, 255, 220, 0.4),
-		inset 0 -6px 10px rgba(0, 45, 18, 0.55),
+		0 0 16px 3px var(--key-glow),
+		inset 0 0 0 1px var(--key-rim),
+		inset 0 -6px 10px var(--key-shade),
 		inset 0 3px 6px rgba(255, 255, 255, 0.18);
 	transition:
 		transform 0.08s ease,
@@ -930,23 +821,25 @@ body.light-theme .crt-fader-label-item.active {
 		filter 0.25s ease;
 }
 
-/* Backlight breathing; on a layer of its own so it does not fight :hover/:active filters */
-.crt-power-btn::after {
-	content: "";
-	position: absolute;
-	inset: 0;
-	border-radius: inherit;
-	background: radial-gradient(
-		ellipse 60% 80% at 50% 60%,
-		rgba(200, 255, 215, 0.35),
-		transparent 70%
-	);
-	pointer-events: none;
-	animation: crt-play-backlight 2.6s ease-in-out infinite;
+.crt-power-btn.tone-green-pulse,
+.crt-power-btn.tone-green-solid {
+	--key-light: rgba(170, 255, 190, 0.95);
+	--key-mid: rgba(70, 215, 110, 0.85);
+	--key-dark: rgba(25, 140, 65, 0.8);
+	--key-edge: rgba(10, 70, 32, 0.9);
+	--key-rim: rgba(210, 255, 220, 0.4);
+	--key-shade: rgba(0, 45, 18, 0.55);
+	--key-glow: rgba(52, 199, 89, 0.5);
+	color: #f4fff6;
 }
 
-.crt-power-btn:disabled::after {
-	display: none;
+/* Blinking states, same rhythm the LED had (these states are always disabled, so no hover clash) */
+.crt-power-btn.tone-orange-pulse {
+	animation: crt-key-blink 1.4s ease-in-out infinite;
+}
+
+.crt-power-btn.tone-green-pulse {
+	animation: crt-key-blink 0.6s ease-in-out infinite;
 }
 
 /* Glyph printed on the plastic: light shines through it brighter than the tinted cap */
@@ -956,7 +849,9 @@ body.light-theme .crt-fader-label-item.active {
 	width: 18px;
 	height: 18px;
 	margin-left: 3px;
-	filter: drop-shadow(0 0 3px rgba(220, 255, 230, 0.9)) drop-shadow(0 1px 0 rgba(0, 60, 25, 0.6));
+	color: #ffffff;
+	filter: drop-shadow(0 0 3px rgba(255, 255, 255, 0.9)) drop-shadow(0 1px 0 var(--key-shade));
+	transition: opacity 0.2s ease;
 }
 
 .crt-power-btn:not(:disabled):hover {
@@ -970,58 +865,40 @@ body.light-theme .crt-fader-label-item.active {
 		0 0 0 3px var(--crt-play-btn-housing),
 		0 0 0 3px #0a0b0e,
 		0 2px 4px 2px rgba(0, 0, 0, 0.5),
-		0 0 20px 5px var(--crt-play-btn-glow),
-		inset 0 0 0 1px rgba(210, 255, 220, 0.45),
-		inset 0 -4px 8px rgba(0, 45, 18, 0.5),
+		0 0 20px 5px var(--key-glow),
+		inset 0 0 0 1px var(--key-rim),
+		inset 0 -4px 8px var(--key-shade),
 		inset 0 3px 6px rgba(255, 255, 255, 0.2);
 }
 
 .crt-power-btn:focus-visible {
-	outline: 2px solid #8dffb0;
+	outline: 2px solid var(--key-light);
 	outline-offset: 5px;
 }
 
-/* Light off: smoky translucent plastic */
+/* Disabled: the light keeps showing the state; only the glyph fades */
 .crt-power-btn:disabled {
 	cursor: not-allowed;
-	color: #3d4a42;
-	background:
-		linear-gradient(
-			180deg,
-			rgba(255, 255, 255, 0.14) 0%,
-			rgba(255, 255, 255, 0.03) 42%,
-			transparent 50%
-		),
-		radial-gradient(
-			ellipse 70% 90% at 50% 60%,
-			rgba(40, 70, 50, 0.85) 0%,
-			rgba(22, 38, 28, 0.95) 70%,
-			rgba(14, 22, 17, 1) 100%
-		);
-	box-shadow:
-		0 0 0 3px var(--crt-play-btn-housing),
-		0 3px 0 3px #0a0b0e,
-		0 6px 10px 2px rgba(0, 0, 0, 0.5),
-		inset 0 0 0 1px rgba(150, 190, 160, 0.12),
-		inset 0 -6px 10px rgba(0, 0, 0, 0.5);
 }
 
 .crt-power-btn:disabled .crt-play-icon {
-	filter: none;
+	opacity: 0.6;
+	filter: drop-shadow(0 1px 0 var(--key-shade));
 }
 
-@keyframes crt-play-backlight {
+@keyframes crt-key-blink {
 	0%,
 	100% {
-		opacity: 0.2;
+		filter: brightness(0.6);
 	}
 	50% {
-		opacity: 1;
+		filter: brightness(1.12);
 	}
 }
 
 @media (prefers-reduced-motion: reduce) {
-	.crt-power-btn::after {
+	.crt-power-btn.tone-orange-pulse,
+	.crt-power-btn.tone-green-pulse {
 		animation: none;
 	}
 }
@@ -1355,57 +1232,9 @@ body.light-theme .crt-flicker {
 	}
 }
 
-@keyframes crt-led-blink-orange {
-	0%,
-	100% {
-		box-shadow:
-			0 0 0 1.5px rgba(180, 80, 0, 0.4),
-			0 0 3px 1px rgba(255, 149, 0, 0.25),
-			0 0 6px 2px rgba(255, 149, 0, 0.1),
-			inset 0 2px 3px rgba(0, 0, 0, 0.5),
-			inset 0 -1px 2px rgba(255, 200, 80, 0.1);
-		filter: brightness(0.55);
-	}
-
-	50% {
-		box-shadow:
-			0 0 0 1.5px rgba(180, 80, 0, 0.7),
-			0 0 8px 3px rgba(255, 149, 0, 0.65),
-			0 0 18px 6px rgba(255, 149, 0, 0.3),
-			inset 0 2px 3px rgba(0, 0, 0, 0.3),
-			inset 0 -1px 2px rgba(255, 200, 80, 0.45);
-		filter: brightness(1.1);
-	}
-}
-
-@keyframes crt-led-blink-green {
-	0%,
-	100% {
-		box-shadow:
-			0 0 0 1.5px rgba(10, 100, 40, 0.4),
-			0 0 3px 1px rgba(52, 199, 89, 0.25),
-			0 0 6px 2px rgba(52, 199, 89, 0.1),
-			inset 0 2px 3px rgba(0, 0, 0, 0.5),
-			inset 0 -1px 2px rgba(120, 255, 140, 0.15);
-		filter: brightness(0.6);
-	}
-
-	50% {
-		box-shadow:
-			0 0 0 1.5px rgba(10, 100, 40, 0.7),
-			0 0 9px 3px rgba(52, 199, 89, 0.7),
-			0 0 20px 6px rgba(52, 199, 89, 0.3),
-			inset 0 2px 3px rgba(0, 0, 0, 0.3),
-			inset 0 -1px 2px rgba(120, 255, 140, 0.5);
-		filter: brightness(1.15);
-	}
-}
-
 @media (prefers-reduced-motion: reduce) {
 	.crt-static,
-	.crt-flicker,
-	.crt-power-led.led-orange-pulse,
-	.crt-power-led.led-green-pulse {
+	.crt-flicker {
 		animation: none;
 	}
 }

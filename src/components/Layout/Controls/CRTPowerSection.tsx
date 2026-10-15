@@ -7,7 +7,7 @@ interface CRTPowerSectionProps {
 }
 
 /**
- * CRTPowerSection - Status LCD, power LED, and green play button.
+ * CRTPowerSection - Status LCD and the backlit start key, whose colour shows the status.
  */
 export default function CRTPowerSection({
 	displayLabel,
@@ -20,10 +20,10 @@ export default function CRTPowerSection({
 		<div className="crt-power-section">
 			<span className="status-badge-label">{displayLabel}</span>
 			<div className="crt-power-row">
-				<div className={`crt-power-led led-${ledColor}`} />
+				{/* The key's backlight is the status light (it replaced the LED) */}
 				<button
 					type="button"
-					className="crt-power-btn"
+					className={`crt-power-btn tone-${ledColor}`}
 					disabled={isDisabled || selectedPathsSize === 0}
 					onClick={onStart}
 					aria-label="Iniciar Processamento"
